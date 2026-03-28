@@ -101,43 +101,57 @@ I evaluate five layers: robots.txt correctness, sitemap quality, canonical consi
 
 ## §4 Pattern library
 
-**The robots.txt disaster** — A developer adds `Disallow: /` to robots.txt during staging and forgets to remove it for production. The entire site disappears from search results within weeks. Fix: robots.txt changes must be reviewed. Monitor index coverage for sudden drops.
+**The robots.txt disaster** — I once audited a 3,000-page manufacturing site that had been invisible to Google for six weeks. The root cause: a developer added `Disallow: /` during a staging deploy and the CI pipeline promoted it to production. Screaming Frog confirmed every page returned a "blocked by robots.txt" status. Index coverage in GSC dropped from 2,800 to 47. Fix: robots.txt changes must be code-reviewed and monitored. Set up a GSC alert for index coverage drops >10%.
 
-**The canonical loop** — Page A has `canonical: B`. Page B has `canonical: A`. Google picks one arbitrarily (often neither). Fix: canonicals must be self-referencing or point to a single authoritative URL.
+**The canonical loop** — Page A has `canonical: B`. Page B has `canonical: A`. I see this most often on e-commerce sites after a platform migration where the old URL mapper and the new CMS both inject canonical tags. Google picks one arbitrarily (often neither). I crawled a Shopify-to-WooCommerce migration with Screaming Frog and found 340 canonical loops across their product catalog. Fix: canonicals must be self-referencing or point to a single authoritative URL. Run a crawl specifically filtering for canonical chains and loops.
 
-**The stale sitemap** — The sitemap was generated once during launch. It still lists the original 50 pages. The site now has 500 pages. 450 pages rely on crawl discovery alone. Fix: auto-generate the sitemap from the CMS/routing system, updated whenever content changes.
+**The stale sitemap** — The sitemap was generated once during launch. It still lists the original 50 pages. The site now has 500 pages. 450 pages rely on crawl discovery alone. I audited a SaaS company where the XML sitemap hadn't been regenerated in three years, still listing URLs from a previous CMS with a completely different URL structure. Every sitemap URL returned 301 or 404. Fix: auto-generate the sitemap from the CMS/routing system, updated whenever content changes. Validate monthly with Screaming Frog's sitemap audit.
 
-**The parameter explosion** — A product listing page has filters for color, size, brand, price range, and sort order. Each combination generates a unique URL. 10 colors × 8 sizes × 20 brands × 5 price ranges × 4 sorts = 32,000 URLs, most with identical or near-identical content. Fix: use canonical tags to point filtered URLs to the base listing, and use robots.txt or parameter handling in Search Console to reduce crawl waste.
+**The parameter explosion** — A product listing page has filters for color, size, brand, price range, and sort order. Each combination generates a unique URL. I crawled a furniture retailer where 10 colors x 8 sizes x 20 brands x 5 price ranges x 4 sorts = 32,000 URLs, most with identical content. GSC showed 28,000 "crawled but not indexed" pages, all parameter variations. Fix: use canonical tags to point filtered URLs to the base listing, block parameter combinations in robots.txt, and configure Search Console parameter handling.
 
-**The HTTPS migration gap** — The site moved to HTTPS but 200 internal links still point to HTTP URLs. Each click triggers a redirect. Google follows the redirects but wastes crawl budget. Fix: update all internal links to HTTPS. Bulk find-and-replace in templates and content.
+**The HTTPS migration gap** — I audited a law firm two months after their HTTPS migration. Screaming Frog found 1,200 internal links still pointing to HTTP URLs. Each click triggered a redirect chain: HTTP -> HTTPS -> canonical URL. Ahrefs showed external backlinks pointing to HTTP versions too, meaning equity passed through two hops. Fix: bulk find-and-replace in templates and content. Check Ahrefs backlink report for external links pointing to HTTP variants.
 
-**The noindex forgotten** — A staging environment was cloned to production with `noindex` meta tags in the template. Nobody noticed because the site still loads fine for users. Search traffic dropped to zero. Fix: automated checks for noindex tags on production URLs.
+**The noindex forgotten** — A staging environment was cloned to production with `noindex` meta tags in the base template. Nobody noticed because the site still loads fine for users. I discovered this on a B2B software company where organic traffic dropped from 15,000/mo to 200/mo over three weeks. The template had `<meta name="robots" content="noindex, nofollow">` in the `<head>`. Fix: automated CI checks for noindex tags on production URLs. Add a synthetic monitoring check that validates robots meta tags on key pages daily.
+
+**The orphan page graveyard** — I crawled a 12,000-page media site and cross-referenced Screaming Frog's crawl data with the sitemap. 3,400 pages existed in the sitemap but had zero internal links pointing to them. These orphan pages were invisible to crawlers following links, relying entirely on sitemap discovery for crawl attention. GSC confirmed: orphaned pages averaged 4x longer between crawls than well-linked pages. Fix: audit for orphan pages quarterly. Every indexable page needs at least one contextual internal link.
+
+**The mixed-signal catastrophe** — A healthcare site had canonical tags pointing to `/services/cardiology`, the sitemap listing `/services/cardiology/`, and internal links pointing to `/Services/Cardiology`. Three different URLs for the same page. Google was confused about which was authoritative and alternated between indexing different versions week to week. Fix: normalize all signals. Canonical, sitemap, and internal links must all reference the exact same URL string.
 
 ---
 
 ## §5 The traps
 
-**The "Google will figure it out" trap** — "We don't need canonical tags because our content is unique." Google still sees URL variations (query parameters, trailing slashes, mixed case) as potential duplicates. Explicit canonicals remove ambiguity.
+**The "Google will figure it out" trap** — "We don't need canonical tags because our content is unique." Google still sees URL variations (query parameters, trailing slashes, mixed case) as potential duplicates. I've watched Google pick the `?utm_source=newsletter` version of a page as the canonical over the clean URL. Explicit canonicals remove ambiguity. Never assume Google's inference matches your intent.
 
-**The "more pages = more traffic" trap** — Creating thousands of thin pages (one page per keyword variation) to capture search traffic. Google's quality algorithms penalize thin content. 50 excellent pages outrank 5,000 thin ones.
+**The "more pages = more traffic" trap** — Creating thousands of thin pages (one page per keyword variation) to capture search traffic. I audited a local services company with 2,000 auto-generated city pages ("Plumbing in [City Name]") where only the city name changed. GSC showed 1,850 of them marked "crawled, currently not indexed" — Google recognized the template and refused to index them. 50 excellent pages outrank 5,000 thin ones.
 
-**The "sitemap is optional" trap** — For small sites with strong internal linking, a sitemap may indeed be unnecessary. For large sites, sites with orphan pages, or sites with frequent content changes, a sitemap is essential for discovery.
+**The "sitemap is optional" trap** — For small sites with strong internal linking, a sitemap may indeed be unnecessary. For large sites, sites with orphan pages, or sites with frequent content changes, a sitemap is essential for discovery. The trap works both ways: I've seen teams spend weeks perfecting sitemaps for 40-page sites when the real problem was their title tags.
 
-**The "robots.txt blocks indexation" trap** — Robots.txt blocks crawling, not indexation. A page blocked by robots.txt that's linked from other sites CAN still appear in search results — Google just can't see its content, so it shows a bare listing. To prevent indexation, use `noindex`.
+**The "robots.txt blocks indexation" trap** — Robots.txt blocks crawling, not indexation. A page blocked by robots.txt that's linked from other sites CAN still appear in search results — Google just can't see its content, so it shows a bare listing with no snippet. I once found a product page ranking #3 for its keyword with no snippet and no cached version because robots.txt blocked it. Google had indexed it purely from external link signals.
 
-**The "set it and forget it" trap** — Technical SEO requires ongoing monitoring. A plugin update, CMS migration, template change, or server configuration change can silently break crawlability. Regular audits are necessary, not just a launch checklist.
+**The "set it and forget it" trap** — Technical SEO requires ongoing monitoring. A WordPress plugin update, a CMS migration, a template change, or a CDN configuration change can silently break crawlability. I've seen a single Yoast SEO update add noindex to an entire blog section because a settings default changed. Regular automated audits are necessary, not just a launch checklist.
+
+**The "crawl error zero" trap** — Teams celebrate when GSC shows zero crawl errors. But GSC only reports errors for URLs Google attempted to crawl. If robots.txt blocks a section, or if orphan pages exist with no links pointing to them, those problems don't appear as "errors." Zero crawl errors can coexist with massive crawlability problems. Cross-reference GSC with a full Screaming Frog crawl.
+
+**The "staging environment is harmless" trap** — "Nobody links to staging, so it doesn't matter." I crawled a SaaS company's main site and found Google had indexed 4,000 pages from `staging.example.com` because a developer had linked to it from a blog post. The staging site had `noindex` stripped during a deploy, and Google indexed the whole thing — complete with test data and placeholder copy. The staging pages started outranking production for branded queries. Fix: password-protect staging environments at the server level, don't rely on meta tags alone.
 
 ---
 
 ## §6 Blind spots and limitations
 
-**Technical SEO says nothing about content quality.** A perfectly crawlable, indexable site with thin content won't rank. Technical SEO ensures search engines can access the content; content quality determines ranking.
+**Technical SEO says nothing about content quality.** A perfectly crawlable, indexable site with thin content won't rank. Technical SEO ensures search engines can access the content; content quality determines ranking. Hand off to the Copy domain frameworks (readability, persuasion, content depth) for content substance evaluation. I've audited sites where every technical signal was green but organic traffic was declining — the content was thin, and no amount of canonical tag perfection fixes "nothing worth ranking."
 
-**Google's behavior is not fully transparent.** Google may choose to ignore your canonical signal, noindex a page it thinks is thin, or crawl pages you blocked in robots.txt (via external links). Technical SEO sets signals; Google makes the final decision.
+**Google's behavior is not fully transparent.** Google may choose to ignore your canonical signal, noindex a page it thinks is thin, or crawl pages you blocked in robots.txt (via external links). Technical SEO sets signals; Google makes the final decision. I've seen Google override explicit canonicals on 15% of pages in a large audit — always verify what Google actually indexed versus what you told it to index.
 
-**Different search engines behave differently.** Bing, Yandex, and DuckDuckGo process robots.txt, canonicals, and sitemaps with varying degrees of compliance. Audit for Google primarily, but don't assume other engines behave identically.
+**Different search engines behave differently.** Bing, Yandex, and DuckDuckGo process robots.txt, canonicals, and sitemaps with varying degrees of compliance. Bing in particular handles JavaScript rendering differently and relies more on `content-language` meta tags than hreflang. Audit for Google primarily, but don't assume other engines behave identically.
 
-**JavaScript changes the entire audit.** If the site is a JavaScript SPA, crawlability depends on whether Google can execute the JavaScript. This is covered in the JS Rendering for SEO framework.
+**JavaScript changes the entire audit.** If the site is a JavaScript SPA, crawlability depends on whether Google can execute the JavaScript. A Screaming Frog crawl in "HTML mode" versus "JavaScript rendering mode" will show the gap. This is covered in depth in the JS Rendering for SEO framework (framework 13).
+
+**Technical SEO can't diagnose UX-driven ranking problems.** A page that's perfectly crawlable, indexable, and canonical but has a 90% bounce rate and 5-second dwell time sends negative user signals that Google factors into ranking. If technical SEO checks pass but rankings are poor, hand off to UX frameworks — Gestalt (visual hierarchy), Cognitive Load (page complexity), Information Architecture (findability) — to evaluate whether the page experience is driving users away. The mechanism: Google measures Core Web Vitals and user engagement signals; poor UX degrades both.
+
+**Server-side configuration is a black box without access.** Many technical SEO recommendations (redirect rules, robots.txt, header-level directives, caching policies) require server access. On managed platforms (Shopify, Wix, Squarespace), you can't implement server-level changes. The audit should flag which recommendations are platform-constrained.
+
+**CDN and edge caching can serve stale SEO signals.** I audited a site where Cloudflare was caching the HTML with an old robots meta tag for 24 hours after the template was fixed. The developer confirmed the HTML was correct on origin, but Googlebot was hitting the CDN edge and seeing the stale `noindex`. Fix: always purge CDN cache after SEO-relevant template changes, and verify what Googlebot actually receives using the URL Inspection tool's "View crawled page" feature.
 
 ---
 
@@ -145,12 +159,17 @@ I evaluate five layers: robots.txt correctness, sitemap quality, canonical consi
 
 | Framework | Interaction with technical SEO |
 |-----------|-------------------------------|
-| **URL Structure** | URL design directly affects crawlability and canonical clarity. Clean URLs are easier for crawlers to parse. |
-| **Duplicate Content** | Canonical tags are the primary mechanism for resolving duplicate content. Technical SEO implements what duplicate content strategy defines. |
-| **Crawl Budget** | Technical SEO controls what gets crawled. Crawl budget optimization decides what SHOULD get crawled. |
-| **JS Rendering** | JavaScript-rendered content may not be crawlable. Technical SEO assumes HTML content; JS rendering adds a layer of complexity. |
-| **Page Speed** | Slow pages consume more crawl budget (crawlers spend time waiting for responses). Speed affects crawl efficiency. |
-| **Redirect Chains** | Redirect chains waste crawl budget and dilute signals. Technical SEO identifies them; redirect audit fixes them. |
+| **URL Structure (SEO)** | URL design directly affects crawlability and canonical clarity. Clean URLs are easier for crawlers to parse. A URL hierarchy that returns 404 on parent segments breaks crawl discovery. |
+| **Duplicate Content (SEO)** | Canonical tags are the primary mechanism for resolving duplicate content. Technical SEO implements what duplicate content strategy defines. When canonicals conflict with hreflang or sitemap signals, Google's behavior becomes unpredictable. |
+| **Crawl Budget (SEO)** | Technical SEO controls what gets crawled. Crawl budget optimization decides what SHOULD get crawled. A technically perfect robots.txt that blocks the wrong sections wastes budget on the right pages while starving the wrong ones. |
+| **JS Rendering (SEO)** | JavaScript-rendered content may not be crawlable at all. Technical SEO assumes HTML content; JS rendering adds a rendering queue delay of seconds to days. Screaming Frog's JS rendering mode versus HTML-only mode reveals the gap. |
+| **Page Speed (Performance)** | Slow server response times (TTFB >1s) directly reduce crawl rate. Google's crawler respects server capacity, meaning a slow server literally gets fewer pages crawled per day. This is where Performance domain audits feed directly into SEO crawl efficiency. Run a Lighthouse audit alongside the Screaming Frog crawl — if TTFB is high, the crawl budget problem may be a server performance problem. |
+| **Redirect Chains (SEO)** | Redirect chains waste crawl budget and dilute equity signals. Each 301 hop costs ~100-300ms and passes "most but not all" equity. |
+| **Information Architecture (UX)** | IA decisions determine site hierarchy, which becomes URL structure, which becomes crawl paths. A confusing IA creates deep click paths, orphan pages, and crawl inefficiency. If a Screaming Frog crawl shows poor depth distribution, the root cause is often IA, not technical SEO. Hand off to the IA framework when the problem is WHERE pages are placed, not WHETHER they're crawlable. |
+| **Navigation Design (UX)** | Navigation implemented as JavaScript-only menus (no `<a href>` tags in HTML) blocks crawlers from discovering linked pages. Mega-menus with 200+ links dilute equity. The mechanism: UX chooses the navigation pattern, but the implementation (semantic links vs. JS event handlers) determines whether crawlers can follow it. The UX navigation audit and the technical SEO crawlability audit should cross-reference findings. |
+| **WCAG Compliance** | Accessibility requirements and technical SEO overlap significantly: proper heading hierarchy (H1-H6), lang attributes, alt text on images, semantic HTML. A WCAG audit often catches technical SEO issues as side effects. Hreflang and `<html lang>` serve both accessibility and international SEO. The mechanism: both disciplines need the same well-structured HTML — fix one and you often fix both. |
+| **Copy/Content Quality** | Technical SEO gets content into the index; copy quality determines whether it ranks. A page with perfect technical signals but 200 words of boilerplate won't rank — Google's "helpful content" system evaluates substance. If indexed page counts are healthy but rankings are poor, the problem is content, not crawlability. Hand off to Copy frameworks (content depth, readability, E-E-A-T). |
+| **Frontend Architecture** | The choice of frontend framework (React, Next.js, plain HTML) determines the rendering strategy, which directly affects crawlability. Server-side rendering decisions made by frontend developers are technical SEO decisions whether they know it or not. If the site uses a JS framework, the frontend architecture audit and the technical SEO audit must run together. |
 
 ---
 

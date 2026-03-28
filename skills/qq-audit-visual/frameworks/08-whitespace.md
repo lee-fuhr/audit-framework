@@ -96,6 +96,10 @@ I evaluate three qualities: (1) Is the whitespace **intentional** — does every
 
 **The empty state void** — Empty tables, empty inboxes, empty dashboards: a tiny icon centered in a massive white rectangle. Users aren't sure if the page loaded. Fix: empty states need intentional composition — illustration, message, and CTA arranged with the same spatial care as populated states.
 
+**The grouped-but-spaced-equally problem** — Related form fields (first name, last name) have the same 24px gap between them as the gap between form sections (personal info vs. address). Gestalt proximity says equal spacing = equal relationship. Users can't tell where one section ends and another begins. Fix: intra-group spacing should be visibly smaller than inter-group spacing (e.g., 16px within groups, 32px between groups).
+
+**The scrollable container whitespace theft** — A scrollable panel with generous padding at the top but zero padding at the bottom. When the user scrolls to the last item, it slams against the container edge. The top breathes; the bottom suffocates. Fix: equal or greater padding at the bottom of scrollable containers to prevent the last item from feeling cramped.
+
 ---
 
 ## §5 The traps
@@ -119,6 +123,8 @@ I evaluate three qualities: (1) Is the whitespace **intentional** — does every
 **Whitespace perception is culturally influenced.** East Asian design traditions often use different spacing conventions than Western Swiss-style design. Dense Japanese web design isn't "wrong" — it reflects different cultural expectations about information presentation.
 
 **Dynamic content destabilizes whitespace.** A card grid with uniform whitespace breaks when one card has 3 lines of text and its neighbor has 1. The whitespace below the short card becomes dead space. Whitespace audits must account for content variability, not just ideal states.
+
+**Whitespace evaluation changes with zoom level.** Users who zoom the browser to 125% or 150% (common on high-DPI displays or for accessibility) compress whitespace proportionally. Generous whitespace at 100% may become tight at 150%. Audit whitespace at the zoom levels your actual users employ, not just at 100%.
 
 ---
 

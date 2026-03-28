@@ -102,6 +102,12 @@ I score by freshness-to-need alignment. For each data product: what freshness do
 
 **The timezone freshness illusion** — The dashboard says "updated today." The ETL runs at midnight UTC. For US West Coast users, "today's" data is actually through 4 PM yesterday. The dashboard is 8 hours staler than users expect. Fix: show exact timestamps with timezone, not relative labels.
 
+**The mixed-freshness dashboard** — A Looker dashboard shows "Today's Revenue" (real-time from Stripe webhook) alongside "Conversion Rate" (computed in a dbt model that runs at 6 AM daily). The revenue is current as of right now. The conversion rate is from yesterday. Both appear on the same dashboard with no freshness label. A PM divides today's real-time revenue by yesterday's conversion rate and draws wrong conclusions. Fix: label each metric's freshness independently. In Looker, add a dimension that shows the data source's last refresh time below each tile.
+
+**The late-arriving event problem** — A mobile app queues events when offline. A user browses the app on an airplane for 3 hours. When the plane lands, 3 hours of events arrive at once with timestamps from the past. The batch ETL has already run for that time window. The events are processed in the next batch and counted in the wrong day. The "daily" metrics for the airplane hours are permanently understated. Fix: implement late-arriving event handling. In Snowflake, use MERGE for idempotent inserts. In the dashboard layer, show a "data may be incomplete for the last 4 hours" warning. Monitor late-arrival rates and adjust the SLA accordingly.
+
+**The streaming-batch seam** — The real-time dashboard shows 1,247 signups today (from Kafka streaming). The daily report shows 1,195 signups for the same day (from the batch pipeline). The difference (52 signups) is from events that arrived after the batch window closed, or from deduplication logic that differs between the streaming and batch paths. Two "correct" numbers, two different answers. Fix: reconcile streaming and batch outputs daily. The batch pipeline is the "correct" number; the streaming number is "fast but approximate." Document which is authoritative and display both with labels when they appear on the same dashboard.
+
 ---
 
 ## §5 The traps
@@ -126,6 +132,8 @@ I score by freshness-to-need alignment. For each data product: what freshness do
 
 **Not all data in a pipeline has the same freshness.** A dashboard might show real-time event counts alongside daily-computed metrics. Users see both on the same screen and may assume they're equally fresh. Label each metric's freshness independently.
 
+**Freshness improvements can mask data quality regressions.** Moving from daily to hourly batch processing means data arrives 24x faster — but also means data quality issues are propagated 24x faster. A corrupted source feed that would have been caught during the daily QA window now reaches dashboards in 30 minutes. Faster freshness requires faster validation.
+
 ---
 
 ## §7 Cross-framework connections
@@ -138,6 +146,10 @@ I score by freshness-to-need alignment. For each data product: what freshness do
 | **Analytics Completeness (01)** | Complete but stale data may be less useful than fresh but slightly incomplete data. Freshness and completeness are both dimensions of data utility. |
 | **Error Tracking (10)** | Pipeline errors that cause freshness degradation should be tracked as data quality incidents. |
 | **Data Retention (08)** | Historical data is inherently stale. When users access historical data, freshness labels should indicate that this is archived data, not current. |
+| **Breach Notification (Compliance 11)** | The 72-hour breach notification deadline depends on breach detection speed, which depends on monitoring freshness. If security event data is processed in daily batches, a breach at 1 AM isn't detected until the next day's batch — consuming 24 of the 72 available hours before anyone is even aware. Security-relevant data needs near-real-time freshness regardless of general analytics freshness requirements. |
+| **CI/CD Maturity (DevOps 03)** | Deploy-triggered data pipeline reruns ensure freshness after code changes. If a schema migration runs during deployment but the ETL doesn't rerun until its next scheduled time, the dashboard shows pre-migration data for hours. Integrate pipeline triggers with deployment events. |
+| **Cognitive Load (UX 05)** | A dashboard that says "last updated: 14 minutes ago" adds cognitive load — the user must decide whether 14 minutes matters for their decision. Binary freshness indicators ("live" with a green dot vs. "stale" with a yellow warning) reduce cognitive overhead. Design freshness labels for quick comprehension, not just accuracy. |
+| **Cost Optimization (DevOps 11)** | Over-engineering freshness is a cost problem. A real-time Kafka pipeline costs $3K/month for data viewed weekly. But under-engineering freshness is a decision quality problem. The cost of a bad decision from stale data can exceed the infrastructure savings. Quantify: what's the dollar cost of a decision delayed by one batch cycle? |
 
 ---
 

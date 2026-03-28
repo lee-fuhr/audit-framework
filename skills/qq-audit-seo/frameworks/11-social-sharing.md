@@ -103,6 +103,12 @@ I evaluate three dimensions per page: completeness (all required OG/Twitter tags
 
 **The auto-generated gibberish** — No meta description, no OG description. The platform auto-extracts text from the page: "Cookie settings | Skip to main content | Menu | Home About Services..." Fix: explicit OG description on every page.
 
+**The wrong image crop** — A landscape hero image (1920×400) used as the OG image. Facebook crops OG images to 1.91:1 aspect ratio (1200×630). The hero image, when cropped, shows only the middle strip — cutting off the text overlay and key visual elements. LinkedIn crops differently than Facebook, making the same image look broken on both. I tested a SaaS company's top 20 pages across Facebook Sharing Debugger and LinkedIn Post Inspector — 14 had images that were cropped in ways that lost critical information. Fix: create dedicated OG images at 1200×630 for key pages. For template pages, ensure the hero image works at the OG crop ratio.
+
+**The dynamic OG tag rendering failure** — A Next.js site where OG tags were rendered client-side using React Helmet. Facebook and LinkedIn crawlers don't execute JavaScript. When shared, the link preview showed the default template values ("My App," generic description, no image). The React code worked perfectly in the browser, but social platform crawlers never ran it. Fix: OG tags must be in the server-rendered HTML. Use `getServerSideProps` or `generateMetadata` (Next.js 13+) to include OG tags in the initial HTML response.
+
+**The protocol-relative image URL** — OG image URL set as `//cdn.example.com/image.jpg` (protocol-relative). Facebook's crawler sometimes resolves this as HTTP instead of HTTPS, causing the image to fail on sites that block HTTP. I found this on a B2B site where the CDN rejected HTTP requests — every social share showed "No image available." Fix: always use absolute HTTPS URLs in OG tags. Never protocol-relative, never relative paths.
+
 ---
 
 ## §5 The traps
@@ -115,17 +121,21 @@ I evaluate three dimensions per page: completeness (all required OG/Twitter tags
 
 **The "validation once is enough" trap** — OG tag implementation can break silently (CMS update, template change, plugin conflict). Periodic validation is necessary, not just initial setup.
 
+**The "LinkedIn and Facebook are the same" trap** — They use the same OG protocol, but their crawlers behave differently. LinkedIn caches for 7 days and is much harder to force-refresh than Facebook. LinkedIn also has a minimum image size of 1200×627 for large previews (below that, you get a small thumbnail). I've seen sites that tested only on Facebook Sharing Debugger and found out weeks later that LinkedIn was showing broken previews because the OG image was 1100px wide.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Platform rendering varies.** Facebook, LinkedIn, Twitter, Slack, and iMessage all render OG data slightly differently. Image cropping, text truncation, and layout vary by platform. Test on the platforms your audience uses most.
+**Platform rendering varies.** Facebook, LinkedIn, Twitter, Slack, and iMessage all render OG data slightly differently. Image cropping, text truncation, and layout vary by platform. Test on the platforms your audience uses most. LinkedIn shows ~100 characters of description; Facebook shows ~150; Twitter shows ~125. A description optimized for one platform may be truncated on another.
 
-**Social sharing is not a direct SEO ranking factor.** Google doesn't use OG tags for ranking. Social sharing drives traffic and brand awareness, which can indirectly improve SEO (more backlinks, more branded searches), but the mechanism is indirect.
+**Social sharing is not a direct SEO ranking factor.** Google doesn't use OG tags for ranking. Social sharing drives traffic and brand awareness, which can indirectly improve SEO (more backlinks, more branded searches), but the mechanism is indirect. Don't conflate social optimization with search optimization — they serve different goals with different audiences.
 
-**Dynamic OG tags require server-side rendering.** If OG tags are injected by JavaScript, social platform crawlers (which don't execute JavaScript) won't see them. OG tags must be in the server-rendered HTML.
+**Dynamic OG tags require server-side rendering.** If OG tags are injected by JavaScript, social platform crawlers (which don't execute JavaScript) won't see them. OG tags must be in the server-rendered HTML. This is the same constraint as structured data rendering — hand off to the JS Rendering framework (13) if the site is a SPA or uses client-side rendering for metadata.
 
-**Social platforms cache aggressively.** Changed OG tags don't take effect until each platform re-crawls the page. For time-sensitive content, proactive cache invalidation is necessary.
+**Social platforms cache aggressively.** Changed OG tags don't take effect until each platform re-crawls the page. For time-sensitive content, proactive cache invalidation is necessary. Facebook: use Sharing Debugger "Scrape Again." LinkedIn: use Post Inspector (but sometimes requires waiting 7 days). Twitter: cache clears within hours usually. Slack: re-shares within the same workspace use the cached version indefinitely unless you post the URL with `?v=2` appended.
+
+**OG quality is a content and design problem.** This framework evaluates whether OG tags exist and are technically correct. But whether the OG image is COMPELLING, the OG title is CLICK-WORTHY, and the OG description MOTIVATES sharing — those are Copy (persuasion, voice) and Design (visual hierarchy, brand consistency) questions. A technically perfect OG implementation with a boring image and generic description still fails. Hand off to Copy frameworks for the quality of the text, and to design review for the quality of the image.
 
 ---
 
@@ -133,12 +143,15 @@ I evaluate three dimensions per page: completeness (all required OG/Twitter tags
 
 | Framework | Interaction with social sharing |
 |-----------|-------------------------------|
-| **Meta Tags** | OG title and description often mirror meta title and description. They serve complementary contexts (social vs. search). |
-| **Image SEO** | OG images should follow image SEO practices (proper format, reasonable size, descriptive content). |
-| **Structured Data** | Structured data and OG tags serve different machines (search engines vs. social platforms). Both should describe the same content consistently. |
-| **JS Rendering** | OG tags must be server-rendered. Social platform crawlers don't execute JavaScript. |
-| **URL Structure** | `og:url` should match the canonical URL. Inconsistency confuses platforms about which URL is authoritative. |
-| **Technical SEO** | OG tags on pages blocked by robots.txt may not be accessible to social platform crawlers. |
+| **Meta Tags** | OG title and description often mirror meta title and description. They serve complementary contexts (social vs. search). The mechanism: search users have explicit intent (they searched for something); social users are browsing passively. The OG title/description should hook passive attention, while meta tags should match search intent. Identical text often serves neither context well. |
+| **Image SEO** | OG images should follow image SEO practices (proper format, reasonable size, descriptive content). But OG images have unique requirements: specific aspect ratios (1.91:1 for Facebook), minimum dimensions (1200×630), and the need to be visually compelling at small preview sizes. A great SEO image (descriptive alt text, compressed, responsive) may be a terrible OG image (wrong aspect ratio, no visual hook, text unreadable when small). |
+| **Structured Data** | Structured data and OG tags serve different machines (search engines vs. social platforms). Both should describe the same content consistently. When the Product schema says "$29.99" but the OG description says "Starting at $19.99," the inconsistency creates trust problems across channels. |
+| **JS Rendering** | OG tags must be server-rendered. Social platform crawlers don't execute JavaScript. This is the most common cause of broken social previews on modern JS-heavy sites. The mechanism is identical to the structured data rendering problem — social crawlers and Google's initial crawl both need content in the initial HTML. Hand off to JS Rendering framework (13). |
+| **URL Structure** | `og:url` should match the canonical URL. Inconsistency confuses platforms about which URL is authoritative. Facebook uses `og:url` to deduplicate share counts — if different URL variants of the same page have different `og:url` values, the share counts fragment across variants. |
+| **Technical SEO** | OG tags on pages blocked by robots.txt may not be accessible to social platform crawlers. Facebook's crawler respects robots.txt (approximately — it follows some rules but not all). LinkedIn's crawler is less predictable. If key pages have broken social previews, check whether robots.txt or CDN rules are blocking the social crawlers. |
+| **Copy/Content Quality (Copy)** | The OG title and description are advertising copy. They need to persuade someone scrolling a social feed to stop and click. This is a different writing skill than SEO meta tag writing (which serves search intent) or on-page copywriting (which serves the reading experience). Copy frameworks evaluate whether the words compel action. If OG tags exist but are generic ("Welcome to our website"), the fix is copywriting, not SEO. |
+| **Visual Design** | The OG image is the most impactful element of a social share. A compelling, on-brand, properly formatted image is a design deliverable, not an SEO deliverable. If the site has custom OG images that look amateur (low resolution, poor typography, clashing colors), the problem is design quality, not metadata implementation. Design frameworks (brand consistency, visual hierarchy) evaluate OG image quality. |
+| **Compliance/GDPR** | Cookie consent implementations can affect social preview crawlers. If the site shows a cookie wall that blocks content until consent is given, Facebook and LinkedIn crawlers may see only the consent modal when they fetch OG data. The preview shows the consent banner text instead of the page content. The mechanism: social crawlers don't click "Accept." If the content is behind a consent gate, the crawlers can't see it. |
 
 ---
 

@@ -105,6 +105,12 @@ I categorize findings by impact: text contrast failures are more severe than non
 
 **The glass morphism failure** — Frosted glass / backdrop blur effect with semi-transparent backgrounds. Text contrast is variable — it passes when the background image is dark, fails when it's light. Fix: add a solid fallback layer behind text, or use enough opacity that worst-case background still provides contrast.
 
+**The placeholder text vanishing act** — Form input placeholder text at #9CA3AF on a white background: 2.6:1 contrast. Fails AA. The team argues "it's just a placeholder, users won't need to read it." But they will — placeholders often serve as the only instruction for what to enter. Fix: placeholders need at least 4.5:1 contrast, or replace with persistent labels that meet contrast.
+
+**The badge text crunch** — Small colored badges (status pills, tags, counts) with white text on medium-saturated backgrounds. "In Progress" in 12px white text on a medium blue badge: the combination of small text, thin weight, and marginal contrast produces unreadable labels. Fix: badges with text need at least 4.5:1 for text under 18px. Use darker background variants or dark text on light badge backgrounds.
+
+**The gradient text gamble** — Text overlaying a gradient background. At one end, the contrast is 7:1. At the other end, it's 2.8:1. The average might pass, but readers at the failing end can't read the text. Fix: check contrast at the worst point of the gradient, not the best point. If any position fails, the gradient fails.
+
 ---
 
 ## §5 The traps
@@ -128,6 +134,8 @@ I categorize findings by impact: text contrast failures are more severe than non
 **Contrast doesn't account for ambient lighting.** A screen in a sunlit room has effectively lower contrast than the same screen in a dark room. Products used outdoors or in variable lighting (retail, healthcare, field work) need higher contrast margins.
 
 **High contrast can be harmful.** Pure black (#000) text on pure white (#FFF) at maximum contrast (21:1) causes eye strain for users with certain visual conditions (astigmatism, photosensitivity). Using #111 or #1A1A1A on #FAFAFA provides excellent contrast without the harshness.
+
+**Contrast tools disagree with each other.** WCAG 2.x relative luminance and APCA produce different results for the same color pair, especially for mid-range values and dark mode. A color pair can pass one standard and fail the other. Until WCAG 3.0 is finalized, auditors must decide which standard to apply and document the choice.
 
 ---
 

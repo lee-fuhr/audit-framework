@@ -101,6 +101,12 @@ I evaluate: (1) Can I identify a **clear elevation scale** with distinct, named 
 
 **The shadow-on-dark problem** — The product uses a dark sidebar. The card shadows — designed for light backgrounds — are invisible on the dark surface. Elevated elements in the dark sidebar appear flat. Fix: shadows on dark backgrounds need lighter shadow colors or increased opacity, or the product should use borders/glow instead of shadows for elevation on dark surfaces.
 
+**The z-index war** — Modal has z-index 1000. Sticky header has z-index 999. Someone's tooltip needs to appear above the header: z-index 1001. Now a date picker inside the modal is behind the modal backdrop at z-index 1000. The team starts using z-index 9999. Fix: define a z-index scale with named layers (base: 0, sticky: 100, dropdown: 200, modal: 300, tooltip: 400) and never use arbitrary values.
+
+**The elevation-without-stacking-context problem** — A card with a large shadow visually appears above adjacent cards, but when the user opens a dropdown inside the card, the dropdown is clipped by the card's overflow or slides behind the next card. Visual elevation (shadow) doesn't match DOM stacking. Fix: elevated components that contain overlays need `isolation: isolate` or explicit `position: relative` + `z-index` to create proper stacking contexts.
+
+**The double-elevation glitch** — A card sits on a page (Level 1 shadow). The card contains a tab panel (Level 0). The tab panel contains a dropdown (Level 2 shadow). But the dropdown shadow is added ON TOP of the card shadow, creating a visual double-shadow artifact at the overlap boundary. Fix: overlays appearing within elevated containers should use shadows calculated relative to the container, not absolute.
+
 ---
 
 ## §5 The traps
@@ -124,6 +130,8 @@ I evaluate: (1) Can I identify a **clear elevation scale** with distinct, named 
 **Elevation perception varies by display.** Subtle shadows that read clearly on a high-quality IPS display may be invisible on a lower-contrast TN panel. Low-end displays reduce the effective range of the elevation scale.
 
 **Motion and elevation are coupled.** An element that rises (shadow increases) should animate the transition. An element that appears above (modal entry) should use motion to communicate its arrival. Static elevation audits miss the motion dimension of depth.
+
+**Elevation systems don't account for user-created layers.** Draggable elements, resizable panels, and floating toolbars that the user positions create elevation relationships the designer didn't plan for. The elevation system must handle dynamic, user-driven stacking gracefully.
 
 ---
 

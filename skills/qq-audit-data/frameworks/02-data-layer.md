@@ -105,6 +105,16 @@ I score by architectural cleanliness and vendor independence. Can you swap a ven
 
 **The divergent platforms** — Web sends events through Segment. The iOS app uses direct Amplitude SDK calls. The Android app uses Firebase. Three platforms, three data flows, three schemas. Cross-platform user journeys are invisible. Fix: one data layer specification, one collection platform, adapted for each client but producing consistent events.
 
+**The GTM container sprawl** — Three marketing agencies, two developers, and an intern have all added tags to Google Tag Manager over 18 months. The container has 87 tags, 34 triggers, and 29 variables. Nobody knows which tags are active, which are abandoned, and which conflict with each other. Tag firing order is undefined. Fix: GTM container audit with a tag inventory, owner assignment, and quarterly cleanup. Use GTM's built-in versioning and approval workflow.
+
+**The first-party proxy masquerade** — The team sets up a first-party subdomain (analytics.example.com) that proxies to a third-party analytics service. This bypasses ad blockers and increases data collection. But in GDPR jurisdictions, this first-party disguise doesn't change the legal analysis — the data still reaches a third party. French CNIL fined companies for exactly this pattern. Fix: first-party collection is fine for your own analytics. First-party proxy to a third party is a legal risk.
+
+**The event queue overflow** — The client-side data layer queues events when the network is unavailable (airplane mode, poor connectivity). The queue has no size limit. After 30 minutes offline, the queue contains 500 events. When connectivity returns, the queue flushes all 500 simultaneously, overwhelming the collection endpoint and dropping half. Fix: bounded queue (50-100 events), oldest-first eviction, and batched flush with backpressure.
+
+**The destination schema mismatch** — Segment sends an `order_completed` event with a `products` array to 5 destinations. Amplitude handles arrays natively. Google Analytics flattens the array into a single concatenated string. Mixpanel truncates at 255 characters. The same event produces different data shapes in different tools, and analysts querying each tool get different answers. Fix: test event transformation at each destination. Use Segment's destination functions or RudderStack's transformers to reshape events per destination before delivery.
+
+**The server-to-server identity gap** — Client-side events carry a Segment `anonymousId` and authenticated `userId`. Server-side events from webhooks (Stripe payment succeeded, SendGrid email delivered) carry only an internal customer ID. Without identity stitching, the Stripe revenue event can't be joined to the user's behavioral journey in Amplitude. Fix: include the analytics `userId` in webhook metadata. When creating a Stripe customer, store the Segment userId as Stripe metadata. Map server-side events through a shared identifier.
+
 ---
 
 ## §5 The traps
@@ -129,6 +139,14 @@ I score by architectural cleanliness and vendor independence. Can you swap a ven
 
 **Data layers are not immune to ad blockers.** First-party collection endpoints reduce ad blocker impact but don't eliminate it. Some blockers target first-party analytics specifically. Accept that client-side collection will always have a gap and compensate with server-side collection for critical events.
 
+**CDPs introduce a single point of failure for all analytics.** When Segment has an outage (and they have — November 2023, 4-hour incident), every destination goes dark simultaneously. The centralization benefit becomes a centralization risk. Design for CDP failure: client-side local buffering, health checks, and a fallback path for business-critical events.
+
+**Data layer migration is a multi-month project at scale.** Moving from scattered SDK calls to a centralized data layer in a mature product means touching every file that emits analytics. The migration itself introduces data gaps (events lost during transition), and parallel-running old and new systems doubles the maintenance burden during the transition.
+
+**Data layers create a false sense of data quality.** Events flowing through Segment or GTM feel "managed." But the data layer doesn't validate business logic — it validates schema. An event with the right structure but wrong values (negative prices, future timestamps, impossible user IDs) passes through cleanly. The data layer is plumbing; it doesn't know whether the water is clean.
+
+**Server-side data layers introduce debugging complexity.** When an event doesn't appear in the analytics tool, the failure could be at: the client (event not emitted), the data layer (event rejected by schema), the routing (destination not configured), or the destination (ingestion failure). Each layer adds a step to the diagnostic chain. Without end-to-end event delivery monitoring, debugging event loss becomes archaeology.
+
 ---
 
 ## §7 Cross-framework connections
@@ -141,6 +159,12 @@ I score by architectural cleanliness and vendor independence. Can you swap a ven
 | **Data Validation (04)** | The data layer is the ideal point for event validation — before events reach any destination. Validate schema, required fields, and data types at the collection layer. |
 | **Error Tracking (10)** | Error events should flow through the same data layer as analytics events. Separate error tracking (Sentry) and analytics (Mixpanel) create data silos. |
 | **A/B Testing Infrastructure (07)** | Experiment assignment and exposure events should flow through the data layer. If A/B test events are in a separate system, correlating experiments with behavior requires cross-system joins. |
+| **GDPR Compliance (Compliance 01)** | The data layer is the technical enforcement point for GDPR consent. It must check consent state before routing events to third-party destinations. A data layer without consent integration means every downstream vendor receives data without lawful basis — a per-event GDPR violation. |
+| **Cookie Consent (Compliance 03)** | The CMP (OneTrust, Cookiebot) must feed consent state into the data layer before any event routing. Race conditions where events fire before consent state propagates are the most common technical GDPR violation. GTM's consent mode and Segment's consent management address this, but only if configured. |
+| **Performance Budget (Frontend 09)** | Each vendor SDK loaded through the data layer adds JavaScript weight. Segment's analytics.js loads ~36KB gzipped, plus each destination SDK. GTM containers can exceed 200KB if unchecked. The data layer's performance impact must be budgeted like any other frontend dependency. |
+| **Infrastructure as Code (DevOps 02)** | Data layer configuration (GTM containers, Segment workspace settings, RudderStack configs) should be version-controlled and deployed through CI/CD, not manually edited in web UIs. Terraform providers exist for Segment and GTM. |
+| **Right to Deletion (Compliance 10)** | The data layer routes events to multiple destinations. When a user exercises their right to deletion, EVERY destination that received events through the data layer must delete that user's data. The data layer's destination list IS the deletion scope for analytics data. |
+| **Gestalt Principles (UX 06)** | Users perceive interface elements as grouped. The data layer must emit events that capture the user's perceived grouping, not just the DOM structure. Click events on visually grouped elements should include group context — otherwise, behavior analytics loses the UX meaning. |
 
 ---
 

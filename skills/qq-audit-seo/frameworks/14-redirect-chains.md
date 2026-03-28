@@ -103,6 +103,12 @@ I evaluate four dimensions: chain length (single-hop is ideal), status code corr
 
 **The soft redirect** — A JavaScript redirect (`window.location.href = "/new-page"`) instead of a server-side 301. Search engines may not follow it. Even if they do, link equity transfer is unreliable. Fix: implement a proper server-side 301 redirect.
 
+**The CDN-level redirect conflict** — A site using Cloudflare Page Rules for www-to-non-www redirects AND the origin server's .htaccess for HTTPS redirects. The two redirect layers create chains: `http://www.example.com` → (Cloudflare: www→non-www) → `http://example.com` → (.htaccess: HTTP→HTTPS) → `https://example.com`. Two hops. I discovered this with `curl -v` tracing the full redirect chain. The Cloudflare rule was added by marketing (for the page rules dashboard), the .htaccess rule by the developer (during HTTPS migration), and neither knew about the other. Fix: handle ALL redirects in one layer. Either do everything at the CDN level or everything at the origin server level. Never split redirect logic across infrastructure layers.
+
+**The vanity URL redirect farm** — A marketing team creating vanity URLs for campaigns: `example.com/spring-sale` → 301 → `example.com/products?promo=spring`. After 3 years, there are 200 vanity URLs, 50 of which redirect to pages that have since been redirected themselves (creating chains). 30 redirect to 404s (campaigns for discontinued products). I audited these using Screaming Frog's redirect chain report filtered by the `/` root path — the redirect inventory was in the .htaccess file with no documentation. Fix: document all vanity URLs in a spreadsheet. Audit quarterly. Remove vanity URLs whose campaigns ended >6 months ago (the few external links they attracted have long since stopped passing meaningful equity).
+
+**The locale redirect chain** — An international site where `example.com/page` → 301 → `example.com/en/page` → 301 → `example.com/en-us/page` because the locale strategy changed twice. The first redirect was the initial internationalization. The second was a refinement to region-specific paths. Users hitting the original URL traverse two hops. I found 4,000 of these chains on a B2B site — every original-launch URL had a 2-hop chain. Ahrefs showed external backlinks pointed to the original URLs (no prefix), meaning link equity was traversing two hops. Fix: update all redirects to point directly from the original URL to the final destination. `example.com/page` → 301 → `example.com/en-us/page` (single hop).
+
 ---
 
 ## §5 The traps
@@ -115,17 +121,21 @@ I evaluate four dimensions: chain length (single-hop is ideal), status code corr
 
 **The "302 is fine because Google is smart" trap** — Google may eventually figure out that a 302 should be a 301. But "may eventually" is not a strategy. Use the correct status code to communicate your intent clearly.
 
+**The "we can remove redirects after a year" trap** — Some SEOs recommend removing old redirects after 12 months because "Google has had time to update its index." This ignores external backlinks. If a page from 5 years ago has 50 external backlinks and you remove the redirect, those 50 backlinks now point to a 404. The equity is permanently lost. Keep redirects for URLs with external backlinks indefinitely. Only remove redirects for URLs with zero external link equity (check Ahrefs or Semrush before removing anything).
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Redirect equity loss is real but unquantifiable.** Google confirms that 301 redirects pass "most" link equity. The exact percentage is unknown and may vary. Chains lose equity at each hop. But the loss is unquantifiable — you can't measure exactly how much equity was lost.
+**Redirect equity loss is real but unquantifiable.** Google confirms that 301 redirects pass "most" link equity. The exact percentage is unknown and may vary. Chains lose equity at each hop. But the loss is unquantifiable — you can't measure exactly how much equity was lost. Industry consensus is roughly 10-15% loss per hop, but Google has never confirmed a number.
 
-**External redirect sources are outside your control.** If a high-authority site links to your old URL, you can't update their link. The redirect is the only mechanism to pass that equity. Keep redirects for URLs with significant external links indefinitely.
+**External redirect sources are outside your control.** If a high-authority site links to your old URL, you can't update their link. The redirect is the only mechanism to pass that equity. Keep redirects for URLs with significant external links indefinitely. Use Ahrefs' backlink report to identify which redirected URLs have the most external equity — these redirects are effectively permanent.
 
-**Redirect loops can crash monitoring tools.** A redirect loop detected during a crawl can consume crawler resources. Most crawl tools have a maximum redirect follow limit, but large numbers of loops still slow down audits.
+**Redirect loops can crash monitoring tools.** A redirect loop detected during a crawl can consume crawler resources. Most crawl tools have a maximum redirect follow limit (Screaming Frog defaults to 5 hops), but large numbers of loops still slow down audits.
 
-**Server configuration complexity varies.** Redirect implementation differs between Apache (.htaccess), Nginx (server config), cloud platforms (edge functions, CDN rules), and CMS-level redirects. The audit framework is universal; the implementation is platform-specific.
+**Server configuration complexity varies.** Redirect implementation differs between Apache (.htaccess), Nginx (server config), cloud platforms (edge functions, CDN rules), and CMS-level redirects. The audit framework is universal; the implementation is platform-specific. I've audited sites where redirects lived in four different places simultaneously (.htaccess, WordPress plugin, Cloudflare Page Rules, and application-level routing) with no single person understanding all four layers. Redirect conflicts between layers create intermittent, hard-to-reproduce chains.
+
+**Redirect auditing requires the full crawl, not spot checks.** You can't find redirect chains by testing 10 URLs manually. A Screaming Frog crawl of the full site with redirect chain detection is the minimum. For external link equity, Ahrefs' "Best by Links" report filtered for redirecting pages reveals which chains are losing the most equity. The combination of crawl data (internal chains) and backlink data (external equity at risk) gives the complete picture.
 
 ---
 
@@ -133,12 +143,15 @@ I evaluate four dimensions: chain length (single-hop is ideal), status code corr
 
 | Framework | Interaction with redirects |
 |-----------|---------------------------|
-| **Technical SEO** | Redirects affect crawlability. Chains waste crawl budget. Loops block crawling entirely. |
-| **Crawl Budget** | Each redirect hop consumes crawl budget. Chains multiply the waste. |
-| **Internal Linking** | Internal links to redirected URLs waste HTTP requests and add latency. Fix the links, don't just rely on the redirect. |
-| **URL Structure** | URL changes create redirects. Good URL structure from the start minimizes future redirect needs. |
-| **Duplicate Content** | Redirects are the strongest signal for URL consolidation. A 301 redirect from duplicate to canonical resolves duplication definitively. |
-| **Page Speed** | Each redirect adds latency. Chains on frequently visited pages measurably affect page load time. |
+| **Technical SEO** | Redirects affect crawlability. Chains waste crawl budget. Loops block crawling entirely. A misconfigured redirect (302 instead of 301) is a technical SEO problem with equity consequences. |
+| **Crawl Budget** | Each redirect hop consumes crawl budget. Chains multiply the waste. The mechanism: a 3-hop chain uses 4 HTTP requests for 1 page view. If Googlebot encounters 1,000 URLs with 3-hop chains, it uses 4,000 crawl requests to visit 1,000 pages — effectively reducing crawl capacity by 75% for those URLs. |
+| **Internal Linking** | Internal links to redirected URLs waste HTTP requests and add latency. Fix the links, don't just rely on the redirect. The mechanism: every internal link that triggers a redirect adds 100-300ms of latency to the page load. On a site with 50 pages each triggering 5 redirect-bound internal links, that's 250 wasted HTTP requests per user session. |
+| **URL Structure** | URL changes create redirects. Good URL structure from the start minimizes future redirect needs. Every URL convention decision (trailing slashes, case, hierarchy depth) has a future redirect cost if it changes. URL structure audits should assess stability — how many redirects exist from past URL changes? |
+| **Duplicate Content** | Redirects are the strongest signal for URL consolidation. A 301 redirect from duplicate to canonical resolves duplication definitively. Unlike canonical tags (hints), redirects are instructions — the browser and crawler are sent to the destination with no ambiguity. |
+| **Page Speed (Performance)** | Each redirect adds latency (100-300ms per hop including DNS, connection, and response). Chains on frequently visited pages measurably affect page load time. The mechanism: redirects happen BEFORE the page starts loading. A 2-hop chain adds 200-600ms before the first byte of actual content. For pages where LCP is borderline, this pushes them from "Good" to "Needs Improvement." |
+| **Link Authority (SEO)** | Redirects are the primary mechanism for preserving external link equity when URLs change. Every redirect chain is a link equity pipeline with friction at each joint. The Ahrefs "Redirects" report shows which redirected URLs carry the most external equity — those are the chains that matter most to consolidate. |
+| **Frontend Architecture** | Client-side redirects (JavaScript `window.location`, meta refresh) are unreliable for both users and search engines. The frontend architecture determines whether redirects happen at the server level (fast, reliable, equity-preserving) or the client level (slow, unreliable, equity-unclear). If the site uses a JS framework with client-side routing, verify that 404 handling and redirects are server-side, not client-side. |
+| **Navigation Design (UX)** | Navigation links that trigger redirects create a measurable UX problem: every nav click adds 100-300ms of invisible latency. Users perceive the site as slower than it actually is. The UX navigation audit should check that navigation links point to final destination URLs. If the navigation template hasn't been updated since the last URL change, every page on the site has redirect-bound nav links. |
 
 ---
 

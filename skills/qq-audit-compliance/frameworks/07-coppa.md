@@ -105,6 +105,14 @@ I score by risk exposure: Is the service directed to children? Is there actual k
 
 **The school-distributed COPPA gap** — A SaaS tool distributed through schools is used by children under 13. The company claims "we're not directed to children, schools handle compliance." But the company has actual knowledge (school context, age ranges in user profiles) that children use the product. Fix: if you know children use your product, COPPA applies regardless of your stated audience. Implement school-based consent procedures.
 
+**The Epic Games precedent** — In 2022, the FTC fined Epic Games $275M for COPPA violations related to Fortnite. Key findings: voice chat enabled by default for children (collecting audio), in-game purchases without parental consent, and matched children with adult strangers. The case established that game design choices (default settings, matchmaking) are COPPA compliance decisions, not just data collection forms. Fix: review all product features — not just data collection forms — for COPPA implications. Default settings, communication features, and user matching all create COPPA exposure when children use the product.
+
+**The persistent identifier trap** — A children's educational app doesn't collect names, emails, or addresses. The team believes they're COPPA-exempt because they collect "no personal information." But the app uses Google Analytics (which sets a persistent client ID cookie) and AdMob (which collects device advertising ID). Under COPPA, persistent identifiers used to track children across sessions are personal information. Fix: audit all SDKs in children's products for persistent identifier collection. Use COPPA-compliant configurations (GA4 with user-level data collection disabled, AdMob's COPPA tag enabled).
+
+**The mixed-audience age gate timing** — A social media platform is "general audience" but popular with teenagers. The platform asks for age at registration. A 12-year-old enters their real age. The platform blocks signup. The 12-year-old creates a new account and enters age 15. The second attempt succeeds. The platform had actual knowledge of a child user (first attempt) but accepted a false age (second attempt) from the same device. FTC guidance suggests blocking the device/IP after an under-13 age entry. Fix: when a user indicates they're under 13, store that signal by device/session and prevent re-attempts. Don't just reject the signup — prevent circumvention from the same context.
+
+**The YouTube COPPA settlement model** — In 2019, Google/YouTube paid $170M for COPPA violations. The key issue: YouTube collected persistent identifiers from children watching child-directed content, then used those identifiers for behavioral advertising. YouTube was not "directed to children" overall but had channels specifically for children. The FTC established that channel-level direction (specific content aimed at children) triggers COPPA even on a general-audience platform. Fix: if your platform has content sections aimed at children (games, educational content, kid-friendly areas), those sections trigger COPPA requirements even if the overall platform is general-audience.
+
 ---
 
 ## §5 The traps
@@ -125,6 +133,10 @@ I score by risk exposure: Is the service directed to children? Is there actual k
 
 **COPPA compliance is evolving.** The FTC has proposed updated COPPA rules (2023-2024) that may expand requirements. The Kids Online Safety Act (KOSA) and other legislation may add new obligations. Stay current with regulatory developments.
 
+**The proposed COPPA updates (2024) would significantly expand scope.** Proposed changes include: covering teens 13-16 with new protections, restricting push notifications to children, prohibiting targeted advertising to children, and requiring consent for new uses of previously collected data. If finalized, products currently compliant under 2013 rules may need significant changes.
+
+**Age verification technology faces an impossible tradeoff.** Effective age verification (facial analysis, ID verification) collects MORE personal data to protect children's privacy — creating a new privacy problem to solve the existing one. Simple age gates (date-of-birth entry) are trivially bypassable. There is no current technology that reliably verifies age without either collecting sensitive biometric data or being easily defeated by a 12-year-old.
+
 ---
 
 ## §7 Cross-framework connections
@@ -137,6 +149,10 @@ I score by risk exposure: Is the service directed to children? Is there actual k
 | **Cookie Consent (03)** | Cookie consent mechanisms may need adaptation for child users. Consent given by a child without parental involvement may not be valid. |
 | **Privacy-Compliant Tracking (Data 05)** | Tracking on child-directed pages requires COPPA-compliant configuration — no behavioral advertising, limited persistent identifiers. |
 | **ADA/Section 508 (04)** | Child users may have accessibility needs. Age gates and parental consent flows must be accessible. |
+| **Data Layer Architecture (Data 02)** | The data layer must support COPPA-conditional event routing. When a user is identified as under-13, the data layer should suppress all non-essential analytics destinations (no behavioral advertising events to Facebook, no cross-site tracking events to Google). This requires the data layer to know the user's age classification BEFORE routing events. |
+| **Analytics Completeness (Data 01)** | COPPA-compliant analytics for child users is inherently less complete than adult user analytics. Behavioral tracking, persistent identifiers, and cross-session analysis are restricted. Accept that child-user analytics will have lower resolution and design product decisions accordingly. |
+| **Error Tracking (Data 10)** | Error tracking tools that capture children's user context (user IDs, session recordings, behavioral breadcrumbs) are collecting children's personal information. Sentry and LogRocket configurations for child-directed pages must minimize captured context — no personally identifiable session data, no behavioral breadcrumbs, error-only with anonymized identifiers. |
+| **Encryption and Security (DevOps/Security)** | COPPA requires "reasonable procedures to protect the confidentiality, security, and integrity of children's personal information." The security standard for children's data is higher than general data. Encryption at rest and in transit is baseline, not aspirational. The FTC evaluates security measures specifically when children's data is involved. |
 
 ---
 

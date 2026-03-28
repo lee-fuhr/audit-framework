@@ -94,6 +94,12 @@ I score across four axes: (1) Stroke consistency — are all icons the same weig
 
 **The one-off custom job** — Product needs a "workflow" icon. The icon set doesn't have one. A designer draws a custom icon in a different style — slightly thicker strokes, slightly different corner radius, slightly more detail. It lives in the nav for years. Everyone gets used to it. New designers add more one-offs matching the one-off's style, not the system's. Fix: every custom icon must go through a "does it match the family?" review before shipping.
 
+**The emoji-as-icon shortcut** — A developer uses emoji (📊 📋 ✅) as status indicators or category icons because "they're already there and everyone knows them." Emoji render differently across operating systems — the chart emoji on macOS looks nothing like the chart emoji on Windows. Sizing and alignment are unpredictable. Fix: use actual icons from the system's icon family for anything functional. Reserve emoji for user-generated content or informal contexts.
+
+**The icon-text label redundancy** — Every icon in the navigation has a text label next to it. The icon adds visual recognition; the label adds clarity. But on the action toolbar, icons appear without labels, and in the settings sidebar, labels appear without icons. The inconsistency isn't in the icons themselves but in the pairing pattern. Users learn one convention and it doesn't apply elsewhere. Fix: establish a rule for when icons appear with labels, when alone, and when labels stand alone — then enforce it consistently.
+
+**The dark mode icon breakage** — Icons designed as dark strokes on light backgrounds become invisible in dark mode because nobody created light-stroke variants. The team "fixes" it with CSS `filter: invert(1)`, which inverts colored icons too — the red error icon becomes teal, the green success icon becomes pink. Fix: icon color tokens that swap properly per theme, not CSS filters.
+
 ---
 
 ## §5 The traps
@@ -117,6 +123,8 @@ I score across four axes: (1) Stroke consistency — are all icons the same weig
 **Cultural interpretation varies.** A trash can icon means "delete" in Western interfaces but may not carry the same meaning globally. A home icon shaped like a Western suburban house has cultural assumptions. Consistency audits evaluate visual coherence, not cultural appropriateness.
 
 **Animation and state changes add complexity.** A static icon audit misses icons that animate between states (hamburger to X, play to pause). These transitions need their own consistency standards — easing, duration, transformation style.
+
+**Icon audits don't account for cognitive load of icon-dense interfaces.** A toolbar with 15 consistent icons is still overwhelming. Consistency helps recognition but doesn't solve the problem of too many icons competing for attention in one view.
 
 ---
 

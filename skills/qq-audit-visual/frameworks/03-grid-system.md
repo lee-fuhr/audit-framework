@@ -100,6 +100,12 @@ I score (1) Does a grid exist? (2) Is it consistent? (3) Is it responsive? (4) I
 
 **The nav/content offset** — Navigation bar has 16px horizontal padding. Main content has 32px margin (matching the grid margin). The nav items are offset from the content below by 16px. Fix: nav horizontal padding should match the grid margin, or the nav should use the same grid container as the content.
 
+**The table-vs-grid conflict** — Data tables with fixed column widths placed inside a fluid grid. The table columns don't align with the page grid columns, creating two competing alignment systems visible on the same viewport. Fix: either constrain the table to span complete grid columns, or accept that tables have their own internal grid and use consistent horizontal padding to visually relate them to the page grid.
+
+**The modal grid orphan** — Modal dialogs that float outside the page grid with arbitrary widths and padding. The modal content doesn't align with anything behind it, and if the modal is wide enough to show multi-column content, its columns use different widths than the page grid. Fix: modals should have a defined internal grid with gutters matching the page system.
+
+**The nested grid multiplication** — A page grid with 24px gutters contains a component with its own 12px gutters, which contains cards with 8px internal gaps. Three different spacing systems create visual noise at every boundary. Fix: nested grids should use the same gutter width or explicit fractions (full/half) of the parent gutter.
+
 ---
 
 ## §5 The traps
@@ -123,6 +129,8 @@ I score (1) Does a grid exist? (2) Is it consistent? (3) Is it responsive? (4) I
 **Grids interact with scroll.** On a long page, the grid provides horizontal consistency, but the user only sees one viewport at a time. Perfect column alignment is most impactful at the top of the page and in side-by-side comparisons. Below the fold, users are more sensitive to vertical rhythm than horizontal alignment.
 
 **Grids don't translate directly to mobile.** A desktop 12-column grid that collapses to a single column on mobile isn't really using a grid on mobile — it's using a margin system. Mobile grid systems need their own design consideration, not just column reduction.
+
+**Grids assume horizontal layout primacy.** In vertical-heavy interfaces (mobile feeds, chat, timelines), horizontal grid alignment matters less than vertical rhythm. Over-investing in column alignment for a vertically scrolling interface misplaces the effort.
 
 ---
 

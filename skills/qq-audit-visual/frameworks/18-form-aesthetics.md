@@ -109,6 +109,12 @@ I evaluate: (1) Does the form look **approachable** before I start reading? (2) 
 
 **The over-styled focus state** — On focus, the input field gets a blue border, blue background tint, blue shadow, blue label color, and the placeholder text changes to blue. Five visual changes for one state. It's overwhelming and distracting when tabbing through fields rapidly. Fix: one or two focus indicators (border color change + subtle shadow) are sufficient.
 
+**The label alignment inconsistency** — Some fields use top-aligned labels. Others use left-aligned labels. The contact form uses floating labels. The settings form uses inline labels. Four labeling patterns in one product. Users develop different scanning patterns for each, slowing comprehension every time they encounter a different form. Fix: choose one label placement strategy and use it everywhere. Top-aligned is the safest default for most products.
+
+**The checkbox/radio aesthetic neglect** — Text inputs and buttons are beautifully styled. Checkboxes and radio buttons are browser defaults — gray, tiny, and platform-specific. The form looks half-designed. Fix: custom-styled checkboxes and radios that match the design system's visual language. This is a solved problem in every modern CSS framework.
+
+**The inline validation timing mismatch** — Some fields validate on blur (user tabs away). Others validate on keystroke (error appears mid-typing). Others validate only on submit. The inconsistency means users can't predict when errors will appear. On keystroke validation is particularly jarring for fields like email — "Invalid email" appears before the user has finished typing. Fix: validate on blur for most fields, on submit for complex multi-field validation, and never on keystroke for free-text fields.
+
 ---
 
 ## §5 The traps
@@ -132,6 +138,8 @@ I evaluate: (1) Does the form look **approachable** before I start reading? (2) 
 **International forms break assumptions.** Address formats, name structures, phone number lengths, and date formats vary by country. A form that's aesthetically clean for US data may become awkward with international formats. Global forms need global aesthetic testing.
 
 **Accessibility overlaps significantly.** Many form aesthetic issues (floating labels, placeholder-only labels, color-only error indication) are also accessibility violations. This framework focuses on visual quality; the accessibility framework covers compliance requirements.
+
+**Form aesthetics degrade under real data.** A form designed with "John Smith" and "jane@example.com" looks different with "Dr. Rajesh Koothrappali-Wolowitz" and "administrative-coordinator@long-company-name-here.enterprise.co.uk". Long values break field widths, overflow containers, and misalign layouts. Always test with extreme-length realistic data.
 
 ---
 

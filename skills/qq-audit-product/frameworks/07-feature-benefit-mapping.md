@@ -104,6 +104,10 @@ I create a two-column map: features on one side, benefits on the other, with lin
 
 **The orphan feature** — A feature that exists but nobody can explain why. It was built for a specific customer request 3 years ago, the customer churned, and the feature remains. It has no benefit and no users, but it has maintenance cost. Fix: audit features for current benefit; sunset the orphans.
 
+**The segment-blind benefit** — The product promotes one set of benefits to all users when different segments care about completely different outcomes. I audited an HR platform that led with "streamline performance reviews" on every page. Their usage data told a different story: 55% of daily active users never touched performance reviews — they used the tool for PTO tracking and payroll integration. The marketing benefit was targeting 30% of the user base while ignoring the 55% majority. Fix: map benefits per segment and deliver segment-appropriate messaging (landing pages, onboarding, upgrade prompts).
+
+**The benefit-metric disconnect** — The team articulates benefits clearly but has no metrics to validate delivery. "Save 4 hours per week on reporting" — but nobody has measured how long reporting actually takes with or without the product. I've seen this in 70% of products I audit: beautiful benefit claims, zero measurement of whether they're true. In one case, a project management tool claimed to "cut meeting time in half." When I looked at their customers' calendar data, meeting time had actually increased 12% after adoption because the tool generated status reports that required review meetings. Fix: every benefit claim must have a measurement plan, a baseline, and a post-adoption measurement.
+
 ---
 
 ## §5 The traps

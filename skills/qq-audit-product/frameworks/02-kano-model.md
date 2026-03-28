@@ -32,11 +32,13 @@ The Kano Model (1984, Noriaki Kano) classifies product attributes by their relat
 
 When I enter a product audit, I immediately start sorting features into Kano categories — not by what the team tells me, but by how users would react if each feature disappeared overnight.
 
+Last year I audited a B2B analytics platform with 52 features on its pricing page. The team classified 48 of them as "essential." When I ran a proper Kano survey with 200 users, the truth was brutal: 11 were must-be, 7 were one-dimensional, 2 were attractive, 29 were indifferent, and 3 were reverse. That's 29 features — 56% of the product — that users literally didn't care about. The team was spending $380K/year maintaining features in the indifferent category.
+
 **What I look at first:**
-- The feature list (or feature map) versus usage data. Features with high usage are one-dimensional or must-be. Features with low usage are indifferent, reverse, or attractive-but-undiscoverable.
-- Customer complaints. Complaints cluster around must-be failures and one-dimensional underperformance. Nobody complains about missing attractive features because they don't know to expect them.
+- The feature list (or feature map) versus usage data. Features with high usage are one-dimensional or must-be. Features with low usage are indifferent, reverse, or attractive-but-undiscoverable. In a typical audit, I find 40-60% of features fall into the indifferent category.
+- Customer complaints. Complaints cluster around must-be failures and one-dimensional underperformance. Nobody complains about missing attractive features because they don't know to expect them. I track the complaint-to-category ratio — if more than 15% of tickets reference a must-be failure, the product is in trouble.
 - NPS comments and reviews. Promoters mention attractive and strong one-dimensional features. Detractors mention must-be failures and reverse features.
-- The roadmap. What percentage of planned work is must-be maintenance vs. one-dimensional improvement vs. attractive innovation? Most roadmaps are 80%+ one-dimensional — improving what exists rather than creating new delight.
+- The roadmap. What percentage of planned work is must-be maintenance vs. one-dimensional improvement vs. attractive innovation? Most roadmaps are 80%+ one-dimensional — improving what exists rather than creating new delight. The healthiest products I've audited allocate roughly 20% must-be maintenance, 50% one-dimensional improvement, and 30% attractive exploration.
 
 **What triggers my suspicion:**
 - A team that describes every feature as "essential" or "must-have." That's Kano illiteracy — they're confusing their investment with user expectation.
@@ -99,6 +101,10 @@ I categorize each significant feature, then evaluate portfolio balance. A health
 **The commodity treadmill** — The team continuously improves one-dimensional features that competitors match within months. Every release is a temporary advantage that decays to parity. Fix: invest in attractive features that are harder to copy (they require insight into users, not just engineering effort).
 
 **The decay blindness** — The team still talks about a feature as their differentiator when it's been must-be for two years. "Our real-time sync is best in class" — when every competitor now has real-time sync. Fix: re-evaluate Kano classification annually.
+
+**The attractive feature graveyard** — A feature was attractive at launch, generated buzz and PR coverage, but the team never invested in it after launch. Now it's buggy, outdated, and the novelty wore off. Users who signed up for the delight now experience frustration. I've seen this with AI features especially — shipped with great fanfare, never improved, and within 6 months the attractive feature has decayed to a must-be expectation that's failing. Fix: attractive features need ongoing investment to stay attractive, or a plan to gracefully transition them to one-dimensional maturity.
+
+**The segment collision** — A feature that's attractive for one user segment is reverse for another, and the product doesn't differentiate. I audited a project management tool that added gamification (badges, streaks, leaderboards). The startup teams loved it — NPS +25 for that segment. Enterprise users despised it — NPS -15, with comments like "this isn't a game." The feature was force-enabled for everyone. Fix: segment the delivery. At minimum, provide an off-switch. Ideally, detect segment and default differently.
 
 ---
 

@@ -92,6 +92,12 @@ I evaluate in layers: (1) Is there a base unit? (2) Do line-heights align to it?
 
 **The icon-text baseline dance** — A 20px icon sits inline with 16px/24px text. The icon is vertically centered in the line box, but its center doesn't align with the text baseline. Every line with an icon shifts rhythm by 2-4px. Fix: align icons to baseline or cap-height, not center, or use a line-height that accommodates both.
 
+**The form-field rhythm break** — Labels, inputs, helper text, and error messages each have different line-heights. Stacked vertically, they produce a ragged rhythm that makes the form feel unsteady. A label at 20px line-height, an input at 40px, helper text at 16px — none are multiples of each other. Fix: set all form elements to multiples of the base rhythm unit.
+
+**The card grid misalignment** — Cards with variable content heights in a grid. The title in card 1 is one line; in card 2, two lines. Body text starts at different vertical positions across the row, destroying horizontal alignment. Fix: enforce equal-height zones within cards (title area always accommodates 2 lines) or use CSS subgrid to align internal zones across cards.
+
+**The section divider rhythm theft** — Horizontal rules and section dividers that don't respect the rhythm grid. A 1px border with 15px margin above and below inserts 31px of non-rhythmic space into a 24px system. Fix: divider total height (margins + border) must equal a multiple of the base unit.
+
 ---
 
 ## §5 The traps
@@ -115,6 +121,8 @@ I evaluate in layers: (1) Is there a base unit? (2) Do line-heights align to it?
 **Rhythm is invisible to most users.** Users don't consciously notice a 4px spacing inconsistency. They DO notice the cumulative effect of many inconsistencies — the page feels "cheap" or "unpolished." This makes rhythm violations individually low-severity but collectively significant.
 
 **Rhythm conflicts with responsive design.** A 24px base unit on desktop may need to compress to 20px on mobile. But 20 is not a clean divisor of 24. The rhythm system must have a responsive strategy — either a different base unit per breakpoint or a unit that works at all sizes (8px is popular because it divides evenly across most breakpoints).
+
+**Vertical rhythm interacts with animation.** Elements that animate in height (expandable sections, accordions, toast notifications) temporarily break the rhythm of everything below them. The transition period creates visible jank. Smooth height animations need to target grid-aligned end states.
 
 ---
 

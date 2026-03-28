@@ -107,6 +107,12 @@ I evaluate: (1) Does the layout look **intentionally designed** at every common 
 
 **The sticky element overrun** — Desktop: 64px sticky header + 48px sticky toolbar = 112px of fixed UI, leaving 668px of scrollable content on a 780px viewport. Mobile: same sticky elements on a 667px screen leave 555px for content. On landscape phone: 320px viewport height minus 112px leaves 208px for content — barely visible. Fix: reduce or eliminate sticky elements at narrow viewport heights, not just widths.
 
+**The touch target compression** — Desktop buttons are 36px tall (fine for cursor). On mobile, the same 36px buttons become tap targets that fail the 44px minimum. The layout is responsive; the interactive elements aren't. Fix: buttons and interactive elements should have mobile-specific sizing that meets touch target minimums, independent of the layout's responsive behavior.
+
+**The image bandwidth burden** — A hero image served at 2400×1200 for desktop is also loaded on mobile at 375px wide. The image is 800KB that the mobile connection didn't need. The layout is responsive; the assets aren't. Fix: use responsive images (`srcset`, `<picture>`) to serve appropriately sized assets for each viewport.
+
+**The horizontal scroll leak** — At some viewport width, an element (often a data table, code block, or absolute-positioned element) extends beyond the viewport, creating a horizontal scrollbar on the entire page. The page layout is responsive but one child is wider than its container. Fix: audit for horizontal overflow at every 50px increment across the viewport range. Use `overflow-x: auto` on containers that can hold wide content.
+
 ---
 
 ## §5 The traps
@@ -130,6 +136,8 @@ I evaluate: (1) Does the layout look **intentionally designed** at every common 
 **Responsive design can't fix content problems.** A page with too much content for mobile will feel crammed regardless of responsive technique. If the audit reveals that mobile layouts are consistently overloaded, the solution may be content strategy, not CSS.
 
 **Device fragmentation makes perfection impossible.** The audit establishes a quality floor across the realistic viewport range. Expecting pixel-perfect design at every possible width is impractical. The goal is "looks intentionally designed everywhere," not "looks identical everywhere."
+
+**Responsive audits don't capture orientation changes.** A mobile layout that works in portrait may break in landscape (or vice versa). Users rotate devices mid-task, and the layout should adapt without data loss, scroll position jumps, or element reflow that disorients the user.
 
 ---
 

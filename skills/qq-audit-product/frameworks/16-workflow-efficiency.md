@@ -118,6 +118,10 @@ For each core workflow, I calculate: total steps, value-adding steps, necessary 
 
 **The loading tax** — Every screen transition triggers a full page load. A 5-step workflow with 2-second loads per step takes 10 extra seconds of pure waiting. Fix: SPA architecture, optimistic updates, prefetching, skeleton screens.
 
+**The context-switching tax** — Completing one task requires information scattered across 4 different screens. The user holds data in working memory while navigating between views. I audited a support tool where agents needed to reference the customer's account (screen 1), recent tickets (screen 2), product config (screen 3), and knowledge base (screen 4) to resolve a single ticket. Average resolution time was 11 minutes. After consolidating the 4 views into a split-pane layout, resolution time dropped to 4.5 minutes — a 59% improvement, entirely from eliminating context switching. Fix: identify workflows that require cross-screen information and design consolidated views.
+
+**The keyboard-hostile workflow** — A workflow performed 50+ times daily that requires the mouse for every step. Tab order is broken, Enter doesn't submit, shortcuts don't exist. Power users — the ones doing this workflow most — are slowed to the speed of click-and-wait. I measured a data entry workflow where keyboard-only completion took 45 seconds per record (when it worked) versus 2 minutes 10 seconds with mouse navigation. But the tab order was broken on 3 of 7 fields, forcing a mouse intervention mid-flow. Fix: every high-frequency workflow must be fully keyboard-navigable with logical tab order and standard shortcuts.
+
 ---
 
 ## §5 The traps

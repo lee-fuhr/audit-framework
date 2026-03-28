@@ -120,6 +120,14 @@ I score by compliance completeness across all seven principles. Each principle i
 
 **The deletion theater** — A user requests account deletion. Their profile is removed from the UI. But their data remains in the database (soft delete), in analytics tools, in backup snapshots, and in email marketing lists. Fix: deletion must be comprehensive — all systems, all backups within the retention period, all third-party processors.
 
+**The consent fatigue exploitation** — A mobile app presents consent requests for analytics, marketing, and personalization sequentially across 5 screens on first launch. By screen 3, users tap "Accept" reflexively to reach the product. The Irish DPC's 2023 enforcement against TikTok specifically cited sequential consent requests that degraded user agency. Fix: single-screen consent with granular toggles. All optional processing categories visible at once. Equal-prominence accept/reject.
+
+**The DPIA-as-checkbox** — The team conducts a Data Protection Impact Assessment for a new facial recognition feature. The DPIA is a 2-page form with "low risk" checked for every question. No actual risk analysis, no mitigation measures documented, no DPO consultation. When the Austrian DPA requests the DPIA during an investigation, the document demonstrates the DPIA was performed but also demonstrates it was meaningless — which is worse than not having one. Fix: DPIAs must include genuine risk analysis with specific threats, likelihood, severity, and mitigations. If the DPIA doesn't change any design decisions, it wasn't a real assessment.
+
+**The legitimate interest bootstrapping** — A SaaS company processes user behavioral data for product analytics under "legitimate interest." They then use the same behavioral data to build a recommendation engine that drives engagement metrics. Each additional processing purpose is bootstrapped from the original legitimate interest assessment without a new balancing test. The original LIA covered basic analytics, not algorithmic profiling. Fix: each distinct processing purpose requires its own legitimate interest assessment. "Analytics" and "algorithmic personalization" are different purposes with different privacy impacts.
+
+**The third-country processor cascade** — A German company uses a French CRM (GDPR-compliant, no transfer issue). The French CRM uses an Indian subprocessor for email delivery. The German company's ROPA shows only the French processor. The Indian transfer is invisible — no SCCs, no TIA, no documentation. The CJEU's Schrems II requirements apply to the full chain. Fix: require processor DPAs to include subprocessor transparency. Map the entire data flow chain, not just direct processor relationships.
+
 ---
 
 ## §5 The traps
@@ -146,6 +154,10 @@ I score by compliance completeness across all seven principles. Each principle i
 
 **GDPR interacts with other regulations.** ePrivacy Directive (cookie consent), national implementations (German BDSG, French Informatique et Libertés), and sector-specific regulations (health, finance) add requirements on top of GDPR.
 
+**GDPR enforcement varies wildly by member state.** The Irish DPC (supervising most US tech companies) has been criticized for slow enforcement while CNIL (France) and the Austrian DSB act aggressively. A company supervised by the Irish DPC faces different practical risk than one supervised by CNIL, even under the same regulation. The lead supervisory authority matters enormously for practical compliance strategy.
+
+**The "right to be forgotten" is not absolute.** Companies sometimes over-delete in response to deletion requests, destroying data they're legally required to retain (financial records, fraud prevention data, legal claims evidence). The exceptions in Art. 17(3) are as important as the right itself. A deletion pipeline that doesn't check exceptions before executing is a liability in both directions.
+
 ---
 
 ## §7 Cross-framework connections
@@ -158,6 +170,11 @@ I score by compliance completeness across all seven principles. Each principle i
 | **DPA Coverage (09)** | GDPR Art. 28 requires DPAs with all processors. DPA coverage is a GDPR compliance requirement, not a separate concern. |
 | **Right to Deletion (10)** | GDPR Art. 17 right to erasure. Implementation requires comprehensive deletion across all systems and processors. |
 | **Privacy-Compliant Tracking (Data 05)** | Tracking implementation is where GDPR meets code. Consent management, data minimization, and purpose limitation are implemented in the tracking system. |
+| **Data Retention (Data 08)** | GDPR's storage limitation principle (Art. 5(1)(e)) requires defined retention periods. The Data Retention audit verifies that stated periods match actual system behavior. A privacy policy claiming "12 months" while the database holds 5 years of data is a GDPR violation discoverable through technical audit. |
+| **Data Layer Architecture (Data 02)** | The data layer is the technical enforcement point for GDPR consent. If consent state doesn't propagate to the data layer before events fire, every unconsented event is a per-event GDPR violation. The architecture choice (GTM consent mode, Segment consent wrapper) determines whether consent is technically enforceable or merely documented. |
+| **Monitoring and Alerting (DevOps 05)** | GDPR compliance requires ongoing monitoring — consent rates, deletion request processing times, data subject request SLAs. These should be tracked as operational metrics with alerting. If the average deletion processing time approaches 25 days (against a 30-day deadline), an alert should fire before the SLA breaches. |
+| **Secret Rotation (DevOps 10)** | GDPR Art. 32 requires "appropriate technical measures" including access control. API keys, database credentials, and service account tokens for systems processing personal data must be rotated regularly. A compromised credential for a system processing EU personal data is simultaneously a security incident and a potential GDPR breach. |
+| **Error Tracking (Data 10)** | Error tracking tools that capture request context (URLs, form data, user IDs) are processing personal data. Sentry, Bugsnag, and Datadog are data processors under GDPR requiring DPAs. Error payloads that include personal data in stack traces or request bodies expand the ROPA and may require specific consent depending on the data captured. |
 
 ---
 

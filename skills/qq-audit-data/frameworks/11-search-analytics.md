@@ -95,6 +95,12 @@ I score by data completeness (are all search interactions tracked?), insight ext
 
 **The irrelevance cascade** — Search returns results for every query (zero-result rate is near zero). But the results are irrelevant — position 1 clicks are only 15% of all clicks. The search engine returns SOMETHING, but not what users want. Fix: track result quality, not just result quantity. CTR by position, refinement rates, and search-to-conversion are the quality signals.
 
+**The synonym blind spot** — Users search for "pricing," "cost," "plans," "how much," and "rates." The search engine treats these as five different queries. The zero-result report shows none of them as high-frequency. But combined, they represent the #1 search intent. Fix: cluster queries by intent. Use Algolia's synonym configuration or Elasticsearch's synonym token filter to map query variants. Track and analyze by intent cluster, not by raw query text.
+
+**The autocomplete bypass** — 40% of searches use the autocomplete suggestion. The team optimizes search results but never analyzes autocomplete click-through. Users who select an autocomplete suggestion may see a results page they never would have searched for organically. If autocomplete suggestions are wrong, users are being led to the wrong results by design. Fix: track autocomplete interactions as a separate analytics stream: suggestion shown, suggestion selected, position of selected suggestion, subsequent behavior after selection.
+
+**The site search as navigation tax** — An e-commerce site with 50,000 products. The top search queries are product names and SKUs. Users are using search because the category navigation is insufficient — they know what they want and can't find it through browse. Search analytics shows healthy CTR and conversion, but search is masking a navigation failure that costs slower users (who don't search) conversions. Fix: segment analytics by "search users" vs. "browse users." If browse conversion is significantly lower, the navigation needs investment — don't let good search metrics hide bad navigation metrics.
+
 ---
 
 ## §5 The traps
@@ -119,6 +125,8 @@ I score by data completeness (are all search interactions tracked?), insight ext
 
 **Search analytics doesn't explain WHY users are searching.** "API documentation" as a query could mean: can't find the docs link, needs a specific endpoint, evaluating the product, or troubleshooting a bug. Query text reveals what, not why.
 
+**Search analytics underrepresents mobile users.** Mobile search interaction patterns differ — smaller keyboards produce more typos, voice search produces different query structures, and mobile users search less frequently (preferring navigation taps). If your search analytics skews desktop, mobile-specific search quality problems are invisible.
+
 ---
 
 ## §7 Cross-framework connections
@@ -131,6 +139,10 @@ I score by data completeness (are all search interactions tracked?), insight ext
 | **Privacy-Compliant Tracking (05)** | Search queries may contain PII. Ensure search tracking respects consent and anonymization requirements. |
 | **Data Validation (04)** | Search analytics data should be validated — are queries correctly captured, are result counts accurate, are click positions correct? |
 | **Error Tracking (10)** | Search errors (timeouts, index failures, malformed queries) should be tracked as errors. A search function that silently fails returns no results, indistinguishable from "nothing matched." |
+| **Hick's Law (UX 04)** | Search that returns 500 results with no clear ranking forces users into a Hick's Law problem — too many options, too little differentiation. Search result count and ranking quality directly affect decision complexity. If users refine searches repeatedly, the results may be overwhelming rather than wrong. |
+| **Information Architecture (UX 10)** | High search rates often signal navigation failures. If users search for items that exist in the navigation but can't be found through browsing, the information architecture is broken. Search analytics is a diagnostic tool for IA problems — zero-result queries reveal missing categories, high-frequency queries reveal misplaced content. |
+| **GDPR Compliance (Compliance 01)** | Search queries are personal data when linked to a user identity. A user searching for their medical condition, a competitor's name, or sensitive topics creates processing of special category data. Search query logs must be included in the ROPA, covered by the privacy policy, and subject to retention limits. |
+| **ADA/Section 508 (Compliance 04)** | Search functionality must be accessible — keyboard operable, screen reader compatible, with live region updates for autocomplete suggestions. If search is inaccessible, users with disabilities can't discover content at all. An inaccessible search box on a site with 50,000 pages is a catastrophic accessibility failure. |
 
 ---
 

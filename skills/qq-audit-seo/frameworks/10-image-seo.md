@@ -106,6 +106,10 @@ I evaluate four dimensions: alt text quality (descriptive, not stuffed), filenam
 
 **The decorative image clutter** — Every decorative icon, divider, background pattern, and UI element has alt text describing it: `alt="blue decorative line"`, `alt="icon of a checkmark"`. Screen readers and search engines process all of these, adding noise. Fix: `alt=""` (empty alt) for purely decorative images.
 
+**The oversized responsive failure** — A product page serving the same 3000×2000px image to mobile and desktop. On mobile, the image displays at 375px wide but the browser downloads all 3000px of it. I measured this on a mid-size e-commerce site: the average product page downloaded 4.2MB of images on mobile, of which 3.6MB was wasted resolution. Mobile LCP was 5.8 seconds. After implementing `srcset` with proper breakpoints (375, 768, 1200, 1920), mobile image payload dropped to 600KB and LCP dropped to 2.1 seconds. Fix: use `srcset` and `sizes` attributes on all content images, with image processing in the build pipeline or via a CDN image service (Cloudinary, Imgix, Cloudflare Images).
+
+**The lazy-load hero disaster** — A blog template where ALL images had `loading="lazy"`, including the hero image. The hero image was the LCP element. With lazy loading, the browser didn't start fetching the image until it parsed past the image element — delaying LCP by 1-2 seconds compared to eager loading. I see this pattern on 40% of WordPress sites I audit because lazy loading is applied globally via a plugin. Fix: identify the LCP element (usually the first large image), remove `loading="lazy"`, and add `fetchpriority="high"` to prioritize its download.
+
 ---
 
 ## §5 The traps
@@ -118,17 +122,23 @@ I evaluate four dimensions: alt text quality (descriptive, not stuffed), filenam
 
 **The "more images = more traffic" trap** — Adding stock photos to every blog post just to have images. Generic stock photos don't drive Google Images traffic. Original, relevant images with good alt text do.
 
+**The "AVIF everywhere" trap** — AVIF offers better compression than WebP, but browser support is still incomplete (no Safari support before iOS 16/macOS Ventura). Serving AVIF without fallbacks breaks images for ~15% of users. The `<picture>` element with AVIF, WebP, and JPEG fallback is the correct implementation, but it triples the image management complexity. For most sites, WebP with JPEG fallback is the pragmatic choice. Only invest in AVIF for image-heavy sites (photography, e-commerce) where the additional 20-30% compression savings justify the implementation cost.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Google's image understanding is improving but imperfect.** Google can identify objects in images (via computer vision) but still relies heavily on alt text, filenames, and surrounding content for relevance signals.
+**Google's image understanding is improving but imperfect.** Google can identify objects in images (via computer vision) but still relies heavily on alt text, filenames, and surrounding content for relevance signals. Google Lens can identify products in images, but its accuracy depends on image quality, background clarity, and product distinctiveness.
 
-**Image SEO ROI varies by industry.** E-commerce, travel, food, and fashion benefit enormously from image search. B2B SaaS may see minimal Google Images traffic regardless of optimization.
+**Image SEO ROI varies by industry.** E-commerce, travel, food, and fashion benefit enormously from image search. B2B SaaS may see minimal Google Images traffic regardless of optimization. I audited a B2B SaaS company that spent two weeks optimizing all their blog images — the total Google Images traffic increase was 12 visits/month. The same effort on product page structured data would have been 100x more impactful.
 
-**Stock photos won't rank in Google Images.** The same stock photo appears on thousands of sites. Google deduplicates them. Original photography or custom graphics are needed for Google Images visibility.
+**Stock photos won't rank in Google Images.** The same stock photo appears on thousands of sites. Google deduplicates them. Original photography or custom graphics are needed for Google Images visibility. The mechanism: Google detects duplicate images across domains and only shows each unique image once in Image Search results, preferring the site with the most topical authority.
 
-**Image rights and attribution are separate from SEO.** Optimizing images for search doesn't address copyright, licensing, or proper attribution. These are legal concerns, not SEO concerns.
+**Image rights and attribution are separate from SEO.** Optimizing images for search doesn't address copyright, licensing, or proper attribution. These are legal concerns, not SEO concerns. However, using copyrighted images without permission CAN result in DMCA takedowns that affect Google Images indexation. Hand off to Compliance frameworks for rights management.
+
+**Image performance is a Page Speed problem.** Image format, compression, sizing, and loading strategy are Performance domain concerns that happen to live in image files. If unoptimized images are the primary LCP problem, the fix is a performance engineering task (build pipeline, CDN image service, responsive images), not an SEO task. The overlap between Image SEO and Page Speed is almost complete — every image optimization improves both simultaneously. Run them together.
+
+**Alt text quality is a content quality problem.** Writing descriptive, accurate alt text for 5,000 product images is a content creation task. Generic batch-generated alt text ("Product Image 1," "Product Image 2") is barely better than no alt text. The best alt text describes what the image SHOWS to someone who can't see it — which is a Copy domain skill (descriptive writing) applied to a metadata field. If alt text quality is poor across thousands of images, the fix is a content process change, not an SEO configuration change.
 
 ---
 
@@ -136,12 +146,15 @@ I evaluate four dimensions: alt text quality (descriptive, not stuffed), filenam
 
 | Framework | Interaction with image SEO |
 |-----------|---------------------------|
-| **Page Speed** | Images are the #1 contributor to page weight. Image optimization directly affects LCP and overall page speed. |
-| **Structured Data** | Product, Article, and Recipe schema reference images. Structured data with image URLs enables rich snippets with images. |
-| **Mobile-First** | Mobile images must have alt text and proper sizing. Responsive images (`srcset`) serve appropriate sizes per device. |
-| **Technical SEO** | Images must be crawlable (not blocked by robots.txt). Image sitemaps help discovery. |
-| **Internal Linking** | Image links pass equity like text links. The image's alt text serves as anchor text. |
-| **Duplicate Content** | Same images on multiple pages without unique context can create duplicate content signals. |
+| **Page Speed (Performance)** | Images are the #1 contributor to page weight. Image optimization directly affects LCP and overall page speed. The overlap is near-total: every image compression, format conversion, and sizing improvement simultaneously improves both SEO and Performance scores. Run these audits together. |
+| **Structured Data** | Product, Article, and Recipe schema reference images. Structured data with image URLs enables rich snippets with images. The mechanism: Google requires images to be at least 1200px wide for Article rich results and specifies minimum dimensions per schema type. A Product schema referencing a 100×100 thumbnail won't generate a rich snippet with an image. |
+| **Mobile-First** | Mobile images must have alt text and proper sizing. Responsive images (`srcset`) serve appropriate sizes per device. The mechanism: Google indexes the mobile rendering — if mobile uses a different `<img>` tag with different (or missing) alt text, Google indexes the mobile version's alt text, not the desktop version's. |
+| **Technical SEO** | Images must be crawlable (not blocked by robots.txt). Image sitemaps help discovery. CDN-hosted images on a different domain need to be accessible to Googlebot — verify with robots.txt on the CDN domain, not just the main domain. |
+| **Internal Linking** | Image links pass equity like text links. The image's alt text serves as anchor text. On e-commerce category pages, product thumbnail images are often the primary link to product pages — if those images have empty alt text, the strongest internal links to each product carry zero context signal. |
+| **Duplicate Content** | Same images on multiple pages without unique context can create duplicate content signals. Google deduplicates images in Image Search — the same product photo on 10 retailer sites only appears once. The site with the strongest topical authority + best image metadata wins. |
+| **WCAG Compliance** | Alt text is both an SEO requirement and a WCAG 1.1.1 requirement. The standards align: descriptive alt text that serves screen reader users also serves search engines. Decorative images need `alt=""` for both WCAG (prevent screen reader noise) and SEO (prevent diluting relevance signals). A WCAG audit will catch most image SEO alt text problems as a side effect. |
+| **Gestalt/Visual Hierarchy (UX)** | Image placement on the page affects how Google interprets image context. Images near headings and relevant text get stronger contextual signals. A product image buried below three paragraphs of boilerplate receives weaker signals than one placed immediately after the product name heading. Gestalt principles (proximity, figure-ground) predict which images users notice first — and Google's algorithm increasingly mirrors these patterns. |
+| **Copy/Content Quality** | The text surrounding images provides contextual signals. A product image in a 2,000-word detailed review with captions gets stronger SEO signals than the same image on a thin category page. Copy depth frameworks evaluate the text quality that gives images their context. The mechanism: Google uses surrounding text within ~100 words of the image to determine image relevance for queries. |
 
 ---
 

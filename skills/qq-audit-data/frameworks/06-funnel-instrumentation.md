@@ -101,6 +101,12 @@ I score by funnel resolution — the number of distinct, measurable steps in eac
 
 **The aggregate-only funnel** — The funnel shows 35% overall conversion. Looks reasonable. But when segmented by traffic source, organic converts at 55% and paid converts at 12%. The paid traffic is low-quality, but the blended metric hides it. Fix: always enable and regularly review funnel segmentation.
 
+**The timing-blind funnel** — Amplitude shows users take an average of 3 days to complete onboarding. But the funnel has no time-between-steps data. The average hides that 50% complete in 10 minutes and 50% take 7 days with multiple sessions. These are two completely different user behaviors requiring different interventions (the quick users need nothing; the slow users need re-engagement emails). Fix: track timestamps at each step. In Mixpanel, use the "Time to Convert" funnel analysis to see the distribution, not just the average.
+
+**The cross-device funnel break** — E-commerce checkout analytics show 40% of users who add to cart on mobile never reach the checkout page. The team optimizes the mobile checkout UX. In reality, 25% of those "abandonments" are users who switch to desktop to complete the purchase. Without cross-device identity resolution (Segment identity graph, Amplitude's cross-platform users), the funnel shows an abandonment that's actually a device switch. Fix: implement cross-device identity stitching before drawing conclusions from mobile funnel data.
+
+**The error-as-abandonment misdiagnosis** — The checkout funnel shows 18% abandonment at the payment step in Amplitude. The product team runs A/B tests on payment page copy and layout. After 6 months of testing, nothing improves. The real cause: Stripe returns a `card_declined` error for 12% of attempts, and expired card errors for 4%. Users aren't choosing to abandon — they're failing. Fix: overlay error events on funnel steps. In Amplitude, create a funnel chart with `payment_error` as a parallel path to see what percentage of "abandonment" is actually failure.
+
 ---
 
 ## §5 The traps
@@ -125,6 +131,8 @@ I score by funnel resolution — the number of distinct, measurable steps in eac
 
 **Funnel optimization can have diminishing returns.** Optimizing a funnel from 20% to 25% conversion is high-impact. Optimizing from 45% to 47% might cost more in engineering time than the incremental revenue justifies. Know when to stop optimizing and invest elsewhere.
 
+**Funnels measure conversion, not satisfaction.** A user who completes checkout may still be frustrated (confusing flow, unexpected fees, slow loading). Funnel completion rate doesn't capture experience quality. Supplement with post-funnel satisfaction signals (NPS, support tickets, return rate) to distinguish "completed but annoyed" from "completed and happy."
+
 ---
 
 ## §7 Cross-framework connections
@@ -137,6 +145,10 @@ I score by funnel resolution — the number of distinct, measurable steps in eac
 | **A/B Testing Infrastructure (07)** | Funnel conversion is the most common success metric for A/B tests. If funnel instrumentation is incomplete, test results are unreliable. |
 | **Search Analytics (11)** | Site search within a funnel (searching for a product during checkout, searching for help during signup) reveals intent and confusion. Search events complement funnel events. |
 | **Dashboard Accuracy (09)** | Funnel dashboards are only accurate if the underlying events are complete, correct, and consistent. Incomplete funnel instrumentation produces misleading dashboards. |
+| **Fitts's Law (UX 03)** | Small click targets at funnel steps cause misclicks that register as navigation away. A 24px "Continue" button on mobile generates genuine Fitts's violations that appear in funnel data as step abandonment. When funnel drop-off concentrates at a specific step, check the target size before assuming content or intent problems. |
+| **WCAG 2.1 AA (UX 08)** | Users with disabilities may interact with funnel steps differently — keyboard-only navigation, screen reader interaction, zoom. If funnel events don't capture input method, you can't diagnose accessibility-caused drop-offs. A checkout that's inaccessible to keyboard users shows as abandonment, not as an accessibility failure. |
+| **Privacy-Compliant Tracking (05) / Consent (Compliance 03)** | In GDPR jurisdictions, funnel analytics requires consent. Users who reject analytics cookies are invisible to funnels. If privacy-conscious users convert at different rates (higher or lower), your funnel metrics are systematically biased. Measure the consent gap and model its impact on conversion estimates. |
+| **CI/CD Maturity (DevOps 03)** | Funnel instrumentation regressions (a deploy that removes a step event) should be caught in CI. Use tracking plan validation tools (Avo, Amplitude Data Management) as build gates. A merged PR that removes a funnel event should fail the build. |
 
 ---
 

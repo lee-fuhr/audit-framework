@@ -114,6 +114,10 @@ I evaluate: (1) is the aha moment identified and validated with data? (2) How fa
 
 **The assumed aha** — The team assumes users have the aha moment when they see the dashboard/report/output, but users don't recognize the value because they lack context. "Here's your churn prediction" — the user doesn't know if 3.2% churn is good or bad. Fix: frame the aha moment with context, comparison, and explicit value articulation.
 
+**The persona-wrong aha** — The product's aha moment is designed for the buyer persona, not the user persona. The admin who evaluates the product experiences the aha during a demo. The daily user who actually needs to get work done never experiences an aha because the value designed for evaluation doesn't match the value needed for daily use. I audited an analytics platform where the buyer's aha was "look at all this data in one place" — impressive in a sales demo. But the analyst's aha should have been "I found the insight I needed in 30 seconds." The product optimized for the former and neglected the latter. Buyer activation was 90%; analyst retention at 90 days was 23%. Fix: identify the aha moment for each persona who interacts with the product, not just the one who buys it.
+
+**The slow-drip aha** — The aha moment requires weeks of data accumulation before value appears. Common in analytics, habit-tracking, and monitoring products. The user signs up and waits... and waits... and 40% churn before the data reaches the threshold where insights become meaningful. I worked with a customer health platform that needed 30 days of data before its risk scores were accurate. They lost 55% of trial users before the scores were even usable. Fix: use benchmarks, peer comparisons, or historical data import to accelerate time-to-aha. If the product needs 30 days, give the user something valuable at day 1 while the full value builds.
+
 ---
 
 ## §5 The traps

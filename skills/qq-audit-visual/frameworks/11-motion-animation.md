@@ -97,6 +97,10 @@ I evaluate: (1) Does every animation **serve a function** (orientation, confirma
 
 **The hover-state disco** — Every interactive element has an elaborate hover animation: scale, shadow, color shift, border glow, transform. Moving the cursor across a navigation bar triggers a light show. Fix: hover animations should be subtle — opacity change, gentle color shift, slight elevation increase. Maximum 150ms, maximum one property change.
 
+**The inconsistent easing zoo** — The modal uses `ease-in-out` at 300ms. The dropdown uses `cubic-bezier(0.4, 0, 0.2, 1)` at 200ms. The tooltip uses `linear` at 150ms. The sidebar uses `ease` at 400ms. Every component feels like it belongs to a different product because motion personality is uncoordinated. Fix: define 2-3 standard easing curves and 2-3 standard durations. All components use these presets, not custom values.
+
+**The reduced-motion afterthought** — `prefers-reduced-motion` is "supported" but only disables the most visible animations. Subtle but constant animations (pulsing dots, breathing glows, micro-transitions) continue, still causing discomfort for motion-sensitive users. Fix: `prefers-reduced-motion: reduce` should disable ALL non-essential motion, not just the obvious ones. The only animations that should survive are functional indicators (loading spinners, progress bars).
+
 ---
 
 ## §5 The traps
@@ -120,6 +124,8 @@ I evaluate: (1) Does every animation **serve a function** (orientation, confirma
 **Motion preferences are personal.** Some users find subtle animations helpful; others find any motion distracting. The audit establishes a quality baseline, but respecting `prefers-reduced-motion` is the mechanism for individual accommodation.
 
 **Motion interacts with cognitive load unpredictably.** Under stress, animations that normally feel smooth can feel slow or distracting. For high-stakes interfaces (medical, financial, emergency), motion should be minimal regardless of functional justification.
+
+**Motion audits don't capture cumulative fatigue.** A single 300ms animation is fine. 50 of them in a 10-minute session adds 15 seconds of pure waiting and creates a subliminal sense of sluggishness. The fatigue effect is only visible in extended use, not in spot-checking individual transitions.
 
 ---
 

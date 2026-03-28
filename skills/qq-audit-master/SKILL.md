@@ -1,7 +1,7 @@
 ---
 name: qq-audit-master
 description: Meta-orchestrator that selects and sequences the right combination of audit domains based on project context, conversation state, and user intent. Routes to 13 domain-specific audit skills containing 255 expert-persona frameworks.
-version: 1.0.0
+version: 2.0.0
 author: Lee Fuhr
 triggers:
   - "full audit"
@@ -101,25 +101,59 @@ Show the domain inventory table below.
 
 ---
 
-## Recommended domain order
+## Build lifecycle sequencing
 
-When running multiple domains, this sequence prevents wasted work:
+Domains are sequenced by the agency build lifecycle. Each phase depends on the previous being stable — auditing visual design when UX is broken wastes time because you'll redesign screens after UX fixes.
 
-1. **Product** — Is this even the right thing? Fix product problems before polishing.
-2. **UX** — Can humans use it? Fix usability before visual design.
-3. **Visual** — Does it look professional? Fix aesthetics before copy audit.
-4. **Copy** — Is the writing good? Fix content after visual context is settled.
-5. **Frontend** — Is the code well-built? Fix code quality after UI is stable.
-6. **Backend** — Is the server-side solid?
-7. **Performance** — Is it fast? Measure after code is clean.
-8. **Security** — Is it safe?
-9. **Testing** — Is it tested?
-10. **SEO** — Can people find it?
-11. **DevOps** — Is it deployable?
-12. **Data** — Is the data trustworthy?
-13. **Compliance** — Is it legally sound?
+| Phase | Domain | Input | Why this order |
+|-------|--------|-------|---------------|
+| **Strategy** | Product | Screenshots | Is this even the right thing? Fix before building more. |
+| **UX** | UX | Code + screenshots | Can humans use it? Fix before making it pretty. |
+| **Design** | Visual | Screenshots (+ CSS) | Does it look professional? Fix before copy audit — copy lives in visual context. |
+| **Content** | Copy | Code + screenshots | Are the words right? Fix after visual context is settled. |
+| **Build** | Frontend | Code only | Is the client code well-built? |
+| **Build** | Backend | Code only | Is the server code solid? |
+| **Optimize** | Performance | Code + browser | Is it fast? Measure after code is clean. |
+| **Harden** | Security | Code only | Is it safe? |
+| **Verify** | Testing | Code only | Is it tested? |
+| **Launch** | SEO | Code + rendered output | Can people find it? |
+| **Ship** | DevOps | Code/config | Is it deployable? |
+| **Measure** | Data | Code + dashboards | Is analytics working? |
+| **Protect** | Compliance | Code + UI | Is it legally sound? |
 
-The logic: fix the WHAT (product) before the HOW (UX), the HOW before the LOOK (visual), the LOOK before the WORDS (copy), the user-facing before the engineering, the engineering before the operations.
+**The rule:** Each domain converges before the next begins. Don't audit downstream until upstream is stable.
+
+**Input types:**
+- **Code only:** Read source files. Used for engineering-quality domains.
+- **Screenshots:** Use agent-browser to capture rendered output. Used for visual/product domains.
+- **Code + screenshots/browser:** Both. Most thorough — code reveals WHY, screenshots reveal WHAT the user actually sees.
+
+For domains requiring screenshots: if agent-browser is available, capture screenshots at the start of each domain audit. If not, instruct the framework agents to read the rendered component code and reason about visual output.
+
+---
+
+## Convergence protocol
+
+**Each domain runs a convergence loop — not a single pass.**
+
+```
+Round 1: Run all frameworks → Score → Fix criticals
+Round 2: Re-run all frameworks → Score → Fix remaining
+Round 3: Re-run all frameworks → Final score
+```
+
+**Convergence target:** 9.5/10 per domain (configurable via smart interview).
+
+**Convergence rules:**
+- **Move on when:** Domain score reaches target, OR round 3 is complete (whichever comes first)
+- **Max 3 rounds per domain** to prevent infinite loops — if round 3 doesn't hit target, remaining issues are likely product decisions, not audit findings
+- **Between rounds:** Fix all critical findings (score < 7) before re-running. Don't accumulate debt.
+- **Dedup across rounds:** Each round receives the previous round's findings to avoid re-reporting fixed issues.
+- **Report the trajectory:** "UX: Round 1 = 7.2, Round 2 = 8.8, Round 3 = 9.6 ✓ — moving to Visual"
+
+**Why convergence matters:** A single pass finds ~60% of issues. Round 2 finds 25% more (because fixes from round 1 expose new issues or fix old ones). Round 3 catches the last 10-15%. Diminishing returns after round 3 — remaining gaps are architectural.
+
+**Between domains:** After a domain converges, brief Lee: "UX converged at 9.6 after 2 rounds (35 fixes). Ready for Visual?" Always pause for direction before starting the next domain.
 
 ---
 
@@ -148,6 +182,104 @@ Before selecting domains, gather context the same way domain orchestrators do �
 5. What's already been audited? (check for existing audit reports)
 
 Pre-fill everything possible. Only ask about genuine gaps.
+
+---
+
+## Live Notion dashboard
+
+**At the start of every audit run, create a Notion page in the LFI Deliverables database** (data source `3ce82ab5-52bc-49e4-addb-54ce1a351a25`).
+
+**Properties:**
+- Title: "Audit: [Product name] — [date]"
+- Client: [if applicable]
+- Type: "Audit"
+- Status: "In progress" → "Complete" when done
+- Session: current session name
+
+**Page structure (update live as the audit progresses):**
+
+### Overview section (top of page)
+
+A domain status table showing the full audit at a glance:
+
+```
+| Phase      | Domain     | Score | Target | Rounds | Status |
+|------------|------------|-------|--------|--------|--------|
+| Strategy   | Product    | 9.2   | 9.5    | 2/3    | 🔄     |
+| UX         | UX         | —     | 9.5    | 0/3    | ⏳     |
+| Design     | Visual     | —     | 9.5    | 0/3    | ⏳     |
+| Content    | Copy       | —     | 9.5    | 0/3    | ⏳     |
+| Build      | Frontend   | —     | 9.5    | 0/3    | ⏳     |
+...
+```
+
+Status emoji: ⏳ pending, 🔄 in progress, ✅ converged, ⚠️ hit max rounds, ⏭️ skipped
+
+### Per-domain sections (one per active domain)
+
+Each domain gets a toggle heading that expands to show:
+
+1. **Score trajectory:** "Round 1: 7.2 → Round 2: 8.8 → Round 3: 9.6 ✅"
+2. **Framework scores table:**
+   ```
+   | # | Framework           | Score | Findings | Fixes | Remaining |
+   |---|---------------------|-------|----------|-------|-----------|
+   | 1 | Nielsen's heuristics | 9/10  | 3        | 3     | 0         |
+   | 2 | Gestalt principles   | 8/10  | 5        | 4     | 1         |
+   ...
+   ```
+3. **Critical findings** (score < 7) with file:line references
+4. **Fixes applied** this round
+5. **Items deferred** (minor, not blocking convergence)
+
+### Live feed (reverse-chron, below the overview table)
+
+A running log of the spiciest takeaways as each framework completes. Newest at top. This is NOT a dry findings list — it's the "holy shit" moments, the surprising discoveries, the patterns that change how you think about the product.
+
+**Format — one entry per framework:**
+
+```
+**14:32 — Fitts's Law (UX, Round 2)** ⬆️ 6→9
+Delete button is 12px from Save on mobile. Users WILL fat-finger this.
+Fixed: moved Delete to overflow menu, Save now full-width.
+→ 3 fixes applied, 0 remaining
+```
+
+**What makes a good entry:**
+- Lead with the finding that would make Lee say "oh shit" or "I never thought of that"
+- One sentence, sharp — not a report summary
+- Include the score change (⬆️ old→new) so the trajectory is visible
+- If nothing surprising, still note the most impactful fix
+- Skip the bureaucratic language — this is a live commentary, not an audit report
+
+**What to skip:**
+- Findings that are just "this is fine, no issues" — only log frameworks that found something
+- Generic descriptions ("several usability issues were identified")
+- Anything Lee would skim past
+
+### Findings summary section (bottom, populated after all domains converge)
+
+After all domains converge:
+- Total findings across all domains
+- Total fixes applied
+- Remaining items by severity
+- Overall quality verdict
+
+**Update frequency:** Update the Notion doc after EVERY framework completes (not just per domain). This gives Lee real-time visibility into progress. Use the Notion MCP tools to update.
+
+**Comments:** Lee may leave comments on the Notion page. Before starting a new domain, check for comments via `include_all_blocks: true` and incorporate feedback into the next domain's approach.
+
+---
+
+## Usage tracking
+
+After each domain audit completes, append a log line to `~/.agents/skills/qq-audit-master/usage.jsonl`:
+
+```json
+{"timestamp": "ISO-8601", "domain": "ux", "product": "forge", "frameworks_run": 20, "findings": 12, "fixes": 8, "score": 85, "duration_min": 45}
+```
+
+This builds the data to answer: which domains find the most issues? Which frameworks are most productive? Where is quality improving over time?
 
 ---
 

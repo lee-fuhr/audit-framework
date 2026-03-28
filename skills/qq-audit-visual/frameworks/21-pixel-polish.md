@@ -104,6 +104,12 @@ This is a cumulative audit. No single issue is typically critical. I evaluate: (
 
 **The 1px alignment symphony** — The sidebar navigation has items where text starts at x=16. The main content area has headings that start at x=17. The body text starts at x=16 but list items start at x=18 (due to left padding). Three slightly different left alignments that should all be 16px. Fix: a single content-margin token applied everywhere. Inspect actual rendered positions, not CSS values.
 
+**The truncation cliff** — Long text truncated with `text-overflow: ellipsis`. But the truncation point varies: some elements truncate at 200px, others at the container edge, and one truncates mid-word instead of mid-sentence. The ellipsis style isn't consistent either — some show "...", one shows "…" (unicode), and another just cuts off with no indicator. Fix: standardize truncation behavior: always use CSS `text-overflow: ellipsis`, truncate at a consistent container width, and ensure the full text is accessible via tooltip.
+
+**The scrollbar visual noise** — On Windows (which shows scrollbars by default), every scrollable container adds a visible scrollbar that shifts content and creates visual noise. The designer on macOS never sees them. A sidebar with a scrollbar, a content area with a scrollbar, and a table with a horizontal scrollbar create three competing tracks of visual chrome. Fix: test on Windows or with scrollbars forced visible. Use `scrollbar-gutter: stable` to prevent layout shift, and style scrollbars to be minimal and consistent.
+
+**The shadow clipping artifact** — A card with a box-shadow sits inside a container with `overflow: hidden`. The shadow is clipped on the sides/bottom, creating an asymmetric shadow that only shows on the top and the parts not touching the container edge. The card looks like it has uneven elevation. Fix: add padding to the container equal to the shadow spread, or use a different containment strategy that doesn't clip shadows.
+
 ---
 
 ## §5 The traps
@@ -127,6 +133,8 @@ This is a cumulative audit. No single issue is typically critical. I evaluate: (
 **Pixel polish is a moving target.** Browser updates, OS updates, and font rendering changes can introduce or fix pixel-level issues. The audit reflects a point in time, not a permanent state.
 
 **Some pixel issues are framework limitations.** Browser inconsistencies in `border-radius`, `box-shadow`, and font rendering may not be fixable without workarounds that introduce their own issues. The audit should flag these but note when the fix is impractical.
+
+**Pixel polish is invisible to automated testing.** Visual regression testing compares screenshots but uses pixel-diff thresholds that typically allow 0.1-1% variation — enough to miss most pixel polish issues. Pixel polish requires human eye evaluation, not automated tools.
 
 ---
 

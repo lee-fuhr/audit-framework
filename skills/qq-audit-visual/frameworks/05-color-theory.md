@@ -105,6 +105,12 @@ I score three things: (1) Does the palette have a visible color relationship (co
 
 **The data viz afterthought** — Charts use 8 colors. The first 2 match the brand palette. The other 6 were grabbed from a random color picker. The chart looks disconnected from the product it's in. Fix: derive the data visualization palette from the brand palette — tints, shades, and analogous hues.
 
+**The opacity-as-color-system shortcut** — Instead of defining distinct colors for different states (hover, active, disabled), the team uses opacity variations of a single color: 100% for active, 80% for hover, 50% for disabled. On white backgrounds it works. On colored backgrounds, the opacity produces unexpected hues (blue at 50% on yellow = muddy olive). Fix: define explicit color tokens for each state rather than relying on opacity math.
+
+**The warm-cool neutral mix** — The neutral scale mixes warm grays (from a beige/brown base) and cool grays (from a blue/slate base). The header uses warm gray (#78716C). The sidebar uses cool gray (#6B7280). They're close enough in value to look "gray" but the temperature difference creates a subtle clash that makes the interface feel uncoordinated. Fix: commit to one temperature for the neutral scale and stick to it across all surfaces.
+
+**The status color overload** — Beyond the standard 4 semantic colors (red/green/yellow/blue), the team added purple for "in review," orange for "pending," teal for "custom," and pink for "VIP." Eight semantic colors exceed the user's ability to remember the mapping. Fix: limit semantic colors to 4-5 and use secondary indicators (icons, labels) for additional states.
+
 ---
 
 ## §5 The traps
@@ -128,6 +134,8 @@ I score three things: (1) Does the palette have a visible color relationship (co
 **Color theory doesn't replace user research on color.** A "beautiful" palette that users find confusing or unappealing is a failure regardless of its theoretical purity. Test color systems with real users, especially for semantic color choices.
 
 **Color interacts with typography and layout.** A well-designed palette can be undermined by poor typography (colored text on colored backgrounds) or poor layout (too many colors in too small a space). Color coherence is necessary but not sufficient for visual quality.
+
+**Color perception varies with age.** The aging eye yellows, reducing sensitivity to blue wavelengths and lowering overall contrast perception. Products targeting users 50+ need palettes designed with age-related vision changes in mind — not just colorblindness but also reduced blue-yellow discrimination.
 
 ---
 

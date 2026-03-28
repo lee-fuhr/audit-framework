@@ -105,6 +105,18 @@ I score by decision coverage — what percentage of recurring business decisions
 
 **The server-side gap** — Client-side analytics track what the user does. Server-side events track what the system does (webhook received, cron job executed, email sent). The team can't connect user actions to system outcomes. Fix: server-side events for every significant system action, correlated with user context.
 
+**The Segment-but-no-plan** — A CDP like Segment or RudderStack is installed. Events are flowing. But nobody defined a tracking plan before implementation. Result: 200 events with no documentation, inconsistent naming, and properties that vary by developer. The tool works; the strategy doesn't. Fix: tracking plan first, implementation second. Segment's Protocols or Amplitude's Data Management features enforce the plan.
+
+**The consent-gated blind spot** — In GDPR jurisdictions, 45% of users reject analytics cookies. The team's Mixpanel dashboards show only the 55% who consented. Product decisions are made on a self-selected subset — users who consent skew different from those who don't (more trusting, less privacy-conscious, often different demographics). Fix: measure consent rates, model the gap, use server-side analytics for consented aggregate counts, and supplement with non-tracking methods (surveys, support data).
+
+**The admin action void** — In a B2B SaaS product, the admin panel has no analytics. An admin changes billing, adds users, configures SSO, exports data — none of it tracked. When a customer claims "we never changed that setting," support can't verify. Fix: track admin actions as first-class events with actor, action, target, and timestamp. This is both analytics and audit trail.
+
+**The onboarding instrumentation gap** — A product-led growth SaaS tracks signup but not the 8 onboarding steps between signup and first value moment. Amplitude shows 40% activation but can't explain why 60% never activate. The team A/B tests the signup page when the real problem is step 5 of onboarding (connecting a data source). Fix: instrument every onboarding micro-step. In Segment, create a tracking plan with events for each step: `onboarding_step_viewed`, `onboarding_step_completed`, `onboarding_step_skipped` — with a `step_name` property. The first-week cohort analysis in Amplitude or Mixpanel becomes immediately actionable.
+
+**The revenue event mismatch** — The analytics system tracks `purchase_completed` on the frontend. The payment processor (Stripe) occasionally fails after the frontend event fires (card declined post-authorization, 3D Secure timeout). Analytics shows 5% more revenue than the billing system. The CEO sees one number in the Looker dashboard and another in Stripe. Fix: track revenue events server-side from the payment processor webhook, not client-side. Use Segment's server-side source or a direct Stripe → warehouse integration (Fivetran, Stitch) as the source of truth for revenue.
+
+**The feature flag blindspot** — The team uses LaunchDarkly for feature flags. 30% of users see Feature X, 70% don't. But feature flag state isn't sent as a user property in Amplitude. When analyzing retention, the team can't distinguish between users who had Feature X available and those who didn't. Fix: send feature flag state as a user property on every event. In Segment, use an `identify` call with `feature_flags: { featureX: true }` on session start. Now every behavioral query can segment by flag state.
+
 ---
 
 ## §5 The traps
@@ -131,6 +143,14 @@ I score by decision coverage — what percentage of recurring business decisions
 
 **Analytics completeness is a moving target.** Every new feature, every UI change, every new platform requires new or updated instrumentation. Completeness today doesn't guarantee completeness tomorrow. Build analytics review into the development process.
 
+**Consent regimes create systematic coverage gaps.** Under GDPR, analytics requires consent. Consent rates of 40-60% mean your analytics covers barely half your users. The unconsented half isn't random — it skews toward privacy-conscious, ad-blocker-using, tech-savvy demographics. Your "complete" analytics may systematically under-represent a significant user segment.
+
+**Analytics completeness assumes stable user identity.** Cross-device, cross-session, and cross-platform identity resolution is required for complete lifecycle tracking. Without it, one user with three devices looks like three users who each visit once. Amplitude's ID management and Segment's identity graph help, but identity resolution is never 100% — especially post-ATT on iOS.
+
+**"Complete" analytics can create a false sense of understanding.** 500 events tracked with no analyst reviewing them produces the same business outcome as zero events tracked. Completeness without active analysis is data hoarding. The value is in the decision loop: collect → analyze → decide → measure impact. If nobody closes the loop, completeness is overhead with no return.
+
+**Analytics completeness audits are biased toward what's measurable.** Actions that happen outside the product (word-of-mouth referrals, offline conversations, competitor comparisons, emotional reactions to pricing) are invisible to analytics regardless of instrumentation quality. Over-indexing on measurable behavior produces blind spots around qualitative drivers of churn and conversion.
+
 ---
 
 ## §7 Cross-framework connections
@@ -143,6 +163,13 @@ I score by decision coverage — what percentage of recurring business decisions
 | **Error Tracking (10)** | Error tracking is completeness for the unhappy path. Users who encounter errors are the most important to track because their experience is degraded. |
 | **Privacy-Compliant Tracking (05)** | Complete tracking must respect privacy constraints. Consent management affects which events fire for which users. Completeness within privacy boundaries. |
 | **Dashboard Accuracy (09)** | Dashboards can only be accurate if the underlying events are complete. A dashboard built on incomplete data produces misleading visualizations. |
+| **GDPR Compliance (Compliance 01)** | Analytics events containing personal data (user IDs, IP addresses, device fingerprints) create GDPR processing activities. Every new event potentially expands the Record of Processing Activities and requires a lawful basis. Completeness decisions are simultaneously compliance decisions. |
+| **Cookie Consent (Compliance 03)** | Consent rates directly determine analytics coverage. If 40% of EU users reject analytics cookies, your "complete" analytics only covers 60% of that population. Consent UX design (dark patterns vs. genuine choice) directly affects your analytics data quality. |
+| **CI/CD Pipeline (DevOps 03)** | Analytics instrumentation should be validated in CI before deployment. A linting step that checks for tracking plan coverage on new user-facing features prevents the "silent feature" pattern. Tools like Avo and Iteratively provide CI-integrated tracking plan validation. |
+| **Hick's Law (UX 04)** | Complex interfaces with many decision points need more granular analytics to understand which options users consider, hover over, and ultimately choose. High cognitive load surfaces correlate with high analytics instrumentation requirements. |
+| **Fitts's Law (UX 03)** | Misclick and overshoot events near small or closely-spaced targets are invisible without explicit click-position tracking. If your analytics only tracks "button clicked" without coordinates, you can't diagnose Fitts's violations from data. |
+| **Monitoring and Alerting (DevOps 05)** | Server-side monitoring covers system health; analytics completeness covers user-facing health. A system that's "up" from an ops perspective but silently failing 10% of checkout attempts is only caught if client-side analytics captures those failures. |
+| **WCAG 2.1 AA (UX 08)** | Users of assistive technologies interact differently — screen reader users may skip visual-only prompts, keyboard users may abandon flows with focus traps. If analytics doesn't capture accessibility-related interaction patterns (keyboard vs. mouse, zoom level, reduced-motion preference), you're blind to 26% of US adults with disabilities. |
 
 ---
 

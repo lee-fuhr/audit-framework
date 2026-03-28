@@ -105,6 +105,12 @@ I score balance as a holistic property of each viewport-sized "screen" of conten
 
 **The asymmetric card grid** — A 3-column card layout where one card has an image and the others don't. The image card carries 3× the visual weight of the text-only cards. Fix: all cards in a grid should carry similar visual weight, or the difference should be intentional (featured card).
 
+**The footer gravity well** — A dark, dense footer with logos, links, legal text, and social icons sits at the bottom of every page. The footer's visual weight is enormous — it anchors the page so heavily that above-the-fold content feels like it's sliding toward the bottom. On short pages, the footer can be heavier than the content. Fix: lighten the footer (fewer elements, lighter background, more whitespace) or balance it with equivalent weight in the header/hero area.
+
+**The form-button weight mismatch** — A long form with light-colored inputs and labels culminates in a bold, saturated submit button. The button is the only heavy element on the page, creating a visual weight cliff. The user's eye jumps from the top to the button, skipping the form content. Fix: add intermediate weight anchors (section headings, progress indicators) to create a gradient of weight from top to bottom.
+
+**The notification badge weight distortion** — A tiny red notification badge on a navigation item carries disproportionate visual weight because of its high saturation and contrast. It pulls the user's eye away from whatever they were doing. One badge is useful; five badges across the nav create a visual weight emergency where everything screams for attention. Fix: limit simultaneous high-weight indicators. Aggregate notifications into a single badge rather than showing one per item.
+
 ---
 
 ## §5 The traps

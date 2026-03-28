@@ -104,6 +104,10 @@ I evaluate four dimensions: external equity sources (where does authority enter 
 
 **The orphaned authority page** — A page with 50 high-quality external backlinks has no internal links from the rest of the site. Its authority can't flow anywhere. It ranks well for its own terms but doesn't help the rest of the site. Fix: link from this page to important pages that need authority. Link to this page from relevant pages to increase its internal prominence.
 
+**The expired content authority drain** — A SaaS company's annual "State of [Industry]" reports from 2019, 2020, 2021, 2022, 2023. Each year's report accumulated 30-50 backlinks. But none of the old reports link to the current one, and none link to product/service pages. 200+ backlinks worth of authority is locked in five pages that don't connect to the rest of the site. I mapped this with Ahrefs — the 5 report pages held 45% of the domain's external link equity, but Screaming Frog showed they had an average of 2 internal outbound links each (both to other old reports). Fix: add "See our latest report" links from old reports to the current one. Add contextual links from the current report to relevant product/service pages. Create a "Research" hub page that links to all reports and funnels equity to commercial pages.
+
+**The sidebar widget equity spread** — A blog with a "Popular Posts" sidebar widget on every page, linking to the same 10 posts site-wide. On a 500-post blog, those 10 posts each receive 500 internal links. Every other post receives 1-3 links (from the category page and maybe related posts). The 10 sidebar posts have 50-100x more internal link equity than everything else. I've seen this pattern on multiple WordPress blogs — Screaming Frog's "Inlinks" column immediately reveals the disparity. The widget was added 3 years ago and the "popular posts" haven't been updated since. Fix: rotate sidebar links quarterly. Or better: remove static sidebar links and invest in contextual links within content.
+
 ---
 
 ## §5 The traps
@@ -116,17 +120,21 @@ I evaluate four dimensions: external equity sources (where does authority enter 
 
 **The "more links from high-DA pages" trap** — Domain Authority (DA) is a third-party metric, not a Google metric. A link from a relevant, lower-DA site in your industry may be more valuable than a link from an irrelevant, high-DA site. Relevance matters as much as authority.
 
+**The "nofollow sculpting" trap** — Using nofollow on internal links to "conserve" equity for important pages. Google confirmed in 2009 that this doesn't work: the equity that would flow through a nofollow link simply evaporates — it's not redistributed to the other links on the page. A page with 10 links where 5 are nofollow distributes equity to only the 5 followed links, but doesn't give them MORE equity than they'd get from a page with 5 links and no nofollow. The nofollow just destroys the other 50%.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Link equity is invisible.** Google doesn't publish PageRank scores or equity values. Third-party metrics (DA, DR, AS) are estimates. Equity flow analysis is based on link structure and inference, not direct measurement.
+**Link equity is invisible.** Google doesn't publish PageRank scores or equity values. Third-party metrics (DA, DR, AS) are estimates based on their own crawl data, not Google's. Equity flow analysis is based on link structure and inference, not direct measurement. Ahrefs' URL Rating (UR) is the best proxy I've found, but it's still an approximation.
 
-**Google's actual link evaluation is complex.** Equity isn't distributed equally to all links on a page. Link position (in-content vs. footer), anchor text, and context all affect how Google evaluates each link. The simple "equity / number of links" model is an approximation.
+**Google's actual link evaluation is complex.** Equity isn't distributed equally to all links on a page. Link position (in-content vs. footer vs. navigation), anchor text, and surrounding context all affect how Google evaluates each link. In-content editorial links carry more weight than template footer links. The simple "equity / number of links" model is a useful approximation but understates the difference between link types.
 
-**External link building is outside this framework.** This audit covers how existing authority flows through the site. Acquiring new external links (link building, PR, content marketing) is a separate discipline.
+**External link building is outside this framework.** This audit covers how existing authority flows through the site. Acquiring new external links (link building, PR, content marketing) is a separate discipline. This framework evaluates the plumbing; the water supply is someone else's responsibility.
 
-**Link equity changes over time.** Pages gain and lose backlinks. New content creates new internal links. Equity flow is dynamic, not static. Regular re-evaluation is necessary.
+**Link equity changes over time.** Pages gain and lose backlinks. New content creates new internal links. Equity flow is dynamic, not static. Regular re-evaluation is necessary — I recommend quarterly re-crawls with Screaming Frog's internal link analysis cross-referenced with Ahrefs' backlink data.
+
+**Equity flow is only one piece of the ranking puzzle.** A page can have maximum internal link equity and still not rank if the content is thin, the technical SEO is broken, or the user experience drives bounces. This framework evaluates authority distribution — content quality (Copy domain), technical crawlability (Technical SEO), and user engagement (UX domain) all must be satisfactory for the authority to translate into rankings. I've audited sites where the equity distribution was perfect (money pages received the most authority) but they still didn't rank because the content was generic and the page speed was terrible.
 
 ---
 
@@ -134,12 +142,16 @@ I evaluate four dimensions: external equity sources (where does authority enter 
 
 | Framework | Interaction with link equity |
 |-----------|------------------------------|
-| **Internal Linking** | Internal links ARE the equity distribution mechanism. Internal linking architecture directly determines equity flow. |
-| **Redirect Chains** | Redirects pass equity (with some loss). Chains accumulate losses. Redirect quality directly affects equity transfer. |
-| **Duplicate Content** | Duplicate pages split equity. Canonical tags consolidate it. Proper canonicalization ensures equity goes to one page, not many. |
-| **Technical SEO** | Crawlable, indexable pages can accumulate and pass equity. Blocked pages can't. |
-| **URL Structure** | URL changes (with redirects) affect equity flow. Stable URLs preserve accumulated equity. |
-| **Crawl Budget** | Pages that receive more equity are crawled more frequently. Equity and crawl priority are correlated. |
+| **Internal Linking** | Internal links ARE the equity distribution mechanism. Internal linking architecture directly determines equity flow. This framework evaluates WHERE equity flows; Internal Linking framework evaluates HOW the link structure is built. They're two views of the same system. |
+| **Redirect Chains** | Redirects pass equity (with some loss). Chains accumulate losses. Redirect quality directly affects equity transfer. The mechanism: a 3-hop redirect chain from a page with DR 70 backlinks loses roughly 30-40% of that equity before it reaches the destination. Consolidating to 1 hop recovers most of it. Redirect audit findings should be prioritized by external backlink equity at risk. |
+| **Duplicate Content** | Duplicate pages split equity. Canonical tags consolidate it. Proper canonicalization ensures equity goes to one page, not many. The mechanism: if 30 external links point to 3 URL variants of the same page, each variant gets ~10 links worth of equity. Consolidating to one canonical URL concentrates all 30 links' equity on one page. |
+| **Technical SEO** | Crawlable, indexable pages can accumulate and pass equity. Blocked pages can't. A page blocked by robots.txt CAN still receive external link equity (Google sees the links pointing to it) but can't pass that equity forward via internal links (since Google can't crawl the page to find its outbound links). |
+| **URL Structure** | URL changes (with redirects) affect equity flow. Stable URLs preserve accumulated equity. Tim Berners-Lee's "Cool URIs don't change" (1998) is an equity preservation principle as much as a web architecture principle. |
+| **Crawl Budget** | Pages that receive more equity are crawled more frequently. Equity and crawl priority are correlated. The mechanism: Google allocates crawl budget partly based on a page's perceived importance, which correlates with link equity. High-authority pages get crawled daily; low-authority pages get crawled monthly. |
+| **Copy/Content Quality (Copy)** | Link-worthy content attracts external equity. Product pages rarely attract backlinks; research reports, original data, tools, and comprehensive guides do. The content strategy directly determines WHERE external equity enters the site. Copy domain frameworks evaluate whether content is link-worthy; this framework evaluates how that equity flows once it arrives. The mechanism: the best internal link architecture in the world can't distribute equity that doesn't exist. If the site has no link-attracting content, the equity pipeline is empty. |
+| **Information Architecture (UX)** | IA determines the hub-and-spoke relationships between pages. A well-designed IA naturally creates the equity flow pattern SEO wants: hubs aggregate authority from many sources and distribute it to spoke pages. If the IA is flat (everything at the same level), there's no hierarchical equity distribution. If the IA is too deep (7 levels), equity dilutes before reaching leaf pages. IA design IS equity architecture design, whether the IA designer knows it or not. |
+| **Navigation Design (UX)** | Navigation links are the most prominent internal links on the site. The pages in the main navigation receive equity from every page that displays the navigation (usually every page on the site). Navigation design decisions directly determine which pages get the most sitewide equity. If the navigation includes low-value pages (privacy policy, terms of service) alongside high-value pages (products, services), the low-value pages receive outsized equity. UX navigation audits and equity audits must share findings. |
+| **Compliance** | Paid links, affiliate links, and sponsored content must be marked with `rel="sponsored"` or `rel="nofollow"` per Google's guidelines AND per FTC disclosure requirements. The SEO concern (don't pass paid equity) and the compliance concern (disclose commercial relationships) are aligned — both require proper link attributes. If the audit finds unmarked paid/affiliate links, flag for both SEO and Compliance. |
 
 ---
 

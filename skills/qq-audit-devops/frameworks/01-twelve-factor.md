@@ -152,6 +152,8 @@ I score by operational impact, not factor count. Some violations are cosmetic (a
 
 **The Friday afternoon migration** — Database migrations that require manual execution by someone who "knows the order." One day they'll be run in the wrong order, or skipped, or run twice. Fix: automated, idempotent migrations that run as part of the release stage.
 
+**The localhost dependency** — The app references `localhost:5432` for the database, `localhost:6379` for Redis, and `localhost:9200` for Elasticsearch in the default config. Developers run everything locally and it works. In production, these resolve to the wrong services or fail entirely. I once watched a production deploy succeed with zero errors — because the app was connecting to a developer's local database that happened to be accessible on the network. Fix: no hardcoded host references. Every service connection must come from config. A fresh checkout with no config should connect to nothing and fail explicitly.
+
 ---
 
 ## §5 The traps
@@ -193,6 +195,9 @@ I score by operational impact, not factor count. Some violations are cosmetic (a
 | **Deployment Strategy (04)** | Blue-green and canary deployments require Factors 5 (immutable releases), 6 (stateless processes), and 9 (fast startup/graceful shutdown). If any of these are broken, advanced deployment strategies collapse. |
 | **IaC (02)** | Infrastructure as Code is the environment-level analog of 12-factor. The app is 12-factor; the infrastructure it runs on should be version-controlled and reproducible too. |
 | **Observability Depth (12)** | 12-Factor gives you log streams. Observability gives you traces, metrics, and correlation. Think of 12-factor as the foundation and observability as the building on top. |
+| **Security (cross-domain)** | Factor 3 (config in env vars) externalizes secrets but doesn't protect them. Env vars are visible in process listings, container inspection, and crash dumps. Layer secret management (vaults, sealed secrets) on top of 12-factor config externalization. |
+| **Compliance (cross-domain)** | SOC2 control CC6.1 (logical access) and CC8.1 (change management) map directly to Factors 3 (no secrets in code), 5 (immutable releases), and 10 (dev/prod parity). 12-factor compliance is audit evidence. |
+| **Frontend (cross-domain)** | Factor 3 violations in frontend apps are endemic — API URLs, feature flags, and analytics keys baked into JavaScript bundles at build time. Frontend needs the same config externalization discipline, often via runtime config endpoints. |
 
 ---
 

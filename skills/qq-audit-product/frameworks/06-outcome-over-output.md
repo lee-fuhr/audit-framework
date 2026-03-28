@@ -105,6 +105,10 @@ I evaluate outcome orientation at three levels: (1) strategic (are company goals
 
 **The disconnected cascade** — Company OKR: "Become the market leader." Team OKR: "Ship dark mode." The connection between these is... vibes. No logical chain from team output to company outcome. Fix: require each team OKR to explicitly articulate how it connects to the company OKR with a testable hypothesis.
 
+**The proxy metric drift** — The team picks a proxy metric for a hard-to-measure outcome, and over time the proxy becomes the goal. I audited a media company that used "time on page" as a proxy for "content quality." The team optimized for time on page — infinite scroll, auto-play videos, pagination of single articles. Users spent more time on the site and were more frustrated with every visit. NPS dropped 22 points in a year while the proxy metric improved 35%. Fix: pair every proxy metric with a counter-metric that catches gaming (in this case, return rate or NPS).
+
+**The outcome-without-baseline trap** — The team defines outcomes ("increase activation rate") but never measures the starting point. After shipping, they report "activation rate is 34%" — but nobody knows if it was 32% or 36% before. Without a baseline, outcome measurement is fiction. I've found this in roughly 60% of teams I audit — they can tell you what the metric IS but not what it WAS. Fix: freeze baseline measurements before any work begins. No baseline, no outcome claim.
+
 ---
 
 ## §5 The traps

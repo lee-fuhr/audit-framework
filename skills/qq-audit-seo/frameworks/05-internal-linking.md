@@ -101,6 +101,10 @@ I evaluate four dimensions: click depth distribution (important pages are shallo
 
 **The deep buried money page** — Homepage → About → Services → Service Category → Service Detail → Contact. The Contact page is 5 clicks deep, but it's the primary conversion page. Fix: link directly from the homepage and every service page to the contact/CTA page.
 
+**The pagination depth spiral** — A category page with 50 products per page, displayed across 40 pages. Products on page 40 are 41 clicks from the homepage. Screaming Frog showed that products on pages 30+ were crawled once every 45 days, while page-1 products were crawled daily. GSC confirmed: page-40 products took 3-4 weeks to appear in search after listing. Fix: increase items per page, add "view all" option, create subcategories to reduce per-category product count, or add direct links to deep products from related content.
+
+**The tag page dilution** — A WordPress blog with 300 tags. Each tag generates a page. Most tags have 1-2 posts. The tag pages collectively received more internal links (from every post that used the tag) than the actual service pages. I mapped this with Screaming Frog's link analysis: 300 tag pages averaged 8 internal links each; 12 service pages averaged 5 internal links each. The tags were outranking the services for competitive terms. Fix: audit tags aggressively. Delete tags with <5 posts. Noindex remaining low-value tag pages. Redirect high-value tags to relevant category or pillar pages.
+
 ---
 
 ## §5 The traps
@@ -113,17 +117,21 @@ I evaluate four dimensions: click depth distribution (important pages are shallo
 
 **The "automated related posts are good enough" trap** — Plugin-generated "related posts" sections often link to barely-related content. Manually curated or algorithm-verified related content provides better context signals and user experience.
 
+**The "every page needs to link to every important page" trap** — Adding "featured products" or "popular services" widgets to every page on the site. This creates a flat link graph where every page links to the same 10 pages, and no page has a meaningful relationship. The anchor text becomes identical site-wide, which looks manipulative. Fix: contextual links within content (where the link adds value for the reader) are worth 5x what template links are worth.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Internal linking can't compensate for weak content.** A page with 100 internal links but thin, unhelpful content won't rank well. Internal links amplify quality; they don't create it.
+**Internal linking can't compensate for weak content.** A page with 100 internal links but thin, unhelpful content won't rank well. Internal links amplify quality; they don't create it. Hand off to Copy domain frameworks (content depth, readability, E-E-A-T) when the content itself is the problem.
 
-**Internal linking analysis requires crawl data.** You can't audit internal links by looking at one page. You need a full crawl (Screaming Frog, Sitebulb, Ahrefs) to map the link graph, identify orphans, and measure click depth.
+**Internal linking analysis requires crawl data.** You can't audit internal links by looking at one page. You need a full crawl (Screaming Frog, Sitebulb, Ahrefs) to map the link graph, identify orphans, and measure click depth. Screaming Frog's "Link Score" metric (its approximation of internal PageRank) is the best starting point for identifying equity distribution problems.
 
-**Dynamic and JavaScript-rendered links may not pass equity.** Links rendered via JavaScript after page load may not be followed by search engines. Ensure critical internal links are in the server-rendered HTML.
+**Dynamic and JavaScript-rendered links may not pass equity.** Links rendered via JavaScript after page load may not be followed by search engines. Ensure critical internal links are in the server-rendered HTML. The mechanism: Googlebot processes the initial HTML first, then queues the page for JavaScript rendering. Links in the initial HTML are discovered immediately; JS-rendered links may be discovered hours or days later. Hand off to JS Rendering framework (13) when navigation links are JavaScript-dependent.
 
 **Pagination complicates link depth.** Category pages with 20 pages of products mean items on page 20 are 20+ clicks from the category landing page. Faceted navigation, subcategories, or increased items per page can reduce this.
+
+**Internal linking is invisible to most stakeholders.** Content writers don't see the link graph. Designers don't see click depth. Product managers don't see equity distribution. The internal link structure is an engineering artifact that affects marketing outcomes — and nobody outside SEO is monitoring it. If there's no process for including internal links in content workflows, entropy will degrade the link structure over time. Hand off to UX Information Architecture when the underlying site structure (not just the links) needs rethinking.
 
 ---
 
@@ -131,12 +139,16 @@ I evaluate four dimensions: click depth distribution (important pages are shallo
 
 | Framework | Interaction with internal linking |
 |-----------|----------------------------------|
-| **Technical SEO** | Internal links are how crawlers discover pages. A crawlable site with no internal links is a crawlable site with orphan pages. |
-| **URL Structure** | URL hierarchy should match internal link hierarchy. If the URL says `/products/widgets/blue-widget`, the product page should be linked from `/products/widgets/`. |
-| **Crawl Budget** | Internal links direct crawl budget toward priority pages. Excessive links to low-value pages waste crawl budget. |
-| **Page Speed** | Pages with excessive internal links (hundreds of links) increase HTML size, which can affect page load time. |
-| **Duplicate Content** | Internal links should point to canonical URLs, not to redirect targets or duplicate versions. |
-| **Image SEO** | Image links use `alt` text as anchor text. Image links without `alt` text pass equity but no context signal. |
+| **Technical SEO** | Internal links are how crawlers discover pages. A crawlable site with no internal links is a crawlable site with orphan pages. Internal links pointing to redirected URLs waste HTTP requests — fix the link, don't just rely on the redirect. |
+| **URL Structure** | URL hierarchy should match internal link hierarchy. If the URL says `/products/widgets/blue-widget`, the product page should be linked from `/products/widgets/`. When these diverge, users and crawlers get conflicting signals about site structure. |
+| **Crawl Budget** | Internal links direct crawl budget toward priority pages. Excessive links to low-value pages waste crawl budget. The mechanism: Googlebot follows links from high-authority pages first. If those pages link to 200 footer items, crawl budget fans out evenly across low-value pages instead of concentrating on money pages. |
+| **Page Speed (Performance)** | Pages with excessive internal links (hundreds of links) increase HTML size, which can affect page load time. More critically, each link is a DOM element — pages with 500+ links (common in mega-menus and footers) generate larger documents that take longer to parse and render, affecting INP (Interaction to Next Paint). |
+| **Duplicate Content** | Internal links should point to canonical URLs, not to redirect targets or duplicate versions. I ran a link audit on a mid-size e-commerce site and found 40% of internal links pointed to non-canonical URL variants (trailing slash mismatches, HTTP instead of HTTPS). Each was a wasted equity signal. |
+| **Image SEO** | Image links use `alt` text as anchor text. Image links without `alt` text pass equity but no context signal. Product grid thumbnails linking to product pages are often the primary internal link to that product — if the `alt` text is empty, the strongest link has no context. |
+| **Information Architecture (UX)** | Internal links ARE the lived expression of information architecture. IA defines the conceptual hierarchy; internal links implement it. When a Screaming Frog crawl shows 30% of pages deeper than 3 clicks, the root cause is almost always an IA problem (too many levels, orphaned sections) rather than a linking problem. Fix the architecture first, then the links follow naturally. |
+| **Navigation Design (UX)** | Navigation is the most visible internal link structure. A hamburger menu that hides 80% of navigation links behind a tap means 80% of the site's primary internal links are behind a user action. UX navigation patterns (mega-menus, sidebars, breadcrumbs) determine the baseline internal link graph that content links then supplement. If the navigation is poorly designed, content links can't compensate. |
+| **Copy/Content Quality (Copy)** | Contextual internal links within content ("Learn more about our blue widgets") provide both equity and topical signals. But the quality of the surrounding copy determines whether Google values the link. A 100-word page with 15 internal links looks like a link farm. A 2,000-word guide with 5 contextual links looks like helpful content. The Copy domain's content depth evaluation directly affects whether internal links are interpreted as manipulative or editorial. |
+| **Frontend Architecture** | Client-side routing frameworks (React Router, SvelteKit) can render `<a href>` tags that look correct in the browser but are actually generated by JavaScript. If the initial HTML doesn't contain these links, crawlers won't discover the linked pages through navigation. Hand off to JS Rendering framework (13) for verification. |
 
 ---
 

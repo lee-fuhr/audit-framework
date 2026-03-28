@@ -109,6 +109,12 @@ I evaluate three dimensions: initial HTML content (is the key content server-ren
 
 **The JavaScript navigation** — Links are `<span onClick="navigate('/products')">Products</span>` instead of `<a href="/products">Products</a>`. Google can't follow the navigation because there are no crawlable links. Fix: use `<a href>` tags for all navigation. JavaScript can enhance the experience (single-page transitions) without replacing the HTML links.
 
+**The hydration mismatch** — A Next.js site where the server-rendered HTML shows the correct product price ($49.99), but during React hydration the component re-fetches from the API and briefly shows "$0.00" before the API responds. Google's renderer sometimes captures the hydration state (the brief "$0.00") rather than the SSR state or the final state. I discovered this when a client's product pages showed "$0.00" in Google cache despite the SSR output being correct. Fix: ensure hydration doesn't overwrite SSR content with loading/default states. Use `suppressHydrationWarning` judiciously, but fix the root cause — the client component should initialize with the server-provided data, not fetch fresh data on mount.
+
+**The infinite scroll indexation wall** — A blog using infinite scroll: the first 10 posts load with the page, and scrolling loads more via API calls. Google's renderer doesn't scroll. Only the first 10 posts are in the rendered HTML. The other 200 posts are invisible to search engines. I audited a media site using this pattern — only 15% of their articles appeared in Google's index. Fix: implement paginated URLs (`/blog/page/2`, `/blog/page/3`) as the canonical version, with infinite scroll as a progressive enhancement. Each paginated URL should be server-rendered with its content.
+
+**The client-side canonical injection** — A React SPA using React Helmet to set `<link rel="canonical">` dynamically. The initial HTML had no canonical tag. By the time Google's renderer executed React Helmet and injected the canonical, the page had already been queued with no canonical signal. I found 300 pages on this site where Google had chosen an unexpected canonical (usually the URL with query parameters). Fix: server-render ALL SEO metadata including canonicals. React Helmet, vue-meta, and similar libraries are fine for the browser experience but unreliable for SEO unless paired with SSR.
+
 ---
 
 ## §5 The traps
@@ -121,17 +127,21 @@ I evaluate three dimensions: initial HTML content (is the key content server-ren
 
 **The "our Lighthouse score is fine" trap** — Lighthouse tests the page as a browser sees it (with JavaScript executed). It doesn't test what Google sees in the initial HTML. A perfect Lighthouse score can coexist with zero indexable content.
 
+**The "prerender.io / rendertron will handle it" trap** — Dynamic rendering services intercept bot requests and serve a pre-rendered HTML version. This works, but: (1) the pre-rendered version must stay in sync with the live version (divergence = cloaking), (2) bot detection misses some crawlers (social platforms, lesser search engines), (3) Google themselves call it "a workaround, not a long-term solution," and (4) the service adds latency (100-500ms per request) and a point of failure. I've seen prerender services go down for 12 hours, during which Googlebot received empty shells for every page on the site. SSR is more reliable because the rendering is built into the application, not bolted on.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Google's rendering capabilities evolve.** Google's Web Rendering Service updates its Chromium version periodically. What doesn't render today may render tomorrow. But relying on Google's improvement timeline is not a strategy.
+**Google's rendering capabilities evolve.** Google's Web Rendering Service updates its Chromium version periodically (currently ~Chromium 119 as of early 2026). What doesn't render today may render tomorrow. But relying on Google's improvement timeline is not a strategy. Also: Google renders at a specific viewport, doesn't scroll, and has timeout limits — even if the Chromium version supports the API, timeout and viewport constraints may prevent full rendering.
 
-**Other search engines may not render JavaScript at all.** Bing's JavaScript rendering is less capable than Google's. Yandex and Baidu have limited JS rendering. If non-Google search engines matter, SSR is essential.
+**Other search engines may not render JavaScript at all.** Bing's JavaScript rendering is less capable than Google's. Yandex and Baidu have limited JS rendering. Social platform crawlers (Facebook, LinkedIn, Slack) don't render JavaScript at all. If non-Google search engines or social sharing matter, SSR is essential. This creates a cross-framework dependency with Social Sharing (framework 11): a CSR site has broken social previews by default.
 
-**Rendering is per-page, not per-site.** Google may successfully render some pages and fail on others (different data dependencies, different JavaScript errors). Testing one page doesn't validate the entire site.
+**Rendering is per-page, not per-site.** Google may successfully render some pages and fail on others (different data dependencies, different JavaScript errors). Testing one page doesn't validate the entire site. I've seen Next.js sites where the homepage rendered perfectly (simple, no API calls) but product pages failed (depended on an API that timed out during Google's render). Test a representative sample of every page type.
 
-**Single-page application navigation creates unique challenges.** SPAs that use the History API update the URL without a server request. If the server doesn't handle those URLs (returns 404 for direct access), deep links don't work for search engines.
+**Single-page application navigation creates unique challenges.** SPAs that use the History API update the URL without a server request. If the server doesn't handle those URLs (returns 404 for direct access), deep links don't work for search engines. This is a frontend architecture decision with direct SEO consequences.
+
+**JS rendering audits require specialized tooling.** You can't audit JS rendering by viewing the page in a browser (the browser always executes JavaScript). You need: Google's URL Inspection tool (shows what Google's renderer sees), Screaming Frog in JavaScript rendering mode (compares HTML-only vs. rendered content at scale), and `curl` or `wget` (shows the raw initial HTML without rendering). The difference between these views IS the JS rendering gap.
 
 ---
 
@@ -139,12 +149,15 @@ I evaluate three dimensions: initial HTML content (is the key content server-ren
 
 | Framework | Interaction with JS rendering |
 |-----------|-------------------------------|
-| **Technical SEO** | Meta tags, canonical tags, and robots directives must be in the initial HTML, not JavaScript-dependent. |
-| **Structured Data** | JSON-LD must be server-rendered for reliable rich snippet eligibility. |
-| **Mobile-First** | Google indexes the mobile rendering. If mobile JS rendering is different from desktop, mobile content is what gets indexed. |
-| **Page Speed** | JavaScript bundle size and execution time affect both CWV and rendering success for search engines. |
-| **Internal Linking** | Links must be `<a href>` tags in the HTML, not JavaScript-only navigation. |
-| **Social Sharing** | OG tags must be in the initial HTML. Social platform crawlers don't execute JavaScript. |
+| **Technical SEO** | Meta tags, canonical tags, and robots directives must be in the initial HTML, not JavaScript-dependent. The mechanism: Google processes the initial HTML immediately for crawl directives. If the canonical tag is client-rendered, Google may process the page without it, then queue it for re-processing later — creating a window where the page is indexed without the intended canonical signal. |
+| **Structured Data** | JSON-LD must be server-rendered for reliable rich snippet eligibility. Client-rendered schema enters Google's rendering queue, adding hours-to-days delay before rich results can appear. For time-sensitive content (events, sales), this delay can mean the rich result never shows because the event/sale is over by the time rendering completes. |
+| **Mobile-First** | Google indexes the mobile rendering. If mobile JS rendering is different from desktop (different API calls, different component loading, different data fetching), mobile content is what gets indexed. Test the rendered output specifically at the mobile viewport (412×823), not just "responsive." |
+| **Page Speed (Performance)** | JavaScript bundle size and execution time affect both CWV and rendering success for search engines. The mechanism: Google's renderer has a time budget per page. Heavy JS frameworks (2MB+ bundles with complex rendering) may not fully execute within Google's render timeout. This isn't just slow — it can mean incomplete rendering. If your bundle is >1MB, test rendering success explicitly. |
+| **Internal Linking** | Links must be `<a href>` tags in the HTML, not JavaScript-only navigation. SPAs using React Router or Vue Router can render `<a>` tags in the DOM, but only after JavaScript executes. If the initial HTML has no navigation links, Google's first crawl pass discovers zero internal pages from that page. The rendered links are processed later (maybe much later). |
+| **Social Sharing** | OG tags must be in the initial HTML. Social platform crawlers don't execute JavaScript at all. A CSR site has zero functional social previews unless OG tags are server-rendered. This is the most visible symptom of JS rendering problems — broken social previews are noticed by users who share links, while broken search indexation is invisible until traffic declines. |
+| **Navigation Design (UX)** | UX navigation patterns (mega-menus, sidebars, breadcrumbs, footer nav) are often implemented with JavaScript frameworks. The UX designer specifies what the navigation looks like; the frontend developer implements it with React/Vue/Svelte components. The SEO consequence depends entirely on whether those components render real `<a href>` tags in the initial HTML. Navigation design (UX domain) and JS rendering (SEO domain) must be evaluated together for any JS-framework site. |
+| **Frontend Architecture** | This is the primary cross-domain interaction. The choice of rendering strategy (SSR, SSG, ISR, CSR) is a frontend architecture decision that determines the entire JS rendering SEO landscape. Next.js, Nuxt, SvelteKit, and Astro all support SSR/SSG — but each requires explicit configuration. The frontend team's choice of framework and rendering strategy IS the JS rendering SEO decision, whether they know it or not. Every finding in this audit ultimately requires frontend engineering to fix. |
+| **Crawl Budget** | JavaScript pages consume double the crawl resources: one for the initial HTML fetch, another for the render queue processing. For large JS-rendered sites, this effectively halves crawl capacity. If crawl budget is already constrained (large site, slow server), JS rendering overhead makes it worse. SSR eliminates this overhead by including content in the initial HTML. |
 
 ---
 

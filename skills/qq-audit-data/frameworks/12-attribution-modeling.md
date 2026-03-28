@@ -99,6 +99,12 @@ I score by model sophistication and validation. Least sophisticated: last-touch 
 
 **The dark social blind spot** — 30% of traffic arrives as "direct" with no referral information. But these users actually came from shared links in messaging apps, email clients, and private social media. They look like direct traffic in the model and get no channel credit. Fix: use UTM parameters on all shared links, and understand that "direct" includes a large unmeasurable component.
 
+**The self-attributing platform trap** — Facebook Ads reports 500 conversions. Google Ads reports 400 conversions. Your analytics shows 600 total conversions for the period. Facebook and Google combined claim 900 because each attributes conversions where the user saw their ad, regardless of other touchpoints. The platforms count overlapping users independently. Fix: never use ad platform self-reported conversions for budget allocation. Use your own analytics (GA4, Amplitude, or a data warehouse model) as the single source of truth.
+
+**The coupon code attribution hack** — The team uses unique coupon codes per channel (PODCAST20, EMAIL15, SOCIAL10) as a low-tech attribution mechanism. It works for direct-response channels. But 40% of users search for coupon codes on RetailMeNot or Honey before checkout, applying a code from a channel they never saw. The podcasting channel gets attribution for deal-seeking behavior. Fix: track the full user journey alongside coupon usage. If a user arrived via organic search and applied PODCAST20 at checkout, the coupon attribution is wrong. Cross-reference coupon data with first-touch data.
+
+**The iOS ATT privacy wall** — After Apple's App Tracking Transparency (ATT) prompt, 75% of iOS users opt out of tracking. Facebook can no longer see post-click conversions for opted-out users. Facebook's conversion data drops 40% while actual conversions remain stable. The attribution model trained on pre-ATT data overweights non-iOS channels. Fix: use probabilistic attribution models (media mix modeling, incrementality testing) alongside deterministic tracking. SKAdNetwork provides aggregate iOS attribution data — incorporate it even though it's delayed and limited.
+
 ---
 
 ## §5 The traps
@@ -123,6 +129,8 @@ I score by model sophistication and validation. Least sophisticated: last-touch 
 
 **Privacy regulations are eroding attribution data.** Cookie deprecation, consent requirements, and platform privacy changes (iOS ATT) are reducing the data available for attribution. The future of attribution is probabilistic and modeled, not deterministic and observed.
 
+**Attribution models are inherently backward-looking in a forward-changing market.** A model that shows podcasting drove 15% of conversions last quarter may not predict next quarter's performance if a new competitor enters the podcast space, or if the podcast host changes. Attribution informs but should never replace strategic judgment about channel investment.
+
 ---
 
 ## §7 Cross-framework connections
@@ -135,6 +143,10 @@ I score by model sophistication and validation. Least sophisticated: last-touch 
 | **Data Layer Architecture (02)** | UTM parameters, referral data, and campaign identifiers flow through the data layer. Data layer quality directly affects attribution data quality. |
 | **Funnel Instrumentation (06)** | Funnel conversion events are the endpoints of attribution. Incomplete funnel instrumentation means incomplete attribution. |
 | **Event Taxonomy (03)** | Campaign tracking parameters (UTMs, click IDs) need consistent naming. Inconsistent campaign naming fragments attribution data. |
+| **GDPR Compliance (Compliance 01)** | Multi-touch attribution requires linking user behavior across sessions and channels — this is profiling under GDPR. Cross-site tracking for attribution purposes requires explicit consent, not just legitimate interest. Post-consent, the attribution model only sees consented users, creating a systematic bias. |
+| **CCPA/CPRA (Compliance 02)** | Sharing user data with ad platforms for attribution (click IDs, conversion data) may constitute "sharing" under CPRA, triggering the "Do Not Sell or Share" opt-out requirement. Users who opt out become invisible to platform-based attribution models. |
+| **Automated Decisions (Compliance 14)** | Attribution models that directly control ad spend (automated bidding, dynamic budget allocation) are making automated decisions with financial consequences. If the model systematically under-credits a channel and automated budget optimization zeros it out, the business consequence is real and unmonitored. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor attribution data quality as a system health metric. A sudden drop in attributed conversions (without a drop in actual conversions) signals a tracking failure, not a marketing failure. UTM stripping by a new browser, a broken pixel, or a CDN change can silently destroy attribution data. |
 
 ---
 

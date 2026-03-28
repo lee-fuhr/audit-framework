@@ -108,6 +108,12 @@ I evaluate four dimensions: content parity (same text), metadata parity (same ti
 
 **The image swap without alt** — Desktop shows high-resolution product images with descriptive alt text. Mobile shows smaller images (different `<img>` tags) with empty alt attributes or no alt attributes. Google indexes the mobile version and loses image SEO signals. Fix: same alt text on mobile images, even if the image source differs.
 
+**The lazy-load content wall** — I audited a SaaS company using IntersectionObserver to lazy-load every content section below the fold. On desktop, scrolling triggered the loads. Googlebot's mobile renderer viewport is 412×823px — it "sees" only the first viewport-height of content. Below-fold sections loaded only when scrolled into view, and Googlebot doesn't scroll. I compared Screaming Frog's JavaScript-rendered crawl with the HTML-only crawl: 60% of page content was missing from the rendered version because the lazy-load observer never fired. Fix: lazy-load images (fine), but never lazy-load text content or structural HTML. Content must be in the DOM regardless of viewport position.
+
+**The responsive breakpoint gap** — A furniture retailer's desktop design showed a full product specification table. The responsive CSS had a `display:none` on the table at mobile widths, replaced by a "view specs" accordion. The accordion content loaded via AJAX on tap. Google's mobile renderer saw the hidden table (CSS hiding alone isn't the problem) but NOT the accordion content (it required a user interaction to load). The fix: put the spec data in the DOM for both breakpoints. Use CSS to change the visual presentation (table vs. accordion), but never require JavaScript interaction to load content.
+
+**The sticky nav link trap** — Desktop navigation had 35 links in a horizontal mega-menu. Mobile navigation collapsed these into a hamburger menu, but the hamburger was a pure CSS `:hover` trigger with no underlying `<a>` tags. On touch devices (including Googlebot's mobile renderer), `:hover` doesn't fire. The 35 navigation links were invisible to the mobile crawler. Screaming Frog's mobile user-agent crawl found 30% fewer discoverable pages than the desktop crawl. Fix: navigation must use real `<a href>` elements regardless of how they're visually presented.
+
 ---
 
 ## §5 The traps
@@ -120,17 +126,23 @@ I evaluate four dimensions: content parity (same text), metadata parity (same ti
 
 **The "mobile page speed is separate from mobile-first" trap** — Mobile page speed and mobile-first indexing are related but distinct. Mobile-first indexing is about CONTENT parity. Mobile page speed is a ranking signal. A mobile page with all content but 10-second load time has a speed problem, not a mobile-first problem.
 
+**The "we tested on iPhone so we're fine" trap** — Testing on a real iPhone tells you about the user experience, not about Googlebot's experience. Googlebot's mobile renderer uses Chromium (not Safari), at a specific viewport (412×823), and doesn't tap, scroll, or wait for lazy interactions. A page that works beautifully on an iPhone 15 Pro Max may be completely unrenderable by Googlebot if it depends on Safari-specific behavior or scroll-triggered content loading. Use Google's URL Inspection tool to see what Googlebot actually sees.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Google's mobile rendering is not a real phone.** Googlebot's mobile rendering uses a specific Chromium version with specific viewport dimensions. Edge cases in responsive design (rare breakpoints, specific device handling) may render differently for Googlebot than for real users.
+**Google's mobile rendering is not a real phone.** Googlebot's mobile rendering uses a specific Chromium version with specific viewport dimensions (412×823). Edge cases in responsive design (rare breakpoints, specific device handling) may render differently for Googlebot than for real users. The mechanism: Googlebot doesn't resize the viewport, doesn't rotate to landscape, and doesn't trigger responsive breakpoints that depend on device-specific media queries.
 
 **Mobile-first doesn't mean mobile-only.** Desktop content isn't ignored entirely — but mobile content is the primary index source. If content is ONLY on desktop, it's at a disadvantage but not invisible.
 
-**AMP is no longer required.** Google dropped the AMP requirement for Top Stories in 2021. AMP pages are still valid but provide no special ranking advantage.
+**AMP is no longer required.** Google dropped the AMP requirement for Top Stories in 2021. AMP pages are still valid but provide no special ranking advantage. Teams still building AMP pages for SEO benefit are investing in a deprecated strategy.
 
-**Progressive web apps (PWAs) add complexity.** PWAs with app-like navigation (client-side routing, dynamic content loading) may create mobile-first indexing challenges if the server-side rendered version differs from the client-side rendered version.
+**Progressive web apps (PWAs) add complexity.** PWAs with app-like navigation (client-side routing, dynamic content loading) may create mobile-first indexing challenges if the server-side rendered version differs from the client-side rendered version. Hand off to JS Rendering framework (13) for PWA-specific rendering verification.
+
+**Mobile-first parity issues compound with UX problems.** A mobile page that has all the content but presents it in a single-column wall of text with tiny tap targets creates TWO problems: the content parity is fine (mobile-first passes), but the UX is terrible (high bounce rate, poor engagement signals). This framework only checks parity — the quality of the mobile experience is evaluated by UX frameworks (Fitts's Law for tap targets, Cognitive Load for information density, Gestalt for visual hierarchy on small screens). Both must pass for the page to rank well on mobile.
+
+**Mobile interstitials and popups affect rankings.** Google's intrusive interstitial penalty applies specifically to mobile. A full-screen popup on mobile that covers the content immediately on page load can suppress rankings. This isn't a mobile-first parity issue (the popup exists on both desktop and mobile); it's a mobile-specific ranking signal. If the audit finds mobile popups, flag for both the mobile-first and the UX Compliance frameworks.
 
 ---
 
@@ -138,12 +150,15 @@ I evaluate four dimensions: content parity (same text), metadata parity (same ti
 
 | Framework | Interaction with mobile-first |
 |-----------|-------------------------------|
-| **Technical SEO** | All technical SEO signals (canonical, robots, sitemap) must be present in the mobile rendering. |
-| **Structured Data** | Structured data must be in the mobile HTML, not just the desktop HTML. |
-| **Page Speed** | Core Web Vitals are measured on mobile, affecting mobile rankings directly. |
-| **JS Rendering** | JavaScript-dependent content on mobile may not be indexed if Google can't execute the JS. |
-| **Internal Linking** | Mobile navigation must contain the same internal links as desktop navigation. |
-| **Image SEO** | Mobile images must have alt text, proper sizing, and accessible loading. |
+| **Technical SEO** | All technical SEO signals (canonical, robots, sitemap) must be present in the mobile rendering. I've seen sites where the canonical tag was injected by a desktop-only JavaScript library. Mobile rendering had no canonical, and Google's index fragmented across URL variants. |
+| **Structured Data** | Structured data must be in the mobile HTML, not just the desktop HTML. The mechanism: Google indexes the mobile rendering. If JSON-LD is in a desktop-only template partial or injected by desktop-only JS, the structured data is invisible to the indexer. |
+| **Page Speed (Performance)** | Core Web Vitals are measured on mobile, affecting mobile rankings directly. The mechanism: CrUX data separates mobile and desktop — a site can have "Good" desktop CWV and "Poor" mobile CWV. Google uses the mobile CWV for mobile rankings. Mobile LCP is typically 2-3x slower than desktop LCP due to slower connections and weaker hardware. |
+| **JS Rendering** | JavaScript-dependent content on mobile may not be indexed if Google can't execute the JS. Hand off to JS Rendering framework (13) when content parity issues are caused by client-side rendering rather than responsive design gaps. |
+| **Internal Linking** | Mobile navigation must contain the same internal links as desktop navigation. The mechanism: if the mobile hamburger menu has 20 links but the desktop mega-menu has 80, Google only sees 20 navigation links for the entire site. Those missing 60 links may be the only path to deeper pages. |
+| **Image SEO** | Mobile images must have alt text, proper sizing, and accessible loading. Responsive images (`srcset`, `sizes`) serve different files per viewport — each variant needs identical alt text. |
+| **Fitts's Law (UX)** | Mobile-first is about content parity for Google. But Google also measures engagement signals. Tiny touch targets on mobile (buttons under 44px, links with no padding) cause user frustration, increase bounce rate, and degrade the engagement signals Google uses for ranking. If mobile content parity passes but mobile engagement is poor, the problem is Fitts's Law, not mobile-first indexing. |
+| **Cognitive Load (UX)** | Desktop layouts spread content across wide screens with sidebars and multi-column grids. Mobile collapses everything into a single column. The same content in a single column creates a much longer scroll depth and higher cognitive load. If mobile content parity is technically fine but the mobile page is 40 screens long, the UX problem (not the SEO problem) will suppress rankings through engagement signals. |
+| **Compliance/WCAG** | Mobile accessibility requirements overlap with mobile-first indexing: `lang` attributes, semantic headings, alt text, and touch target sizes serve both screen reader users and Googlebot's mobile renderer. A WCAG audit on the mobile rendering often catches mobile-first parity issues as a side effect. |
 
 ---
 

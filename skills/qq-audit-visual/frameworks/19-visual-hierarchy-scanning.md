@@ -116,6 +116,12 @@ I evaluate: (1) Does the layout **support the appropriate scanning pattern** for
 
 **The false visual hierarchy** — Page has a large, colorful illustration at the top. Below it, the primary heading. Users fixate on the illustration (high visual weight) and skip the heading (lower visual weight). The illustration is decorative; the heading is informative. The scanning order is wrong. Fix: either make the heading more visually dominant than the illustration, or integrate the key message into the visual.
 
+**The equal-weight grid** — Feature comparison page with a 3×4 grid of cards, all identical in size, color, weight, and spacing. Nothing is emphasized. The user must read every card to find what matters. The layout has eliminated hierarchy in pursuit of symmetry. Fix: use size, position, or color to create a clear entry point. One "featured" or "recommended" card at larger size breaks the grid enough to guide scanning.
+
+**The banner blindness zone** — A promotional or informational banner at the top of the page, in the exact position where users have learned to expect ads. Users skip it entirely — their eyes jump from the browser tab to the first real content below the banner. The banner could contain critical information (system outage, billing alert) and still be invisible. Fix: critical information should not be placed in banner-blind positions. Use inline alerts, modals, or content-area placements for important messages.
+
+**The multi-column body text** — Content area splits body text into 2-3 newspaper-style columns. Users must read down column 1, then jump back to the top of column 2 — a pattern that worked in print but breaks on scrollable screens where the bottom of column 1 may not be visible alongside the top of column 2. Fix: single-column body text for web content. Use multi-column only for short, above-the-fold content where all columns are simultaneously visible.
+
 ---
 
 ## §5 The traps
@@ -139,6 +145,8 @@ I evaluate: (1) Does the layout **support the appropriate scanning pattern** for
 **Task overrides pattern.** A user with a specific goal (find the "Cancel subscription" link) will ignore the scanning pattern and use targeted search — scanning for specific keywords rather than following the layout's intended path. Scanning pattern design serves browsing behavior; specific task behavior requires discoverability (which is a separate framework).
 
 **Motion breaks all static patterns.** Any animated element will capture fixation regardless of its position. A blinking cursor, a loading spinner, or a sliding carousel overrides static scanning patterns. Motion-based attention must be evaluated separately.
+
+**Scanning pattern research is dominated by desktop studies.** Most eye-tracking research was conducted on desktop viewports. Mobile scanning, which involves thumb-scrolling and different hold positions, may produce patterns that differ from the desktop F and Z models. Applying desktop scanning research to mobile layouts may be misleading.
 
 ---
 

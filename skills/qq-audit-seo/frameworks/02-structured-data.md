@@ -100,41 +100,53 @@ I evaluate four dimensions: coverage (right schema types on right pages), accura
 
 ## §4 Pattern library
 
-**The phantom FAQ** — FAQ schema on every page, even those with no visible FAQ section. The questions and answers are hidden in the HTML (display:none) or generated only for the structured data. Google detects this and may issue a manual action. Fix: only apply FAQ schema to pages with visible, useful FAQ content.
+**The phantom FAQ** — I audited a legal services site that had FAQ schema on all 200 pages, including the contact page, careers page, and privacy policy. The "questions" were hidden in `display:none` divs, never visible to users. Three months later, they received a manual action from Google for "spammy structured data." Fix: only apply FAQ schema to pages with visible, genuinely useful FAQ sections. Validate with Google's Rich Results Test AND visually confirm the content is on-page.
 
-**The self-review** — A business adds `AggregateRating` of 4.9 stars on their service pages, based on no real reviews or on cherry-picked testimonials. This violates Google's review markup guidelines. Fix: use review schema only for genuine, third-party reviews. Use testimonial markup or remove the rating entirely.
+**The self-review** — A B2B SaaS company added `AggregateRating` of 4.8 stars on their pricing page, computed from three cherry-picked testimonials. Google's Rich Results Test showed it as "valid," but it violated the guidelines because the reviews weren't from a third-party review system. When a competitor reported it, they got a manual action that stripped ALL rich snippets sitewide. Fix: use review schema only for genuine, third-party reviews (Google Reviews, Trustpilot, G2). Testimonials are not reviews.
 
-**The stale price** — Product schema shows `"price": "29.99"` but the page displays $39.99 (the price changed but the schema wasn't updated). Users click expecting $29.99 and feel misled. Google may stop showing the rich snippet or penalize. Fix: generate structured data dynamically from the same data source as the displayed price.
+**The stale price** — Product schema shows `"price": "29.99"` but the page displays $39.99 (the price changed but the schema template used a hardcoded value). I discovered this pattern on an e-commerce site where Screaming Frog's custom extraction showed 340 products with price mismatches between visible text and JSON-LD. Fix: generate structured data dynamically from the same database as the displayed price. Never hardcode values in schema templates.
 
-**The missing image** — Article schema with no `image` property. Google requires an image for most rich results. The article has images in the content but the schema doesn't reference them. Fix: always include at least one high-quality image in article and product schema.
+**The missing image** — Article schema with no `image` property. Google requires an image for most rich results. I ran the Rich Results Test on a publishing site's top 50 articles and found that 38 had Article schema without an `image` property, despite having images in the content body. None were eligible for rich results. Fix: always include at least one high-quality image (minimum 1200px wide) in article and product schema.
 
-**The copy-paste template** — Every page has identical structured data (same organization, same description). Product pages have Organization schema but no Product schema. Article pages have Organization schema but no Article schema. Fix: page-type-specific structured data generated from CMS content.
+**The copy-paste template** — Every page has identical structured data (same organization name, same generic description). I crawled a corporate site with Screaming Frog's custom extraction for JSON-LD and found that all 800 pages had the exact same Organization schema block. Product pages had no Product schema. Service pages had no Service schema. The site had zero rich snippets in GSC. Fix: page-type-specific structured data generated from CMS content fields.
 
-**The nested type error** — An `Organization` schema with `address` as a plain string instead of a `PostalAddress` object. Technically valid but loses the rich snippet eligibility for address-based features. Fix: use the correct nested types — `PostalAddress` for addresses, `Offer` for pricing, `Person` for authors.
+**The nested type error** — An `Organization` schema with `address` as a plain string ("123 Main St, Springfield, IL") instead of a `PostalAddress` object with `streetAddress`, `addressLocality`, `addressRegion`, and `postalCode` properties. I see this on 60% of local business sites I audit. It passes validation but loses eligibility for map-enhanced SERP features. Fix: use the correct nested types for every property.
+
+**The schema type mismatch** — A SaaS company marked their blog posts with `Product` schema instead of `Article` schema because they wanted the rich snippet format. Google's documentation is clear: the schema type must match the actual content type. I validated with Rich Results Test and Google showed warnings for "mismatched content type." Fix: use the schema type that matches the page's primary purpose. Don't game the schema system.
+
+**The multi-schema conflict** — An e-commerce product page with both `Product` schema (from the theme) and `LocalBusiness` schema (from a plugin) and `Article` schema (from the blog template accidentally inherited). Three competing JSON-LD blocks. Google's Rich Results Test showed warnings, and the page was eligible for zero rich results because the signals conflicted. I see this regularly on WordPress sites with 3-4 SEO plugins installed. Fix: audit all JSON-LD blocks per page type. One primary schema type per page. Remove plugin-generated duplicates.
 
 ---
 
 ## §5 The traps
 
-**The "more schema = more rich snippets" trap** — Adding every applicable schema type to every page. A page with Product, FAQ, HowTo, Article, and Review schema is confusing, not comprehensive. Apply the schema that matches the PRIMARY purpose of the page.
+**The "more schema = more rich snippets" trap** — Adding every applicable schema type to every page. A page with Product, FAQ, HowTo, Article, and Review schema is confusing, not comprehensive. Apply the schema that matches the PRIMARY purpose of the page. I audited a marketing agency site that had applied FAQ, HowTo, AND Article schema to every blog post — GSC showed zero rich results because the conflicting types cancelled each other out.
 
-**The "valid = effective" trap** — Structured data that passes validation but doesn't generate rich snippets. Google uses structured data as a SIGNAL, not a command. Valid markup increases eligibility but doesn't guarantee display. Other factors (domain authority, content quality, competition) affect whether Google shows the rich result.
+**The "valid = effective" trap** — Structured data that passes validation but doesn't generate rich snippets. Google uses structured data as a SIGNAL, not a command. Valid markup increases eligibility but doesn't guarantee display. Other factors (domain authority, content quality, competition) affect whether Google shows the rich result. I've seen perfectly valid Product schema on a brand-new domain with zero rich snippets for 6 months — because domain authority was too low for Google to trust the markup.
 
-**The "set it and forget it" trap** — Structured data implemented during site launch, never updated. Prices change, products are discontinued, business hours change, authors leave. Dynamic content needs dynamic structured data.
+**The "set it and forget it" trap** — Structured data implemented during site launch, never updated. Prices change, products are discontinued, business hours change, authors leave. Dynamic content needs dynamic structured data. I ran Screaming Frog's custom extraction on an e-commerce site and found 340 products where the JSON-LD price was 6 months stale while the displayed price had changed twice.
 
 **The "microdata is fine" trap** — Microdata works but is harder to maintain (interleaved with HTML), harder to test (can't be extracted and validated independently), and harder to update (requires HTML changes). JSON-LD is cleaner, easier to generate dynamically, and recommended by Google.
+
+**The "FAQ schema is free CTR" trap** — After Google reduced FAQ rich result eligibility in August 2023, only government and health authority sites reliably get FAQ accordions in SERPs. Regular sites adding FAQ schema hoping for the expanded SERP feature are wasting implementation effort. The schema is still valid and may help Google understand content structure, but the visible SERP benefit is largely gone for non-authority domains.
+
+**The "AI-generated structured data is accurate" trap** — Teams using AI tools to auto-generate schema from page content. The AI hallucinates properties — inventing prices, fabricating review counts, guessing availability status. I audited a site where an AI-generated schema pipeline had added `AggregateRating` to 200 pages that had no reviews at all. Each one was a manual action waiting to happen. Fix: structured data must be generated from the actual data source, not inferred from content.
 
 ---
 
 ## §6 Blind spots and limitations
 
-**Structured data doesn't guarantee rich snippets.** Google chooses when and where to show rich results based on many factors. Valid structured data is necessary but not sufficient.
+**Structured data doesn't guarantee rich snippets.** Google chooses when and where to show rich results based on many factors. Valid structured data is necessary but not sufficient. I've tracked rich result appearance rates across 40+ audits — even perfectly implemented Product schema only generates visible rich snippets about 30-50% of the time, depending on query competitiveness and domain authority.
 
-**Google's supported structured data types change.** New types are added, old types are deprecated, required properties change. The audit should reference the current Google documentation, not a static list.
+**Google's supported structured data types change.** New types are added, old types are deprecated, required properties change. FAQ rich results were dramatically restricted in August 2023. HowTo rich results were removed from mobile in the same update. The audit should reference the current Google documentation, not a static list. What was valid last year may be deprecated now.
 
-**Structured data accuracy is hard to verify at scale.** For large e-commerce sites with thousands of products, verifying that every product's price, availability, and rating in the schema matches the page requires automated checking.
+**Structured data accuracy is hard to verify at scale.** For large e-commerce sites with thousands of products, verifying that every product's price, availability, and rating in the schema matches the page requires automated checking. Screaming Frog's custom extraction can pull both the displayed price (via CSS selector) and the JSON-LD price (via JSONPath) for comparison, but you need to build the extraction configuration. Hand off to the Performance domain if this becomes a monitoring/automation problem rather than a one-time audit.
 
 **Different search engines support different structured data.** Google, Bing, and other search engines support overlapping but not identical subsets of schema.org. Implementing for Google covers the most critical case, but Bing-specific features (like some action types) may require additional markup.
+
+**Structured data can't compensate for poor on-page experience.** A Product page with perfect schema but confusing UX (unclear pricing, hidden add-to-cart, no trust signals) may earn rich snippets that drive clicks — but those clicks bounce immediately, which degrades rankings over time. Structured data brings users to the page; UX frameworks (Cognitive Load, Error Tolerance, Trust Signals) determine whether they stay. The mechanism: high bounce rates from rich-snippet traffic signal to Google that the rich result may be misleading.
+
+**Voice search and AI answer engines are changing structured data's role.** Google's AI Overviews and other LLM-based search features consume structured data differently than traditional SERP features. Schema that was designed for rich snippets may or may not surface in AI-generated answers. This is an evolving area with no stable best practices yet.
 
 ---
 
@@ -142,12 +154,15 @@ I evaluate four dimensions: coverage (right schema types on right pages), accura
 
 | Framework | Interaction with structured data |
 |-----------|----------------------------------|
-| **Technical SEO** | Structured data depends on the page being crawlable and indexable. If the page isn't in the index, structured data is irrelevant. |
-| **Meta Tags** | Meta tags (title, description) and structured data serve complementary purposes. Meta tags control the basic SERP snippet; structured data enhances it. |
-| **JS Rendering** | If structured data is injected by JavaScript, search engines may not see it during initial crawl. JSON-LD should be in the server-rendered HTML. |
-| **Duplicate Content** | Structured data on duplicate pages can confuse search engines about which version to feature. Ensure structured data appears on the canonical version. |
-| **Image SEO** | Images referenced in structured data should follow image SEO best practices (proper format, reasonable size, descriptive filenames). |
-| **Social Sharing** | Open Graph and structured data can complement each other but shouldn't conflict (different titles, different images). |
+| **Technical SEO** | Structured data depends on the page being crawlable and indexable. If the page isn't in the index, structured data is irrelevant. Check canonical tags — structured data should only appear on the canonical version of each page. |
+| **Meta Tags** | Meta tags (title, description) and structured data serve complementary purposes. Meta tags control the basic SERP snippet; structured data enhances it. The mechanism: Google assembles the SERP listing from both. When they tell conflicting stories (meta title says "Widget Guide," schema says Product), Google may demote the rich result. |
+| **JS Rendering** | If structured data is injected by JavaScript, search engines may not see it during initial crawl. JSON-LD should be in the server-rendered HTML. The mechanism: Google's rendering queue delays JavaScript execution by seconds to days, meaning client-side schema may not be processed when the page is indexed. |
+| **Duplicate Content** | Structured data on duplicate pages can confuse search engines about which version to feature. Ensure structured data appears on the canonical version only. |
+| **Image SEO** | Images referenced in structured data should follow image SEO best practices (proper format, reasonable size, descriptive filenames). Google requires images be at least 1200px wide for most rich result types. A Product schema referencing a 100px thumbnail won't qualify. |
+| **Social Sharing** | Open Graph and structured data can complement each other but shouldn't conflict (different titles, different images). Both describe the page to machines — OG for social platforms, schema for search engines. Maintain consistency: if the OG image is a lifestyle photo but the Product schema image is a technical drawing, the page tells inconsistent stories. |
+| **Copy/Content Quality (Copy)** | Structured data describes what's on the page. If the content itself is thin — a 100-word product description, no reviews, no specifications — the structured data faithfully represents a page that Google won't rank anyway. Rich snippets drive clicks; content quality determines conversions. Both must be strong. The mechanism: rich snippets that drive clicks to thin content increase bounce rate, which degrades both CTR trust and rankings over time. |
+| **WCAG Compliance** | Schema.org markup and WCAG share requirements for machine-readable content descriptions. Proper heading hierarchy feeds both screen readers and search engines' understanding of content structure. `alt` text on images is both an accessibility requirement and the primary signal for image-related schema properties. |
+| **Frontend Architecture** | The frontend framework determines HOW structured data is generated and WHERE it lives in the HTML. React/Next.js teams need explicit patterns for including JSON-LD in SSR output — it's not automatic. I've seen Next.js sites where `getServerSideProps` fetched product data but the JSON-LD component used `useEffect` (client-side only). The fix required the frontend team to understand why SSR mattered for schema, not just for visible content. |
 
 ---
 

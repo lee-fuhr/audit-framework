@@ -104,6 +104,12 @@ I score by accuracy gap — the distance between what the policy says and what a
 
 **The "we do not sell your data" lie** — The policy prominently states "we do not sell your personal data." But the site shares user data with advertising networks for targeting, which qualifies as "sale" under CCPA. Fix: understand the legal definitions of "sale" and "sharing" in applicable jurisdictions before making this claim.
 
+**The third-party script audit gap** — The privacy policy lists Google Analytics and Stripe as third parties. A website audit reveals 14 additional third-party scripts: Hotjar, Intercom, Facebook Pixel, LinkedIn Insight, Clearbit, Drift, Segment (routing to 5 additional destinations), and two forgotten marketing tags from a 2021 campaign. Each undisclosed script is a potential FTC deceptive practices finding. Fix: run a monthly automated scan (BuiltWith, Wappalyzer, or a custom Puppeteer script that inventories all third-party network requests) and reconcile against the privacy policy.
+
+**The marketing-legal disconnect** — Marketing deploys a new lead enrichment tool (Clearbit) that appends company data to form submissions. This is new data collection from a third-party source — the privacy policy doesn't mention third-party data enrichment. When a user discovers their company name appeared in a profile they never provided, they file a GDPR complaint. The processing was never disclosed. Fix: any new tool that processes personal data must trigger a privacy policy review. Make privacy review a gate in the vendor onboarding process.
+
+**The retention period hand-wave** — The privacy policy says "we retain data for as long as necessary for the purposes described." This is legally insufficient under CPRA (which requires specific retention periods per data category) and practically useless for accountability. Fix: specify concrete retention periods: "Account data: duration of account + 30 days. Transaction records: 7 years (tax compliance). Analytics data: 24 months. Marketing preferences: until withdrawal."
+
 ---
 
 ## §5 The traps
@@ -126,6 +132,10 @@ I score by accuracy gap — the distance between what the policy says and what a
 
 **Privacy policies serve multiple audiences.** Users want clarity. Regulators want completeness. Lawyers want protection. Balancing these audiences while maintaining accuracy is the core challenge.
 
+**The FTC treats privacy policy inaccuracies as deceptive practices.** The FTC has brought enforcement actions against companies (Snapchat, Ashley Madison, Flo Health) specifically for privacy policy claims that didn't match actual data practices. An inaccurate privacy policy isn't just a compliance gap — it's an affirmative legal liability under Section 5 of the FTC Act. The policy becomes evidence against you.
+
+**Privacy policies for AI-powered products face new disclosure requirements.** If the product uses AI/ML (recommendations, content generation, risk scoring), the privacy policy must disclose: what data is used for training, whether user content contributes to model improvements, whether automated decisions are made, and the logic involved. The EU AI Act (2024) adds explicit transparency requirements for AI systems that interact with natural persons.
+
 ---
 
 ## §7 Cross-framework connections
@@ -138,6 +148,11 @@ I score by accuracy gap — the distance between what the policy says and what a
 | **Privacy-Compliant Tracking (Data 05)** | The privacy policy describes tracking practices. The tracking implementation must match. This is the primary accuracy verification point. |
 | **Data Retention (Data 08)** | Retention periods stated in the policy must match actual retention practices. Verify with Data Retention audit results. |
 | **Terms of Service (05)** | ToS and privacy policy must not conflict. Data handling described in ToS must be consistent with the privacy policy. |
+| **Data Layer Architecture (Data 02)** | The data layer determines which third-party services receive user data. The privacy policy's "who we share with" section must match the data layer's destination configuration. A new Segment destination added by engineering without updating the privacy policy creates an immediate accuracy gap. |
+| **Analytics Completeness (Data 01)** | Every analytics event that captures personal data creates a processing activity that should be reflected in the privacy policy. If the analytics team adds a new event tracking user location, the privacy policy's "data we collect" section needs updating. Analytics instrumentation changes are privacy policy changes. |
+| **Error Tracking (Data 10)** | Error tracking tools (Sentry, Bugsnag) that capture user context are processing personal data. The privacy policy should disclose error tracking as a data processing activity with its own purpose ("service improvement and bug resolution") and third-party disclosure. |
+| **Schema Evolution (Data 14)** | Schema changes that add new personal data fields (adding `phone_number`, `location`, `company_name`) are privacy policy changes. The privacy policy's "data we collect" section must evolve with the schema. Automate: when a schema change adds a new PII field, trigger a privacy policy review ticket. |
+| **Monitoring and Alerting (DevOps 05)** | Automated third-party script scanning (weekly Puppeteer crawl, BuiltWith API checks) can detect new scripts that aren't reflected in the privacy policy. Alert when an undisclosed third-party script is detected on the site. This is privacy policy drift detection. |
 
 ---
 

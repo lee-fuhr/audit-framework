@@ -114,6 +114,10 @@ I evaluate: (1) coverage — are the most-used adjacent tools integrated? (2) de
 
 **The silent sync failure** — An integration breaks and nobody notices for weeks. Data stops flowing. Users assume everything is current. Decisions are made on stale data. Fix: monitor integration health, alert on sync failures, show "last synced" timestamps.
 
+**The version mismatch decay** — The integration was built against v2 of the partner's API. The partner shipped v3 six months ago. The integration still "works" but returns incomplete data, misses new fields, and throws silent errors on deprecated endpoints. I audited a marketing automation tool whose Salesforce integration had been on an API version 2 years behind. It was missing 11 custom fields that the sales team had added, silently dropping data on every sync. The sales team blamed "CRM data quality" for 8 months before anyone traced it to the stale integration. Fix: integration version monitoring — track partner API versions and flag when the integration falls behind by more than one major version.
+
+**The bidirectional conflict storm** — Two-way sync between the product and a CRM with no conflict resolution strategy. A contact's email is updated in both systems within the same sync interval. Which version wins? I've seen products where the answer is "whichever synced last, randomly." In one case, a sales team discovered that 15% of their contact emails had been overwritten by stale data from a parallel system. The integration had been silently losing data for 5 months. Fix: define conflict resolution rules per field (last-write-wins, source-of-truth-wins, or flag-for-human-review), communicate the rules to users, and log every conflict.
+
 ---
 
 ## §5 The traps

@@ -104,6 +104,12 @@ I evaluate: (1) Is there a **consistent border vocabulary** (one width, one colo
 
 **The color-coded border overuse** — Different border colors for different states: blue for focus, red for error, green for success, yellow for warning, gray for default. Five border colors create a traffic light effect. Fix: use border color for the primary interactive state (focus) and background/text color for semantic states. Borders shouldn't carry the full semantic load.
 
+**The inconsistent border-radius cropping** — Container has `border-radius: 12px`. Its child image has no border-radius and `overflow: visible`. The image corners poke outside the rounded container. Some cards clip correctly (overflow: hidden on the container); others don't. The inconsistency makes some cards look polished and others look broken. Fix: containers with border-radius need `overflow: hidden` or child elements need matching border-radius values.
+
+**The hair-line rendering gamble** — Designer specifies 0.5px borders for a delicate look. On 1x displays, 0.5px renders as either 0px (invisible) or 1px (not delicate). On 2x displays, it renders as intended. The design is display-dependent. Fix: minimum 1px borders for reliability. If delicacy is needed, use a lighter border color rather than a thinner width.
+
+**The mixed separator vocabulary** — Some sections are separated by horizontal rules (`<hr>`). Others by borders on the bottom of the last element. Others by a 1px background-colored div. Others by margin alone. Four separation techniques with subtly different rendering (borders respect border-radius, dividers don't; margins collapse, padding doesn't). Fix: choose one separation approach and apply it consistently.
+
 ---
 
 ## §5 The traps
@@ -127,6 +133,8 @@ I evaluate: (1) Is there a **consistent border vocabulary** (one width, one colo
 **Border removal may expose spacing problems.** Borders sometimes compensate for insufficient whitespace. Removing a "redundant" border may reveal that the underlying spacing is too tight for borderless separation.
 
 **Borders interact with accessibility.** Some users rely on borders to identify interactive elements (input fields, buttons). Removing borders for aesthetic reasons may harm usability for users with low vision or cognitive differences.
+
+**Border rendering differs across browsers.** The same 1px solid border can appear subtly different in Chrome, Safari, and Firefox due to anti-aliasing differences. Sub-pixel border rendering is particularly inconsistent. Audits should check rendering across the browser matrix, not just one.
 
 ---
 

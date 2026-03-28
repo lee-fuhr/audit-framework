@@ -117,6 +117,10 @@ I evaluate: (1) coverage — are all subjects, resources, and actions modeled? (
 
 **The API permission bypass** — The web interface enforces permissions properly, but the API grants broader access because permission checks weren't implemented on every endpoint. A user who can't delete via the UI can delete via the API. Fix: permissions must be enforced at the API/service layer, not just the UI layer.
 
+**The cross-tenant leak** — Multi-tenant product where a URL with a sequential ID allows users to access another tenant's data by guessing the ID. I've found this in 3 of the last 8 B2B products I audited — the UI prevents cross-tenant navigation, but the API doesn't check tenant boundaries on object access. In one case, changing a report ID from 4521 to 4522 exposed a competitor's financial data. Fix: every API endpoint must validate tenant ownership of every referenced object. Use UUIDs instead of sequential IDs to add obscurity as a defense-in-depth layer (but NEVER as the only check).
+
+**The permission inheritance confusion** — A resource has both folder-level permissions and item-level permissions, and the interaction between them is undefined. Does item-level "viewer" override folder-level "editor"? Does folder-level "admin" cascade to items? I audited a document management product where 35% of permission-related support tickets were about this exact confusion. The team had implemented "most restrictive wins" for security, but users expected "most specific wins" (item overrides folder). Neither was documented. Fix: choose one inheritance model, document it clearly, and show effective permissions for any given user on any given resource.
+
 ---
 
 ## §5 The traps

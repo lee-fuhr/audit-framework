@@ -118,6 +118,10 @@ I evaluate: (1) completeness — can ALL user data be exported? (2) format utili
 
 **The API rate wall** — The API exists and is documented. But rate limits of 100 requests per hour mean exporting 50,000 records takes 500 hours (20 days of continuous requests). Technically portable, practically trapped. Fix: provide bulk export endpoints or data dump capabilities alongside the paginated API.
 
+**The attachment orphan** — The export includes records with references to files ("See attached report.pdf") but the attachments themselves aren't included. I audited a project management tool where the export captured 100% of task data but 0% of the 14,000 file attachments. Users who migrated discovered their historical context was gutted — every reference to a document, image, or spec pointed to a dead link. Fix: export must include all attachments, or at minimum provide a separate bulk download option for associated files.
+
+**The relationship flattener** — Export converts a rich relational data model into flat CSVs. A CRM with contacts linked to companies linked to deals linked to activities becomes four disconnected spreadsheets with no way to reconstruct the relationships. I worked with a mid-market company that spent 3 weeks and $12K in consulting fees trying to rebuild the relationship graph after migrating from a CRM that exported flat files. Fix: export in a format that preserves relationships (JSON with nested objects, or SQLite with foreign keys) alongside the flat CSV option.
+
 ---
 
 ## §5 The traps

@@ -102,6 +102,12 @@ I score by verification depth. For each critical metric: Is the calculation docu
 
 **The time zone trap** — The dashboard shows "daily" metrics using UTC timestamps. The business operates in US Eastern time. A purchase at 11 PM Eastern (4 AM UTC next day) appears in the wrong day's metrics. Fix: consistent timezone handling, documented and matching the business's operating timezone.
 
+**The self-serve dashboard drift** — A product manager builds a dashboard in Looker using a custom SQL query. The query works correctly. Six months later, a dbt model upstream renames a column. The dashboard query silently returns zero rows for that metric. Nobody notices because the PM switched teams and the dashboard has no owner. Fix: assign ownership to every dashboard. Use Looker's content validator or Tableau's "stale content" detection to flag dashboards referencing broken queries.
+
+**The survival bias dashboard** — The churn dashboard shows "average days before churn: 45." This only includes users who HAVE churned. Users who will churn but haven't yet are excluded. The dashboard tells you about past churners, not about the at-risk population. Fix: build a predictive churn model (survival analysis) alongside the retrospective metric. Show both: "churned users averaged 45 days" and "current at-risk users: 2,300 (based on behavioral signals)."
+
+**The calculated metric inconsistency** — Finance defines revenue as gross charges minus refunds. The product dashboard defines revenue as net charges (already refund-adjusted in Stripe). The difference is $80K/month. Both are "correct" by their own definition. Leadership sees two numbers and trusts neither. Fix: create a certified metric definition in the BI layer (Looker's PDT, dbt's metric definition, or Metabase's certified questions) that is THE revenue number everywhere.
+
 ---
 
 ## §5 The traps
@@ -126,6 +132,8 @@ I score by verification depth. For each critical metric: Is the calculation docu
 
 **Dashboards with many metrics dilute attention.** A dashboard with 50 metrics where 48 are accurate and 2 are wrong is unreliable — the user doesn't know which 2 are wrong. Fewer, verified metrics are better than many unverified ones.
 
+**Dashboard accuracy creates a feedback loop with trust.** Once stakeholders catch one wrong number, they question every number. Rebuilding credibility takes months of verified accuracy. The first inaccuracy discovered sets the trust floor for all dashboards. Invest disproportionately in the accuracy of the 3-5 metrics leadership watches most closely.
+
 ---
 
 ## §7 Cross-framework connections
@@ -138,6 +146,10 @@ I score by verification depth. For each critical metric: Is the calculation docu
 | **Data Freshness (15)** | A dashboard showing stale data is "accurate" for a previous point in time but misleading for current decisions. Freshness is an accuracy dimension. |
 | **Funnel Instrumentation (06)** | Funnel dashboards are only accurate if every step is instrumented. Missing steps make funnel conversion rates appear higher than reality (steps are skipped, not failed). |
 | **A/B Testing Infrastructure (07)** | Experiment results displayed on dashboards must use correct statistical calculations. Displaying a p-value without context or a confidence interval without the methodology is misleading even if technically "accurate." |
+| **Cognitive Load (UX 05)** | Dashboard information density directly affects comprehension. A dashboard with 50 metrics, 10 filters, and 3 comparison modes overwhelms users — they focus on the first metric they see or the one they already believe. Dashboard design is a UX problem, not just a data problem. Apply Miller's Law: 7±2 key metrics per view. |
+| **CCPA/CPRA (Compliance 02)** | If customer-facing dashboards display personal information (account details, usage stats), CCPA's right to know means the displayed data must be accurate AND accessible for download. Dashboard accuracy becomes a compliance obligation when users rely on displayed data for their own records. |
+| **Infrastructure as Code (DevOps 02)** | Dashboard definitions (Looker LookML, Tableau workbook XML, dbt exposures) should be version-controlled. When someone changes a metric definition, the change should be reviewable in a PR — not silently edited in the BI tool's UI where nobody tracks what changed. |
+| **Secret Rotation (DevOps 10)** | Dashboard service accounts connecting to data warehouses use credentials. When those credentials rotate, dashboards can silently fail — showing stale cached data or no data. Dashboard health checks should verify active data connections, not just cached results. |
 
 ---
 

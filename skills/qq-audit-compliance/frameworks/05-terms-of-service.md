@@ -122,6 +122,14 @@ I score by enforceability and coverage. Enforceability: would a court uphold the
 
 **The zombie account terms** — Users can delete their accounts. The ToS says nothing about what happens to their data. User deletes account, assumes data is gone. Data persists. User complains to a regulator. Fix: ToS specifies data handling on termination, consistent with the privacy policy and actual system behavior.
 
+**The AI training clause bomb** — The ToS includes a broad content license: "you grant us a perpetual, irrevocable, worldwide license to use your content for any purpose including improving our services." A journalist discovers the company uses user content to train an AI model. The clause technically permits it, but users didn't expect it. Public backlash forces a policy reversal. Zoom faced this exact situation in 2023 when users discovered their video calls could be used for AI training. Fix: AI/ML training uses should be explicitly disclosed, not hidden in broad license language. Specific disclosure builds trust; broad licenses discovered post-hoc destroy it.
+
+**The arbitration clause geographic invalidity** — The ToS includes binding arbitration with a class action waiver. This is enforceable in most US states but may be unenforceable under EU consumer protection law (Directive 93/13/EEC, unfair terms in consumer contracts). The CJEU has repeatedly struck down arbitration clauses in consumer contracts. A US-drafted ToS applied globally creates enforceability gaps. Fix: include jurisdiction-specific carve-outs. "For users in the European Union, the following section does not apply" with appropriate alternative dispute resolution.
+
+**The content moderation gap** — The ToS prohibits "illegal or harmful content" but doesn't define "harmful." A user posts content that's legal but offensive. The company removes it. The user points to the ToS and argues their content wasn't covered. Without a specific content policy defining categories (hate speech, harassment, misinformation, NSFW), moderation decisions are arbitrary and legally vulnerable. Fix: a detailed Acceptable Use Policy (AUP) separate from the ToS, with specific categories, examples, and enforcement consequences.
+
+**The modification notice failure** ��� The ToS says "we may modify these terms at any time by posting the updated terms on our website." The company changes the arbitration clause. Nobody is notified by email. Six months later, in a dispute, the company tries to enforce the new arbitration clause. The court finds the user wasn't reasonably notified of the material change. Fix: material ToS changes require conspicuous notice (email, in-app notification) with a reasonable review period (30 days) before taking effect.
+
 ---
 
 ## §5 The traps
@@ -144,6 +152,10 @@ I score by enforceability and coverage. Enforceability: would a court uphold the
 
 **ToS need regular updates.** Laws change, the service changes, and business practices change. Terms that were current 3 years ago may have gaps for current operations.
 
+**ToS enforceability depends on the acceptance mechanism more than the content.** Perfectly drafted terms with a browsewrap acceptance mechanism (terms linked in the footer, no affirmative acceptance) have been repeatedly held unenforceable. The acceptance UX is as legally important as the legal text. Courts look at whether a reasonable user would have noticed the terms and had an opportunity to read them before agreeing.
+
+**Class action waivers face ongoing legal challenges.** While the Supreme Court upheld arbitration with class action waivers in AT&T Mobility v. Concepcion (2011) and Epic Systems v. Lewis (2018), state courts continue to find creative ways to void them for unconscionability or public policy reasons. The waiver's enforceability isn't guaranteed — it depends on the specific clause language, the jurisdiction, and the type of claim.
+
 ---
 
 ## §7 Cross-framework connections
@@ -156,6 +168,10 @@ I score by enforceability and coverage. Enforceability: would a court uphold the
 | **CCPA/CPRA (02)** | CCPA rights to know, delete, and opt-out cannot be waived. ToS must not create barriers to exercising these rights. |
 | **OSS License Compliance (08)** | If the service incorporates open source software, ToS must not conflict with the open source license obligations. |
 | **COPPA (07)** | If the service may be used by children, ToS must address age restrictions and parental consent, consistent with COPPA requirements. |
+| **Right to Deletion (Compliance 10)** | The ToS data-on-termination clause must match the deletion implementation. If ToS says "data deleted within 30 days of account termination" but the deletion pipeline only runs monthly, there's a gap between the legal promise and the technical capability. |
+| **Data Export (Data 13)** | If ToS grants users a license to export their data, the export feature must actually exist and work. A contractual right to data portability without a functional export mechanism is a ToS promise the company can't keep. |
+| **Automated Decisions (Compliance 14)** | ToS provisions that say "we may use automated systems to moderate content, detect fraud, or enforce our terms" should disclose the existence of automated decision-making. Under GDPR Art. 22, automated decisions with significant effects require specific disclosure beyond a buried ToS clause. |
+| **CI/CD Maturity (DevOps 03)** | ToS version tracking should be automated. When the ToS is updated, the acceptance mechanism must present the new version and require re-acceptance. If ToS changes deploy without updating the version number in the acceptance flow, users are bound by terms they never agreed to. |
 
 ---
 

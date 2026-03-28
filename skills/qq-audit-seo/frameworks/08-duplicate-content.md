@@ -111,6 +111,12 @@ I evaluate four dimensions: URL-level duplication (same content, different URLs)
 
 **The pagination canonical mistake** — A 20-page product listing where pages 2-20 all have `rel="canonical"` pointing to page 1. Google may not crawl pages 2-20 (they've been told page 1 is the canonical). Products only on later pages disappear from the index. Fix: each pagination page should self-canonicalize.
 
+**The print stylesheet duplicate** — A CMS that generates `/page/print/` URLs for every page — a separate URL with a print-friendly layout. I crawled a 3,000-page corporate site with Screaming Frog and found 3,000 additional `/print/` URLs, each with identical content to the parent page but no canonical tags. Google had indexed 1,800 of the print versions. Fix: noindex print URLs, or canonical them back to the parent page. Better yet: use CSS `@media print` instead of generating separate URLs.
+
+**The staging/preview URL leak** — A WordPress site with Yoast SEO generating preview URLs (`/?p=1234&preview=true`) and a staging site on a subdomain. Neither was blocked from crawling. Screaming Frog found 400+ preview URLs in the sitemap (plugin misconfiguration), and Google had indexed the staging subdomain because an internal wiki linked to it. Fix: password-protect staging at the server level, block preview URLs in robots.txt, and audit sitemaps for non-production URLs.
+
+**The AMP duplicate** — Sites still running AMP pages alongside standard pages. The AMP version at `/amp/page` is a stripped-down duplicate of `/page`. If `rel="amphtml"` and `rel="canonical"` are misconfigured (or if AMP was abandoned but the pages still exist), Google has two versions competing. I see this on news sites that adopted AMP in 2018, abandoned it in 2022, but never cleaned up the AMP URLs. Screaming Frog's custom search for `/amp/` paths finds them quickly. Fix: redirect AMP URLs to canonical pages with 301s if AMP is no longer maintained.
+
 ---
 
 ## §5 The traps
@@ -123,17 +129,23 @@ I evaluate four dimensions: URL-level duplication (same content, different URLs)
 
 **The "hreflang solves everything" trap** — Hreflang tells Google about language/region relationships. It doesn't fix duplicate content within a single language. Two English pages in two countries with identical content and proper hreflang are still thin content if neither has unique value.
 
+**The "AI will rewrite duplicates into unique content" trap** — Using AI to spin near-duplicate location pages or product descriptions into "unique" versions. I audited a home services company that used AI to rewrite 200 city pages. The rewrites were technically unique (different words) but semantically identical (same information, same structure, same value). Google's helpful content system detected the pattern and devalued the entire section. Unique doesn't mean valuable. Each page needs genuinely different information — local reviews, team photos, specific service details for that area.
+
 ---
 
 ## §6 Blind spots and limitations
 
-**Duplicate content is not a "penalty."** Google doesn't penalize sites for having duplicate content (unless it's deceptive). It simply chooses one version to index and ignores the rest. The problem is when Google chooses the wrong version or splits equity.
+**Duplicate content is not a "penalty."** Google doesn't penalize sites for having duplicate content (unless it's deceptive). It simply chooses one version to index and ignores the rest. The problem is when Google chooses the wrong version or splits equity. The distinction matters: clients who panic about a "duplicate content penalty" often waste effort on low-priority cleanup when the real issue is consolidation strategy.
 
-**Content similarity is subjective.** Two pages with 60% overlapping content — is that "duplicate" or "related"? Google's threshold is not published. Use judgment: if you wouldn't want both pages to rank for the same query, they're duplicates.
+**Content similarity is subjective.** Two pages with 60% overlapping content — is that "duplicate" or "related"? Google's threshold is not published. Use judgment: if you wouldn't want both pages to rank for the same query, they're duplicates. Screaming Frog's "Near Duplicates" feature (using shingle-based comparison) can identify pages with >70% content overlap — a good starting point for investigation.
 
-**Canonical is a hint, not a directive.** Google may ignore canonical tags if they conflict with other signals (internal links, sitemap presence, link equity). Consistent signals (canonical + sitemap + internal links all agreeing) are more persuasive than canonical alone.
+**Canonical is a hint, not a directive.** Google may ignore canonical tags if they conflict with other signals (internal links, sitemap presence, link equity). Consistent signals (canonical + sitemap + internal links all agreeing) are more persuasive than canonical alone. I've seen Google ignore canonicals on 15-20% of pages when signals conflict.
 
-**Cross-domain canonicalization is weaker than same-domain.** Telling Google "the canonical version is on a different domain" works, but Google gives it less weight than same-domain canonicals.
+**Cross-domain canonicalization is weaker than same-domain.** Telling Google "the canonical version is on a different domain" works, but Google gives it less weight than same-domain canonicals. For syndicated content, the original publisher's domain authority relative to the syndication partner's authority is the deciding factor.
+
+**Duplicate content problems often have UX roots.** Tag/category overlap, near-duplicate product variants, and templated location pages are usually IA problems, not SEO problems. If the same content appears on multiple pages, the question is: should those pages exist at all? Hand off to UX Information Architecture when the content structure itself needs consolidation, not just the URL signals. The mechanism: IA defines what pages exist and how they relate; duplicate content just describes the SEO symptom of a bad IA decision.
+
+**Content quality and duplication are different axes.** A page can be unique (no duplicates anywhere) but still thin (100 words of generic text). And a page can be duplicated (same content at two URLs) but high-quality at the canonical version. Duplicate content management resolves the URL problem; content quality assessment (Copy domain) resolves the substance problem. Both can suppress rankings, but they require different fixes.
 
 ---
 
@@ -141,12 +153,15 @@ I evaluate four dimensions: URL-level duplication (same content, different URLs)
 
 | Framework | Interaction with duplicate content |
 |-----------|-----------------------------------|
-| **Technical SEO** | Canonical tags and indexability controls are the implementation layer for duplicate content strategy. |
-| **URL Structure** | URL design directly creates or prevents duplication. Clean URLs with consistent conventions minimize URL-level duplicates. |
-| **Internal Linking** | Internal links should point to canonical URLs, reinforcing which version is authoritative. |
-| **Crawl Budget** | Duplicate URLs waste crawl budget. Reducing duplication frees budget for unique content. |
-| **International SEO** | Hreflang is the duplicate content mechanism for international sites. Missing hreflang on same-language pages is a duplicate content issue. |
-| **Meta Tags** | Duplicate title tags signal duplicate content to search engines, even when the page content differs. |
+| **Technical SEO** | Canonical tags and indexability controls are the implementation layer for duplicate content strategy. When canonicals conflict with other technical signals (sitemap includes non-canonical URLs, internal links point to non-canonical variants), Google's behavior becomes unpredictable. Signal alignment is the key. |
+| **URL Structure** | URL design directly creates or prevents duplication. Clean URLs with consistent conventions minimize URL-level duplicates. Server-level URL normalization (force lowercase, consistent trailing slash, HTTPS redirect) prevents duplication before it starts. |
+| **Internal Linking** | Internal links should point to canonical URLs, reinforcing which version is authoritative. The mechanism: if 80% of internal links point to `/products/widget` but the canonical says `/products/widget/`, Google sees a conflict and may choose based on link weight rather than canonical declaration. |
+| **Crawl Budget** | Duplicate URLs waste crawl budget. Reducing duplication frees budget for unique content. On a large e-commerce site, I found that 60% of Googlebot's daily crawl was on parameter-variant URLs that were all duplicates of 2,000 base products. Consolidating duplicates effectively tripled the crawl frequency for unique content. |
+| **International SEO** | Hreflang is the duplicate content mechanism for international sites. Missing hreflang on same-language pages is a duplicate content issue. The mechanism: en-US and en-GB pages with 95% identical content look like duplicates to Google without hreflang declaring them as regional variants. |
+| **Meta Tags** | Duplicate title tags signal duplicate content to search engines, even when the page content differs. Screaming Frog's "Duplicate" filter on titles is a fast way to find both URL-level duplication (same page, different URLs) and content-level duplication (different pages with the same topic). |
+| **Copy/Content Quality (Copy)** | Near-duplicate content is often a content strategy problem, not a technical problem. When 50 location pages differ by only the city name, the fix isn't canonical tags — it's creating genuinely unique content for each location. Copy domain frameworks evaluate whether the content itself justifies a separate page. The mechanism: Google's "helpful content" system evaluates whether a page provides unique value. Technically unique (different words) but substantively identical (same information) content still gets devalued. |
+| **Information Architecture (UX)** | Tag/category overlap, product variant pages, and hub/spoke content structures all create near-duplication patterns that originate in IA decisions. If the IA has both a "Blue Widgets" category and a "Blue" tag, and both show the same products, the duplicate content problem is an IA problem. Fix the IA (consolidate redundant taxonomies) rather than just adding canonical tags to the symptom. |
+| **Compliance/GDPR** | GDPR requirements can create duplication: cookie consent variations that generate parameter-based URLs (`?consent=accepted`), privacy policy pages duplicated across regional domains, and consent-based content variations (EU users see different content than US users at the same URL). If the site serves different content based on consent status, verify that Googlebot (which doesn't accept cookies) sees the full content version. |
 
 ---
 

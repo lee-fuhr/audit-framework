@@ -98,6 +98,12 @@ I evaluate: (1) Is the density **appropriate for the product's context** and use
 
 **The "above the fold" obsession** — Team crams everything into the first viewport to avoid scrolling. Hero, key metrics, feature grid, CTA — all in 800px of vertical space. Nothing breathes. Users feel overwhelmed instead of informed. Fix: scrolling is not expensive. Cramming is. Distribute content with appropriate density for each section, and trust that users scroll (they do — research confirms it).
 
+**The tooltip information dump** — To avoid cluttering the interface, information is hidden behind tooltips. Hovering over a metric reveals: full label, calculation method, data source, last updated timestamp, and a "learn more" link. The tooltip is now 5 lines of text in a floating box that obscures adjacent content. Fix: if the information is important enough to exist, it deserves a proper layout — an expandable detail panel or a dedicated page, not a cramped floating box.
+
+**The accordion overload** — The team uses accordions to hide density: 15 sections collapsed by default, each containing a form, a table, or a data summary. Users must click to reveal each section, losing context on previously opened ones. The page appears sparse but is actually extremely dense — the density is just hidden behind clicks. Fix: if users need most of the information, show it. Accordions work for genuinely optional detail, not for hiding primary content.
+
+**The multi-column form trap** — To increase density, a form is laid out in 3 columns. Labels and inputs are packed side by side. Users lose track of which label belongs to which input. Error messages, appearing between rows, shift the entire layout. Fix: forms should rarely exceed 1-2 columns. Density gains from multi-column forms are offset by comprehension losses.
+
 ---
 
 ## §5 The traps
@@ -121,6 +127,8 @@ I evaluate: (1) Is the density **appropriate for the product's context** and use
 **Density interacts with typography.** Small text increases density but decreases readability. The audit must consider whether density gains come at the expense of legibility — which is a net negative.
 
 **Cultural expectations vary.** Japanese web design is traditionally denser than Western web design. Chinese e-commerce platforms display more information per page than Western equivalents. Density norms are culturally calibrated.
+
+**Density needs change within a single session.** A user starting their day might want an overview (lower density). After identifying something to investigate, they want detail (higher density). Static density settings serve one mode but not the other. Density evaluation should consider the full task arc, not a single moment.
 
 ---
 

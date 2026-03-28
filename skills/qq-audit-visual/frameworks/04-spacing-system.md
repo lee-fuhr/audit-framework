@@ -102,6 +102,12 @@ I calculate the "scale adherence rate" — percentage of all spacing values that
 
 **The padding overflow** — A component has 16px padding all around. Someone adds a longer text string. Instead of allowing the component to grow, they reduce padding to 8px on the sides. Now this instance has different padding from all other instances of the same component. Fix: let the component grow, or truncate the content.
 
+**The margin-collapse surprise** — Two vertically adjacent elements each have 24px margin. CSS margin collapse produces 24px total, not 48px. A developer "fixes" this by adding a wrapper div with padding, introducing an off-scale 48px gap in some places and 24px in others. Fix: use gap (in flexbox/grid) instead of margins to avoid collapse behavior, or standardize on one approach and document it.
+
+**The density mode mismatch** — The product has a "compact" density option that reduces spacing by an inconsistent amount. Default mode uses 16/24/32; compact uses 12/16/24. The ratios between levels change, creating a different visual feel rather than just a tighter version of the same design. Fix: density modes should scale all spacing by a consistent factor (e.g., 0.75×) to preserve proportional relationships.
+
+**The touch-target vs. visual-spacing conflict** — Visual spacing between list items is 8px (looks great, clean density). But the touch target for each item needs 44px height minimum. The developer adds invisible padding to meet the touch target, but the visual spacing is now misleading — the 8px gap is actually 8px of visual space within 44px of hit area. Fix: design the visual spacing to accommodate touch targets from the start, not as an invisible afterthought.
+
 ---
 
 ## §5 The traps
@@ -125,6 +131,8 @@ I calculate the "scale adherence rate" — percentage of all spacing values that
 **Optical spacing ≠ mathematical spacing.** Rounded shapes need more mathematical space to appear equally spaced as rectangular shapes. An icon next to text may need 12px to look like 8px of "even" spacing. Strict scale adherence can produce optically uneven results. Allow optical adjustments but document them.
 
 **Spacing systems become stale.** A scale designed for a dashboard may not serve a new marketing page. As the product evolves, the scale may need new values. The system should evolve deliberately, not through ad-hoc additions.
+
+**Spacing systems don't account for content-dependent optical adjustments.** Text with ascenders and descenders (like "typography" vs. "ICONS") creates different perceived spacing at the same pixel value. Strict spacing adherence can produce optically inconsistent results when content character varies significantly.
 
 ---
 

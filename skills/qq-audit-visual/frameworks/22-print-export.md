@@ -106,6 +106,12 @@ I evaluate: (1) Is all **informational content** present in the export? (2) Is t
 
 **The screenshot blur** — User exports a chart as PNG to include in a board presentation. The chart is 600px wide on screen, exported at 1x resolution. On a projector at 1920×1080, the 600px image is scaled to 960px and every label is blurry. Fix: export at 2x resolution minimum, or offer SVG export for infinite scalability.
 
+**The dark-mode print disaster** — User in dark mode prints a page. The print output is white text on a dark background, consuming enormous amounts of ink and producing unreadable results. Or the print stylesheet strips colors but doesn't adjust text to black, producing invisible text on white paper. Fix: print stylesheets should always force light mode: white background, dark text, regardless of the user's current theme.
+
+**The interactive state freeze** — User exports a view while a dropdown is open or a tooltip is visible. The export captures the transient state — a dropdown menu floating over the content, a tooltip obscuring a label. The static export preserves a moment that was never meant to be frozen. Fix: export functions should dismiss all transient UI (modals, tooltips, dropdowns, hover states) before capturing.
+
+**The pagination header orphan** — A multi-page PDF export where page 2 starts mid-table with no column headers. The reader must flip back to page 1 to understand what each column means. Fix: repeat table headers on every page. For charts, include the chart title and legend on every page that shows chart data.
+
 ---
 
 ## §5 The traps
@@ -129,6 +135,8 @@ I evaluate: (1) Is all **informational content** present in the export? (2) Is t
 **Dynamic and interactive content can't fully export.** Tooltips, expandable sections, client-side filtering, and scroll-to-reveal data exist only in the interactive version. The export must determine: show the expanded version? Show only the visible state? The answer depends on user expectations.
 
 **Export scope varies by user.** One user wants to export "just this chart." Another wants to export "the whole dashboard." Another wants to export "last quarter's data." The export system must handle scope selection, which is a UX problem beyond visual quality.
+
+**Export accessibility is a separate concern.** A PDF export may be visually beautiful but completely inaccessible to screen readers — no tagged headings, no alt text on charts, no reading order. PDF accessibility is a specialized domain beyond visual quality evaluation.
 
 ---
 

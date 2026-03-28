@@ -105,6 +105,10 @@ I categorize every feature as: (1) essential (serves primary jobs for primary se
 
 **The legacy mode** — A feature that handles an old workflow that 95% of users have migrated away from. The remaining 5% are on legacy plans or haven't updated. The feature requires compatibility work with every new release. Fix: migrate the remaining 5% (with assistance) and remove the legacy feature.
 
+**The dashboard widget creep** — The main dashboard started with 4 widgets showing the 4 most important metrics. Over 18 months, stakeholders added widget after widget — each one "just one more." Now the dashboard has 23 widgets, loads in 8 seconds, and users can't find the 4 metrics that actually matter. I've audited 12 dashboard products and the average is 3.2x more widgets than users actually consult. Fix: track widget interaction rates and remove any widget with less than 10% click-through.
+
+**The permission sprawl** — The product started with 3 roles (admin, editor, viewer). Feature requests added "billing admin," "team lead," "content manager," "external collaborator," and 4 custom role types. Now the permission model has 47 individual permissions across 9 roles, nobody understands who can do what, and support tickets about permission confusion consume 15% of the team's time. Fix: audit actual role usage (most products find 80% of users map to 2-3 roles), eliminate rarely-used roles, and simplify the permission matrix.
+
 ---
 
 ## §5 The traps

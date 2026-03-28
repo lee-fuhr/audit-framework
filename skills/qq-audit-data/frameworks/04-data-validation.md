@@ -106,6 +106,12 @@ I score by trust level — how confident can a decision-maker be that the data t
 
 **The slowly corrupting dimension** — A product catalog table is updated daily from an API. One day, the API returns empty strings instead of NULLs for missing fields. The ETL process happily loads them. Analyses that filter `WHERE category IS NOT NULL` now incorrectly include products with `category = ''`. Fix: validation at the pipeline boundary — check for empty strings, unexpected values, and format changes.
 
+**The timezone-shifted revenue** — All database timestamps are stored as UTC. The ETL job converts to business timezone (US Eastern) for reporting. During daylight saving time transition, the conversion is off by one hour. Revenue events near midnight are attributed to the wrong day. Monthly revenue reports disagree with daily totals by $47K. Fix: use Great Expectations or dbt tests to assert that daily revenue sums equal monthly totals. Check timezone handling explicitly during DST transitions.
+
+**The orphaned foreign key** — Users are deleted from the `users` table. But the `orders` table still references those user IDs with no foreign key constraint enforced. Revenue queries that join users to orders silently drop orphaned orders. Revenue is under-reported by 3%. Fix: enforce foreign key constraints in the database. For analytics warehouses where FK constraints aren't supported (BigQuery, Snowflake), use dbt tests: `relationships` test on every FK column.
+
+**The float precision revenue** — Order amounts stored as FLOAT instead of DECIMAL. After 100,000 orders, rounding errors accumulate to $1,200 discrepancy vs. the payment processor. The dashboard shows $1.2M; Stripe says $1,201,200. Fix: always use DECIMAL/NUMERIC for monetary values. Add a dbt test asserting that sum of `order_amount` matches the control total from the payment system.
+
 ---
 
 ## §5 The traps
@@ -132,6 +138,8 @@ I score by trust level — how confident can a decision-maker be that the data t
 
 **Data quality metrics can be gamed.** A 99.5% completeness score looks good — unless the missing 0.5% is the most important data. Quality metrics need to be weighted by business impact, not just percentage.
 
+**Data validation catches known problems but not unknown ones.** Validation rules are written for anticipated failure modes. A novel data corruption pattern (API returning valid-looking but wrong data) passes all existing checks. Validation provides defense in depth, not complete defense. Supplement with anomaly detection for patterns that don't match any rule.
+
 ---
 
 ## §7 Cross-framework connections
@@ -144,6 +152,10 @@ I score by trust level — how confident can a decision-maker be that the data t
 | **Analytics Completeness (01)** | Complete data that's inaccurate is worse than incomplete data that's accurate. Completeness and validation are both necessary for trustworthy analytics. |
 | **Schema Evolution (14)** | Schema changes can introduce data quality issues (new required fields with no defaults, type changes, renamed columns). Validate that schema evolution doesn't break existing data. |
 | **Data Freshness (15)** | Freshness is a data quality dimension. Stale data is a validation failure. Monitor freshness as part of the overall data quality framework. |
+| **Right to Deletion (Compliance 10)** | Deletion requests create referential integrity risks. Deleting a user's record while their order records remain creates orphaned foreign keys. Validation rules must account for post-deletion data states — NULL user references that are expected, not corrupted. |
+| **Monitoring and Alerting (DevOps 05)** | Data quality monitoring (Monte Carlo, Great Expectations) should feed into the same alerting infrastructure as system monitoring. A data quality SLA breach (freshness, completeness, uniqueness) should trigger the same severity of alert as a system outage — because for data-driven decisions, it IS an outage. |
+| **Error Tolerance (UX 07)** | Form validation on the frontend prevents many data quality issues at the source. If the UI allows users to submit invalid email formats, invalid phone numbers, or impossible dates, application-level validation catches them — but at higher cost. Push validation as close to the user as possible. |
+| **GDPR Compliance (Compliance 01)** | GDPR's accuracy principle (Art. 5(1)(d)) requires keeping personal data accurate and up to date. Data validation for personal data fields isn't just an engineering concern — it's a compliance obligation. Inaccurate personal data that leads to wrong decisions about individuals is a GDPR violation. |
 
 ---
 

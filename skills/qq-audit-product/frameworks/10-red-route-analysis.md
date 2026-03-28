@@ -103,6 +103,10 @@ I identify 3-5 red routes, then evaluate each on: speed (is it the fastest thing
 
 **The interrupted red route** — A red route that's interrupted by non-essential elements. The user is completing their primary task and gets interrupted by a popup asking for a product review, a tooltip about a new feature, or a banner about an upcoming webinar. Fix: never interrupt the red route with non-critical messaging.
 
+**The mobile red route mismatch** — The red route on desktop is the dashboard; the red route on mobile is a completely different action (quick approval, status check, notification triage). The team builds one responsive version of the desktop red route and calls mobile "done." I audited a field service platform where 82% of mobile sessions were technicians marking jobs complete — a 2-tap action. But the mobile experience was a compressed version of the desktop dashboard, requiring 7 taps and 3 page loads to reach the completion button. After redesigning mobile around the actual mobile red route, task completion time dropped from 45 seconds to 6 seconds. Fix: identify red routes per device class, not just per product.
+
+**The red route dependency chain** — The red route depends on a service, API, or data source that has lower reliability than the red route itself. The team monitors the red route at 99.9% but it calls an internal API that's at 99.5%. The weakest link determines actual reliability. I've found this in every enterprise product I've audited with more than 3 microservices — the red route's real availability is the product of every dependency's availability. Fix: map the full dependency chain for each red route and ensure every link meets or exceeds the red route's SLO.
+
 ---
 
 ## §5 The traps

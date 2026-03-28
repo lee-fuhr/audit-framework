@@ -101,6 +101,12 @@ I score by queryability — how quickly can a new analyst find the right event a
 
 **The implicit schema** — Events have no documented property schema. Developers add whatever properties seem useful. Over time, the same event carries wildly different properties depending on which code path triggers it. The `page_viewed` event from the marketing site has 3 properties. From the app, it has 12. Fix: explicit property schemas per event, enforced at collection time.
 
+**The platform-forked taxonomy** — Web tracks `checkout_started`. iOS tracks `CheckoutStarted`. Android tracks `begin_checkout` (matching Firebase's convention). Three platforms, three names, one user action. Cross-platform funnel analysis in Amplitude requires three event names joined with OR logic. Fix: one canonical tracking plan enforced across all platforms. Segment Protocols or Avo can validate cross-platform event names in CI.
+
+**The vendor-driven naming** — The team adopted Google Analytics 4's recommended event names (`add_to_cart`, `begin_checkout`, `purchase`) for GA4 compatibility. But Amplitude's best practices recommend Object-Action (`Cart Item Added`, `Checkout Started`). Now the tracking plan has two naming conventions: GA4 names for e-commerce events and Segment conventions for everything else. Fix: choose ONE internal convention. Use the data layer's destination transformations to map to vendor-specific names at delivery time. Internal consistency trumps vendor alignment.
+
+**The boolean property trap** — An event has `is_premium: true/false` as a property. Six months later, a third tier is added. The boolean no longer captures reality. Events are split into `is_premium: true` (which tier?) and `is_premium: false` (free or basic?). Fix: use string enum properties (`plan_tier: "free" | "basic" | "premium" | "enterprise"`) instead of booleans for anything that could expand beyond two values.
+
 ---
 
 ## §5 The traps
@@ -125,6 +131,8 @@ I score by queryability — how quickly can a new analyst find the right event a
 
 **Perfect taxonomy doesn't help without adoption.** If the event catalog is documented but nobody reads it, and new events are added without checking the catalog, the taxonomy degrades over time. Governance is ongoing, not one-time.
 
+**Taxonomy conventions optimized for one tool may not work for another.** Amplitude handles Object-Action names well (natural grouping by object). BigQuery prefers snake_case (SQL compatibility). Mixpanel displays whatever you send. A taxonomy designed for one tool's UI creates friction in another. Consider how event names render in every tool in your stack.
+
 ---
 
 ## §7 Cross-framework connections
@@ -137,6 +145,10 @@ I score by queryability — how quickly can a new analyst find the right event a
 | **Schema Evolution (14)** | Taxonomy changes ARE schema changes. Adding properties, renaming events, and deprecating fields require the same careful evolution strategy as database schema changes. |
 | **Dashboard Accuracy (09)** | Dashboards built on inconsistent event names show inconsistent data. If "sign up" is tracked under three names, the signup dashboard shows one-third of reality. |
 | **Funnel Instrumentation (06)** | Funnel analysis requires precise event names for each step. Taxonomy inconsistencies (different names for the same step on different platforms) make cross-platform funnel analysis impossible. |
+| **CI/CD Maturity (DevOps 03)** | Event taxonomy can be enforced in CI. Tools like Avo, Amplitude Data, and Segment Protocols provide linting that rejects PRs introducing non-conforming event names. This shifts taxonomy enforcement from "code review catch" to "build gate." |
+| **GDPR Compliance (Compliance 01)** | Event names that contain or imply personal data (`user_email_submitted`, `john_doe_login`) create GDPR concerns in the analytics layer. Taxonomy governance should include a PII-in-event-name check. |
+| **Cognitive Load (UX 05)** | For self-serve analytics users (PMs, marketers), a messy event list IS cognitive overload — 500 inconsistently named events force the user to decode naming conventions before querying. Taxonomy is the UX of your data product. |
+| **Error Tolerance (UX 07)** | When analysts write queries against inconsistent event names, they inevitably miss variants. The query `WHERE event = 'signup'` misses `Sign Up` and `user_signup`. The taxonomy creates a hidden error-tolerance problem in every downstream analysis. |
 
 ---
 

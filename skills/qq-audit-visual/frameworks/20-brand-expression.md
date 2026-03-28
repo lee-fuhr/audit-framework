@@ -98,6 +98,12 @@ I evaluate: (1) Are **brand assets** used correctly? (2) Is the **brand system**
 
 **The stock photo default** — Brand guidelines specify photography art direction: warm lighting, authentic moments, diverse subjects. The product uses photos from generic "business" stock collections: sterile lighting, staged poses, corporate aesthetic. The photos technically feature people in the right context but feel wrong. Fix: curate imagery to brand photography guidelines. If custom photography isn't possible, curate stock with extreme selectivity.
 
+**The micro-interaction personality vacuum** — Buttons click, modals open, pages load — all with zero personality. The interactions are functional but anonymous. Any SaaS product could have the same interactions. Fix: micro-interactions are a brand expression opportunity. A distinctive loading animation, a characteristic transition style, or a signature success state can express brand personality without impeding function.
+
+**The white-label identity crisis** — Product supports white-labeling (customer logos, customer colors). The white-label config replaces the brand's primary color and logo, but everything else (typography, spacing, illustration style, micro-interactions) remains the original brand's design. The result is an uncanny valley — recognizably the same product with different paint. Fix: white-label systems need to either be genuinely neutral (no personality to conflict) or allow deeper theming (type, spacing, illustration swaps).
+
+**The email-vs-app personality split** — Transactional emails (invitations, notifications, receipts) use the marketing team's email templates: rich brand expression, custom illustrations, distinctive typography. The app itself is generic. Users who received a beautiful branded invitation click through to a product that doesn't look like it was made by the same company. Fix: email and in-app visual language should share the same personality. If one is more branded, close the gap.
+
 ---
 
 ## §5 The traps
@@ -121,6 +127,8 @@ I evaluate: (1) Are **brand assets** used correctly? (2) Is the **brand system**
 **Brand expression competes with usability.** A brand-driven animation that delays interaction, a brand typeface that's hard to read at small sizes, or a brand color that fails contrast — brand expression that harms usability is always the wrong trade-off. Usability wins.
 
 **Brand maturity varies.** A startup with a logo and two brand colors has different expression expectations than an enterprise with comprehensive guidelines. The audit should calibrate expectations to brand maturity.
+
+**Brand expression is perceived holistically, not element-by-element.** Users don't evaluate "is this button branded?" — they evaluate "does this product feel like [brand]?" The holistic perception means individual branded elements in an otherwise generic interface may not register, while a consistently neutral interface with branded spacing and typography may feel more branded overall.
 
 ---
 

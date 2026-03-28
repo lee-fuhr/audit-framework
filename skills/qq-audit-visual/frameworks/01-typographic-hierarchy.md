@@ -94,6 +94,12 @@ I evaluate three dimensions: (1) Does a clear scale exist and is it followed? (2
 
 **The responsive size collapse** — Desktop H1 at 48px scales to 28px on mobile, but H2 stays at 24px. The two levels collide and become indistinguishable. Fix: the scale must compress proportionally. If the ratio between levels is 1.33× on desktop, it should be at least 1.2× on mobile.
 
+**The component-scoped drift** — Each component (card, modal, sidebar, table) develops its own internal type scale independent of the global scale. The card uses 18/14/12, the modal uses 20/16/13, the table uses 14/12/11. Individually coherent, but placed on the same page they produce 9+ distinct sizes with no consistent relationships. Fix: all components inherit from a single global scale. If a component needs a size the scale doesn't have, the scale is incomplete — extend it, don't override it.
+
+**The monospace hierarchy gap** — Products with code editors, terminal output, or technical content use a monospace font alongside the system font. The monospace type at the same pixel size renders optically smaller than the proportional font, breaking the hierarchy. Code blocks at 14px look smaller than body text at 14px. Fix: bump monospace sizes by 1-2px above their proportional equivalents to achieve optical parity.
+
+**The data-label collision** — In dashboards and data-heavy interfaces, numeric values and their labels compete for the same hierarchy level. Both are 14px, both are the same weight, and the user can't tell at a glance which is the label and which is the data. Fix: create a clear hierarchy between data values (larger, bolder) and their labels (smaller, lighter, sometimes uppercase). The number is the content; the label is metadata.
+
 ---
 
 ## §5 The traps
@@ -117,6 +123,8 @@ I evaluate three dimensions: (1) Does a clear scale exist and is it followed? (2
 **Motion overrides static hierarchy.** An animated element at H3 size will capture attention before a static H1. If the product uses animation, the typographic hierarchy is only the baseline — motion hierarchy sits on top.
 
 **Hierarchy is culturally influenced.** Western readers scan top-left to bottom-right; RTL readers scan differently; CJK vertical text layouts change everything. A hierarchy audit must account for the actual reading direction of the target audience.
+
+**Typographic hierarchy assumes the font loads.** If the custom font fails to load and the fallback has significantly different metrics (x-height, weight rendering, character width), the hierarchy built for the primary font may break with the fallback. Test hierarchy with both the intended font and the system fallback.
 
 ---
 

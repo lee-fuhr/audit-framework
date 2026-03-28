@@ -112,6 +112,12 @@ I score by consent integrity — does the technical implementation genuinely res
 
 **The forgotten consent record** — A regulator requests proof that user X consented to marketing tracking on date Y. The team discovers that consent records are stored as cookies on the user's browser, not on the server. The cookie has expired. There's no proof. Fix: store consent records server-side with timestamps, user identifiers, and consent text versions.
 
+**The first-party analytics masquerade** — The team deploys a CNAME cloaking setup where `analytics.example.com` proxies to a third-party analytics provider's servers. Ad blockers are bypassed, data collection increases 25%. But CNIL (French DPA) fined companies for exactly this pattern in 2022 — the data still reaches a US-based third party. The first-party domain doesn't change the GDPR analysis. Fix: CNAME proxying to third parties is a transfer. If the analytics provider is US-based, you need consent (for non-essential analytics) AND a transfer mechanism (SCCs/DPF).
+
+**The GA4 "anonymization" assumption** — The team believes GA4 anonymizes IP addresses by default, so no consent is needed. GA4 does process IPs differently than UA, but it still collects user-level identifiers (client ID, user ID if set), device data, and behavioral patterns — all personal data under GDPR. Austrian and French DPAs ruled GA use requires consent in 2022 (the "101 complaints" decisions by noyb). Fix: don't assume any Google product is consent-exempt. Use server-side GTM with a first-party endpoint if you want to claim legitimate interest, and document the balancing test.
+
+**The consent-state race condition** — On a React SPA, the consent management platform (OneTrust) loads asynchronously. Segment's `analytics.js` also loads asynchronously. On fast connections, analytics fires 200ms before OneTrust resolves consent state. On 10% of page loads, events reach Mixpanel before the user has interacted with the banner. Fix: use Segment's consent wrapper or GTM consent mode to queue events until consent state is resolved. No event fires until the CMP has determined the consent state — even if that means buffering for 2 seconds.
+
 ---
 
 ## §5 The traps
@@ -138,6 +144,8 @@ I score by consent integrity — does the technical implementation genuinely res
 
 **Privacy regulations evolve.** GDPR interpretations change with court decisions and regulatory guidance. CCPA became CPRA with new requirements. New state and national privacy laws are emerging regularly. Privacy compliance is a moving target.
 
+**Privacy-compliant tracking can produce biased data that feeds biased decisions.** If 45% of EU users opt out and those users skew younger, more tech-savvy, and more privacy-conscious, your product decisions are made on a systematically older, less technical user segment. This isn't just a data gap — it's a demographic bias baked into every analysis. No amount of consent optimization eliminates this structural problem.
+
 ---
 
 ## §7 Cross-framework connections
@@ -150,6 +158,10 @@ I score by consent integrity — does the technical implementation genuinely res
 | **GDPR Compliance (Compliance 01)** | GDPR defines the legal requirements. This framework audits the technical implementation of those requirements in the tracking system specifically. |
 | **Data Retention (08)** | Consent records must be retained. Tracking data must be retained only as long as necessary. Retention policies must align with both regulatory requirements and consent scope. |
 | **Attribution Modeling (12)** | Attribution requires cross-session, cross-channel tracking. Privacy regulations restrict the identifiers and cookies that enable attribution. Privacy-first attribution models are an emerging necessity. |
+| **Breach Notification (Compliance 11)** | Tracking data that includes personal identifiers (user IDs, device fingerprints, IP addresses) creates breach notification obligations if the analytics system is compromised. Every tracking endpoint is an attack surface. A Mixpanel or Amplitude breach exposes the behavioral data of all your consented users. |
+| **ADA/Section 508 (Compliance 04)** | The consent banner itself must be accessible — keyboard navigable, screen reader compatible, sufficient contrast. An inaccessible consent banner prevents users with disabilities from making privacy choices, creating both an accessibility and a privacy violation simultaneously. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor consent rates as a system health metric. A sudden drop in consent rate (from 55% to 20%) might indicate a CMP misconfiguration, not a change in user preference. Consent rate monitoring should alert like any other business KPI. |
+| **Frontend Performance (Frontend 09)** | CMPs like OneTrust add 50-200KB of JavaScript and block rendering until consent is resolved. The consent banner's performance impact on Core Web Vitals (LCP, CLS) must be budgeted. A compliant site that loses 3 points on Lighthouse performance score loses SEO ranking. |
 
 ---
 

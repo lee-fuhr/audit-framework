@@ -93,6 +93,12 @@ I evaluate four dimensions: (1) Is there a **clear primary style**? (2) Do all i
 
 **The AI-generated image tell** — Team uses AI-generated illustrations to move fast. Some have visible artifacts — uncanny proportions, impossible object relationships, inconsistent perspective within a single image. Even when artifacts are subtle, the style varies image to image because each prompt produces a different aesthetic. Fix: AI-generated imagery needs the same art direction and curation as stock photography. Generate many, curate few, post-process for consistency.
 
+**The aspect ratio roulette** — Images displayed in a grid where some are 4:3, some are 16:9, and some are square. The layout uses `object-fit: cover` to mask the differences, cropping each image differently. Faces get cut off, key subjects disappear, and compositions are destroyed. Fix: either normalize all images to a consistent aspect ratio during upload/processing, or use container aspect ratios with manual crop-point control.
+
+**The resolution mismatch** — Hero images are crisp @2x retina assets. In-product illustrations are 1x, visibly blurry on retina displays. Screenshot thumbnails are 72dpi JPEGs that look like a 2005 website. Three resolution tiers on the same page signal three levels of care. Fix: all imagery should target the same device pixel ratio as the primary display context. For web, that's @2x minimum.
+
+**The photography-meets-illustration clash** — Product pages alternate between photographs (of real people using the product) and stylized illustrations (abstract concepts). The two media types have completely different visual languages — one is literal, the other is abstract. Interspersed on the same page, they create visual whiplash. Fix: separate photographic and illustrative sections clearly, or choose one media type as primary and use the other sparingly for contrast.
+
 ---
 
 ## §5 The traps
@@ -116,6 +122,8 @@ I evaluate four dimensions: (1) Is there a **clear primary style**? (2) Do all i
 **Imagery is often the last thing budgeted.** Many imagery inconsistencies exist because custom illustration and directed photography are expensive. The audit may surface issues that require significant investment to resolve. Severity scoring should account for practical constraints.
 
 **User-generated content complicates coherence.** Products that display user avatars, uploaded photos, or community content can't control those images' style. The audit should focus on product-controlled imagery and evaluate whether the UI successfully frames user content consistently.
+
+**Imagery performance interacts with coherence.** Slow-loading images create inconsistency in the user experience — some images appear instantly (cached), others pop in after 2 seconds (CDN latency), and some never load (broken URLs showing broken-image icons). The auditor sees the loaded state; users often see a temporal inconsistency.
 
 ---
 

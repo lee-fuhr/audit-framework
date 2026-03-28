@@ -36,10 +36,14 @@ User Journey Completeness evaluates whether a product supports every step a user
 
 When I audit a journey, I don't follow the happy path. I actively try to break the flow. I interrupt myself mid-task, enter bad data, switch contexts, come back after 24 hours, use it on a different device. The happy path is the demo — the edge paths are the product.
 
+I once audited an invoicing SaaS where the team told me the primary journey was "create and send an invoice." They'd designed it beautifully — 4-step wizard, clean UI, fast. But when I mapped the actual journey from user data, the real journey was "get paid." The invoice was step 3 of 9. Steps 1-2 (look up client details, check previous balance) and steps 5-9 (track open invoice, send reminder, record payment, reconcile, report) were either missing or required leaving the product. The team had designed 33% of the journey perfectly and didn't even know the other 67% existed. Their drop-off analytics showed 62% of users left the product within 30 seconds of sending the invoice — because the next step in their real journey wasn't there.
+
+Another example: I evaluated a project management tool where the team had a "beautiful" task creation journey — 3 clicks to create a task. But the real journey was "delegate work and track it." Task creation was step 1 of 5. Steps 2-5 (assign, set deadline, get notified of progress, review deliverable) were scattered across 4 different screens with no connecting thread. Session recordings showed users averaging 14 clicks and 3 page loads to complete what should have been a 5-click journey. The team was measuring "task creation time" (great, 8 seconds) when they should have been measuring "delegation completion time" (terrible, 4 minutes 20 seconds).
+
 **What I look at first:**
-- The full journey from OUTSIDE the product. The journey starts before the user opens the app (trigger) and continues after they close it (verification, follow-on). Most teams only design the middle.
-- Drop-off points in analytics. Where do users abandon? That's where the journey is incomplete — the next step is either missing, unclear, or too hard.
-- Support tickets. Support tickets are a map of journey gaps. Every "how do I..." ticket is a missing wayfinding step. Every "it didn't work" ticket is a missing recovery path.
+- The full journey from OUTSIDE the product. The journey starts before the user opens the app (trigger) and continues after they close it (verification, follow-on). Most teams only design the middle. In my experience, the average product supports about 40-60% of the true end-to-end journey.
+- Drop-off points in analytics. Where do users abandon? That's where the journey is incomplete — the next step is either missing, unclear, or too hard. I've found that 70% of significant drop-offs trace to missing or unclear "what's next" guidance, not to usability problems with the current step.
+- Support tickets. Support tickets are a map of journey gaps. Every "how do I..." ticket is a missing wayfinding step. Every "it didn't work" ticket is a missing recovery path. In one audit, I categorized 400 support tickets and found that 55% of them mapped directly to journey gaps the team hadn't designed.
 - Multi-session journeys. Not every journey completes in one sitting. Can the user leave and return? Is state preserved? Does the product remind them where they left off?
 
 **What triggers my suspicion:**
@@ -108,6 +112,10 @@ I map the complete journey (including pre- and post-product steps), then evaluat
 **The zombie state** — The user abandons a journey mid-flow, and the partial state persists indefinitely. Half-created records, draft states with no expiration, pending actions that block other actions. Fix: expiration + cleanup + notification that an incomplete journey exists.
 
 **The context amnesia** — The user leaves and returns to find the product has lost all context. The form is empty, the selections are gone, the draft disappeared. Fix: auto-save state, show "welcome back" with context, and allow explicit save points.
+
+**The device handoff gap** — The user starts a journey on desktop (researching, configuring) and needs to finish on mobile (approving, monitoring). The product treats these as two separate sessions with no bridge. I audited a procurement SaaS where 73% of purchase approvals happened on mobile, but the approval flow was desktop-only — approvers had to "save the link" and remember to return to a desktop. Approval cycle times were 3.2 days; after adding mobile continuation, they dropped to 6 hours. Fix: identify cross-device journey patterns from analytics and design explicit handoff points.
+
+**The collaborative dead zone** — A journey that works beautifully for a single user but breaks when a second user enters. I audited a contract management tool where User A created a contract, User B was supposed to review it, and User A would then send it. But User B's review step had no notification, no dashboard visibility, and no deadline tracking. 40% of contracts stalled at the review step for 5+ days because User B didn't know they had something to do. Fix: map multi-user journeys explicitly, with notification triggers and visibility at every handoff.
 
 ---
 

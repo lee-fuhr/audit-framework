@@ -105,6 +105,12 @@ I score: (1) Do all instances of the same component type look **identical**? (2)
 
 **The third-party island** — The product uses a custom design system for everything except the date picker (from react-datepicker), which has its own font, its own border radius, its own shadow, and its own color scheme. It looks like a popup from another application. Fix: override the third-party component's styles to match the design system tokens. If that's not possible, evaluate alternatives that are more themeable.
 
+**The state treatment inconsistency** — Buttons show disabled state by reducing opacity to 50%. Inputs show disabled by graying the background. Toggles show disabled by desaturating the color. Checkboxes show disabled by reducing opacity to 30%. Four different approaches to the same semantic state. Users can't reliably identify "disabled" because it looks different everywhere. Fix: define one disabled treatment (e.g., 50% opacity + cursor: not-allowed) and apply it universally.
+
+**The spacing token misapplication** — The design system defines component spacing tokens, but developers mix them with arbitrary values. A card using system tokens for padding sits next to a card using hardcoded `padding: 18px`. At a glance they look identical, but at certain content lengths the 2px difference creates visible misalignment. Fix: lint for non-token spacing values in component styles.
+
+**The interactive size inconsistency** — Primary buttons are 40px tall. Dropdown triggers are 36px. Input fields are 44px. Search bars are 32px. When these elements sit on the same row in a toolbar, the height inconsistency creates a ragged baseline that no amount of vertical alignment can fully fix. Fix: define 2-3 interactive element heights (compact: 32px, default: 40px, large: 48px) and assign each component to a tier.
+
 ---
 
 ## §5 The traps
@@ -128,6 +134,8 @@ I score: (1) Do all instances of the same component type look **identical**? (2)
 **Component consistency across products is a separate concern.** If an organization has multiple products sharing a design system, inter-product consistency is an additional layer beyond intra-product consistency. This audit focuses on the single product level.
 
 **Animation and interaction consistency is partially outside scope.** This audit covers visual appearance (static and states). Motion consistency has its own framework (motion/animation purposefulness).
+
+**Component consistency audits snapshot a moment in time.** Design systems evolve — new components are added, old ones are updated. A consistent product today may drift tomorrow as different teams adopt system updates at different rates. Consistency requires ongoing maintenance, not a one-time audit.
 
 ---
 

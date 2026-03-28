@@ -107,6 +107,12 @@ I score by three criteria: technical compliance (no pre-consent cookies), UX com
 
 **The CMP-as-tracker** — The consent management platform itself sets third-party cookies for its own analytics. Before the user has consented to anything, the CMP has already set tracking cookies. Fix: audit the CMP's own cookie behavior. Some CMPs have analytics features that must be disabled for compliance.
 
+**The A/B test cookie dilemma** — The experimentation platform (Optimizely, VWO) sets a cookie to maintain variant assignment. Is this "strictly necessary" (for consistent user experience) or "functional" (requiring consent)? Most DPAs say experimentation cookies require consent because the site functions without them. But if the experiment cookie is blocked, variant assignment re-randomizes on each page load, contaminating the experiment. Fix: classify A/B test cookies as "functional" requiring consent. Accept that EU users who reject functional cookies can't be included in experiments — and account for this selection bias in results.
+
+**The localStorage end-run** — The team discovers that cookie consent doesn't cover localStorage or sessionStorage. They move user identifiers and tracking data to localStorage to bypass the consent banner. The ePrivacy Directive covers "information stored on a user's device" — not just cookies. localStorage, sessionStorage, IndexedDB, and cache storage all require consent for non-essential purposes. The CNIL explicitly confirmed this in its 2020 guidance. Fix: extend CMP control to all client-side storage mechanisms, not just cookies.
+
+**The CNIL enforcement cascade** — CNIL fined Google (€150M) and Facebook (€60M) in January 2022 for making cookie rejection too difficult. The banners offered "Accept All" as a single click but required multiple steps to reject. This wasn't a technical violation (cookies weren't set before consent) — it was a UX manipulation violation. Fix: the number of clicks to reject must equal the number to accept. CNIL's standard is clear: "Reject All" with equal prominence. If your banner requires clicking "Customize" → toggling off categories → clicking "Save," you need a "Reject All" shortcut.
+
 ---
 
 ## §5 The traps
@@ -131,6 +137,10 @@ I score by three criteria: technical compliance (no pre-consent cookies), UX com
 
 **Cookie consent is evolving.** The proposed ePrivacy Regulation would replace the Directive with updated rules. Browser-based consent management (privacy sandboxes, GPC) may change the technical landscape. Stay current with regulatory developments.
 
+**Cookie consent compliance testing requires automation, not just manual checks.** A manual audit catches the state on audit day. But a CMS update, a marketing tag added via GTM, or a third-party script change can introduce pre-consent cookies at any time. Tools like Cookiebot's automated scanning, BuiltWith's tag detection, or custom Puppeteer scripts that check cookies before banner interaction should run weekly.
+
+**Cookie consent creates a measurable business cost.** Studies show consent banners reduce analytics data by 30-50% in the EU and increase bounce rates by 2-5%. This is a real cost that should be quantified and budgeted, not just accepted as "the cost of compliance." Optimizing banner UX (within compliance) to maximize genuine consent improves both compliance quality and data quality.
+
 ---
 
 ## §7 Cross-framework connections
@@ -143,6 +153,11 @@ I score by three criteria: technical compliance (no pre-consent cookies), UX com
 | **Data Layer Architecture (Data 02)** | The data layer must check consent state before loading any analytics or marketing tags. The CMP and data layer must be integrated. |
 | **Privacy Policy (06)** | The privacy policy must describe cookie usage, categories, and purposes. Cookie consent and privacy policy must be consistent. |
 | **ADA/Section 508 (04)** | The consent banner must be accessible — keyboard navigable, screen reader compatible, adequate contrast. An inaccessible consent banner has both privacy and accessibility compliance issues. |
+| **Analytics Completeness (Data 01)** | Consent rates directly determine analytics coverage. If 45% of EU users reject analytics cookies, your Amplitude dashboards represent only 55% of EU behavior. This isn't a data gap that can be fixed with better instrumentation — it's a structural limitation of consent-based tracking. Model the consent bias explicitly in all EU-segment analyses. |
+| **A/B Testing Infrastructure (Data 07)** | Experiment cookies require consent classification. If classified as "functional" (most conservative interpretation), users who reject functional cookies can't be included in experiments. This creates a systematic selection bias: EU experiment populations only include consent-giving users. Report this limitation alongside all EU experiment results. |
+| **Data Layer Architecture (Data 02)** | The CMP and data layer must be tightly integrated. GTM consent mode, Segment's consent management, and RudderStack's consent wrapper all provide mechanisms — but each must be explicitly configured. The most common technical cookie compliance failure is a working CMP that isn't connected to the data layer, so the banner works but scripts fire regardless. |
+| **Frontend Performance (Frontend 09)** | CMP JavaScript (OneTrust, Cookiebot, CookieYes) adds 50-200KB and often blocks rendering until consent state resolves. This directly impacts Core Web Vitals. A consent banner that causes a 500ms layout shift (CLS) degrades both user experience and SEO. Use CMP-specific performance optimization: defer non-critical CMP UI, minimize consent state resolution time, and cache consent state aggressively. |
+| **Log Aggregation (DevOps 08)** | Server-side logs that capture client IP, user agent, and request URLs may constitute tracking under the ePrivacy Directive. If these logs are used for analytics purposes (not just security/operational purposes), they may require consent. The distinction between "security logging" (strictly necessary) and "analytics logging" (consent required) depends on purpose, not technology. |
 
 ---
 

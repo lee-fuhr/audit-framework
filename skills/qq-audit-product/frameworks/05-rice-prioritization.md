@@ -105,6 +105,10 @@ I evaluate the product's prioritization health across three dimensions: (1) is t
 
 **The impact theatre** — Impact scored as "high" for every feature because every PM believes their feature is the most important. When everything is high impact, nothing is differentiated. Fix: forced ranking — if you have 10 features, only 2 can be Impact 3, 3 can be Impact 2, and the rest are 1 or below.
 
+**The quick-win addiction** — The team only ships low-effort features because they score well on RICE (small denominator). The roadmap becomes a stream of small improvements with no strategic bets. After 12 months, the product has improved incrementally but hasn't evolved. I audited a SaaS company that shipped 47 features in one year — average effort 0.5 person-months each. Not a single one moved their primary retention metric. Meanwhile, a competitor shipped 4 features at 3 person-months each and increased retention by 18%. Fix: reserve 30% of capacity for high-effort, high-impact bets that RICE alone would deprioritize.
+
+**The stakeholder scoring war** — Each stakeholder scores their own features generously and others' conservatively. Sales scores customer-requested features at Impact 3; Engineering scores infrastructure at Impact 3; Marketing scores growth features at Impact 3. Nobody is wrong individually, but the system produces meaningless rankings. Fix: calibration sessions where the full team scores together, defending each input publicly. One team I worked with found their scores changed by 40% on average after cross-team calibration.
+
 ---
 
 ## §5 The traps

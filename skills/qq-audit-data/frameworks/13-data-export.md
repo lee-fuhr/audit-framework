@@ -107,6 +107,12 @@ I score by three criteria: accessibility (how easy is it to request and receive 
 
 **The expired link export** — The export generates a download link that expires in 24 hours. The user doesn't check email for 3 days. The link is dead. They have to request again. Fix: links that last at least 7 days, with clear expiry communication, or a persistent download section in account settings.
 
+**The relationship-destroying export** — A CRM exports customer records as a flat CSV. Each customer has multiple contacts, multiple deals, and multiple activities. The flat export produces 50,000 rows with massive redundancy — every field from the customer record duplicated per contact, per deal, per activity. Importing this CSV into another CRM requires manual deduplication. Fix: export related data as separate files with foreign keys (customers.csv, contacts.csv, deals.csv) or as a hierarchical format (JSON, Parquet) that preserves relationships.
+
+**The encoding catastrophe** — The export generates a CSV file. Customer names with special characters (Müller, O'Brien, Señor) are garbled because the export uses Latin-1 encoding but the consuming application expects UTF-8. Japanese customer names are completely lost. Fix: always export as UTF-8 with BOM (byte order mark) for CSV — Excel requires the BOM to detect UTF-8. Include the encoding in export documentation and file headers.
+
+**The derived data omission** — GDPR Art. 20 portability covers data the user "provided" to the controller. But Art. 15 (access) covers ALL personal data, including derived data (risk scores, behavioral segments, predicted preferences). An export that includes only user-provided data (profile fields, uploaded content) omits the derived data that the user has a right to access. Fix: include derived data in the Art. 15 access export even if it's excluded from the Art. 20 portability export. Document the distinction.
+
 ---
 
 ## §5 The traps
@@ -131,6 +137,8 @@ I score by three criteria: accessibility (how easy is it to request and receive 
 
 **Real-time data complicates export.** For systems with rapidly changing data, an export represents a point in time. The data may have changed by the time the user downloads the export. Document what "export time" means.
 
+**Large exports create performance and security risks.** An export of 500,000 records generates a multi-gigabyte file. The export job consumes database resources that affect production performance. The download link exposes a large data file that, if intercepted, is a data breach. Throttle export generation, compress output, and secure download links with time-limited tokens and IP binding.
+
 ---
 
 ## §7 Cross-framework connections
@@ -142,7 +150,11 @@ I score by three criteria: accessibility (how easy is it to request and receive 
 | **Schema Evolution (14)** | Export formats may need to evolve as the data schema changes. Old exports should remain readable, and new exports should reflect the current schema. |
 | **Data Validation (04)** | Exported data should be validated — are all fields present, are formats correct, are relationships intact? A corrupt export is worse than no export. |
 | **GDPR Compliance (Compliance 01)** | Data portability is a GDPR requirement. This framework audits the technical implementation of that right. |
-| **Right to Deletion (Compliance 10)** | Export and deletion are often requested together — user wants their data, then wants it deleted. The export must complete before deletion. |
+| **Right to Deletion (Compliance 10)** | Export and deletion are often requested together — user wants their data, then wants it deleted. The export must complete before deletion. Implement a "download then delete" workflow that gates deletion on confirmed export receipt. |
+| **ADA/Section 508 (Compliance 04)** | The export request mechanism must be accessible — keyboard operable, screen reader compatible. If users with disabilities can't request their own data, the export feature violates both accessibility law and GDPR's requirement that rights be exercisable. |
+| **Breach Notification (Compliance 11)** | Export files sitting on download servers are high-value breach targets — they contain concentrated personal data in easily readable formats. Secure export storage with encryption at rest, time-limited access, and deletion after download confirmation. An export server breach is essentially a pre-packaged data breach. |
+| **International Transfer (Compliance 12)** | If users download their data from a server in a different jurisdiction (EU user, US download server), the export itself is a cross-border transfer. Ensure export infrastructure respects data residency requirements. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor export requests for anomalies — a spike in export requests might indicate an automated scraping attempt or a social engineering attack. Rate-limit export requests and alert on unusual patterns. |
 
 ---
 

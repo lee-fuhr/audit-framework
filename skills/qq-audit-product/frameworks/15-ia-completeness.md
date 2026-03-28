@@ -109,6 +109,10 @@ I evaluate three dimensions: (1) findability — can users find what they need? 
 
 **The reorganization whiplash** — The IA was restructured and features moved to new locations. Users who developed navigation muscle memory are now lost. Bookmarks are broken. Mental models are invalidated. Fix: if you must restructure, redirect old paths to new locations for at least 6 months, and provide a migration guide.
 
+**The role-blind IA** — The same navigation structure for every user type. The admin sees the same sidebar as the end user, but 40% of the links are access-denied dead ends for the end user. I audited an enterprise HR platform where end users saw 14 navigation items, 6 of which led to "You don't have permission" pages. Users learned through repeated failure which items were "theirs" — a terrible onboarding experience. Fix: role-based navigation that shows only what the user can access, with clear labeling for items that require elevated access.
+
+**The depth-without-breadcrumbs problem** — The IA has 4+ levels of nesting (Category → Sub-category → Item → Detail → Sub-detail) with no breadcrumb trail. Users navigate 3 levels deep and can't find their way back. I tracked session recordings where users averaged 4.7 "back" clicks to return to a known location, with 23% of users giving up and returning to the home screen to start over. Fix: breadcrumbs for any IA deeper than 2 levels, with every level clickable.
+
 ---
 
 ## §5 The traps

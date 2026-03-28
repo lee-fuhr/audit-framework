@@ -103,6 +103,12 @@ I score by experimentation rigor. Can the team make statistically valid causal c
 
 **The guardrail-free optimization** — An experiment increases free-trial signups by 20%. The team celebrates and ships. Three months later, trial-to-paid conversion has dropped 30%. The experiment attracted lower-quality users. There was no guardrail metric for conversion quality. Fix: every experiment has guardrail metrics that must not degrade.
 
+**The SRM ghost** — An experiment shows variant B winning with p=0.02. But sample ratio mismatch (SRM) check reveals a 52/48 split instead of the expected 50/50. The imbalance is statistically significant (chi-square p<0.001). Something in the randomization is broken — maybe variant B's page loads faster and users bounce less before the experiment event fires, or maybe a bot is disproportionately hitting one variant. The "winning" result is an artifact of broken randomization. Fix: Eppo and Statsig run SRM checks automatically. If your homegrown platform doesn't, add a chi-square test on the traffic split before any results analysis. SRM invalidates ALL experiment conclusions.
+
+**The server-cache contamination** — A CDN caches pages by URL. The experiment assigns variants via JavaScript after page load. But the CDN serves a cached version of variant A to users assigned variant B for 15% of requests. The experiment is contaminated — 15% of the treatment group sees the control. The measured effect is diluted. Fix: implement server-side experiment assignment that varies the response before caching, or use cache-busting keys that include variant assignment.
+
+**The concurrent experiment collision** — Experiment A tests new onboarding copy (affects activation rate). Experiment B tests a pricing page redesign (affects conversion rate). Both run simultaneously. Users in variant A of Experiment A AND variant B of Experiment B show a 40% drop in LTV that neither experiment detects independently. The new copy sets expectations that the new pricing page contradicts. Fix: use experiment groups (LaunchDarkly's "mutual exclusion groups") for experiments that could interact, or track interaction effects by analyzing outcomes for all variant combinations.
+
 ---
 
 ## §5 The traps
@@ -127,6 +133,8 @@ I score by experimentation rigor. Can the team make statistically valid causal c
 
 **A/B testing produces local optima.** Incremental A/B tests converge on local optima (the best version of the current design). Radical innovation requires bold changes that would fail in an A/B test against an optimized status quo. Use experiments for optimization, not for innovation.
 
+**A/B tests can't detect effects on metrics you don't track.** If the experiment metric is "signup rate" but the real effect is on "time to first value" (which isn't instrumented), the test shows no significant result and the team moves on — missing an improvement to the metric that actually matters for retention. Experiment design depends on analytics completeness (Framework 01).
+
 ---
 
 ## §7 Cross-framework connections
@@ -139,6 +147,10 @@ I score by experimentation rigor. Can the team make statistically valid causal c
 | **Data Validation (04)** | Experiment data is subject to the same quality issues as any other data. Sample ratio mismatch detection is a form of data validation specific to experiments. |
 | **Privacy-Compliant Tracking (05)** | Experiment assignment and exposure tracking must comply with privacy regulations. A/B test cookies may require consent in GDPR jurisdictions. |
 | **Attribution Modeling (12)** | Experiments can validate attribution models. If an experiment shows a 5% lift from email but the attribution model credits email with 15%, the model is miscalibrated. |
+| **GDPR Compliance (Compliance 01)** | Experiment assignment cookies may require consent under ePrivacy Directive. In GDPR jurisdictions, A/B testing that uses cookies to maintain variant assignment needs to be categorized in the CMP. If 45% of EU users reject functional cookies, your experiment only covers 55% of EU traffic — potentially biasing results for the EU segment. |
+| **Automated Decisions (Compliance 14)** | A/B tests that affect pricing, feature access, or eligibility may constitute automated decision-making under GDPR Art. 22. A pricing experiment that charges some users 20% more produces "similarly significant effects." If the experiment affects financial outcomes, transparency and safeguard obligations may apply. |
+| **Monitoring and Alerting (DevOps 05)** | Experiment monitoring should integrate with operational alerting. If variant B causes a 3x increase in API errors or a 500ms increase in page load time, the experiment platform should detect this and auto-halt — not wait for the weekly results review. Eppo and Statsig support automated guardrail-based halting. |
+| **Frontend Performance (Frontend 09)** | Experiment JavaScript (Optimizely, LaunchDarkly client SDK, VWO) adds to page weight and introduces render-blocking scripts if not loaded asynchronously. A 200ms flash of original content (FOOC) before the variant renders degrades UX and may affect experiment validity. Server-side experiments or edge-worker assignment (Cloudflare Workers, Vercel Edge Config) eliminate client-side rendering flicker. |
 
 ---
 

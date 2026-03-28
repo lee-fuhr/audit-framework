@@ -104,6 +104,10 @@ I evaluate gaps in four tiers: (1) table-stakes gaps (missing something every co
 
 **The perception gap** — The product actually has a capability the competitor lacks, but users don't know it. The feature is buried in settings, undocumented, or poorly named. The competitive "gap" is actually a discoverability problem. Fix: before building the capability, check if you already have it.
 
+**The integration moat confusion** — The team thinks their 50 integrations are a competitive advantage. But the competitor's 12 integrations are deeper, more reliable, and cover the exact tools the target customer uses. I audited a CRM where the team was building Zapier-level integrations at a rate of 3 per month while their competitor shipped one deep HubSpot integration that handled bidirectional contact sync, deal updates, and email tracking. The competitor won 73% of head-to-head evaluations despite having fewer total integrations. Fix: audit win/loss data for what integration capabilities actually drive purchasing decisions, not integration count.
+
+**The price-anchoring blindspot** — The team ignores a lower-priced competitor because "we compete on value, not price." But the cheaper competitor is now 80% as good at 40% of the price, and mid-market customers can't justify the premium. I've seen three products lose their mid-market entirely because they refused to acknowledge that "good enough at half the price" is a competitive gap, not a positioning choice. Fix: map the competitive landscape across price-value tiers, not just features.
+
 ---
 
 ## §5 The traps

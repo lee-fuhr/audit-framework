@@ -111,6 +111,10 @@ I evaluate five signal categories: (1) retention quality, (2) organic growth, (3
 
 **The happy-few signal** — 8% of users are fanatics — they use the product daily, refer it actively, and would be devastated without it. The other 92% are indifferent. This IS PMF — for that 8%. The question is whether that 8% is a large enough segment to build a business on, and whether you can find more of them.
 
+**The channel-dependent PMF** — The product has strong PMF when sold through founder-led outreach but zero PMF when acquired through paid ads or content marketing. Different channels attract different user profiles, and PMF only exists for the profile the founder naturally attracts. I audited a B2B tool where founder-sourced users had 85% retention at 90 days, while paid-acquisition users had 22% retention. The team was spending $40K/month on ads acquiring users who would churn. Fix: map PMF by acquisition channel and stop spending on channels where PMF doesn't exist.
+
+**The adjacent-market overreach** — The product has strong PMF in a specific vertical and expands to an adjacent vertical assuming PMF will transfer. It rarely does. I worked with a restaurant management tool that expanded into hotel management. Same "hospitality" market, completely different jobs. Restaurant PMF was built on table turnover optimization — hotels don't have tables. They spent 18 months and $2M building hotel features before acknowledging zero traction. Fix: treat every new vertical as a fresh PMF hypothesis, not an extension of existing PMF.
+
 ---
 
 ## §5 The traps

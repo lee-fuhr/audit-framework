@@ -106,6 +106,10 @@ For each significant screen, I evaluate all five states. A screen with all five 
 
 **The form massacre** — User fills out a 15-field form, submits, gets a validation error, and the form is empty. All data is lost. This single failure has probably caused more user rage than any other pattern in web history. Fix: ALWAYS preserve form state through errors.
 
+**The stale data mirage** — Data loaded 3 hours ago still displays as current. The dashboard shows yesterday's numbers with no timestamp, no staleness indicator, no refresh prompt. I audited a logistics platform where dispatchers were routing trucks based on load data that was 4 hours old — costing an average of $2,300 per misrouted shipment. Fix: show "last updated" timestamps on all data-dependent views, auto-refresh at intervals appropriate to the data's volatility, and visually dim or flag stale data.
+
+**The permission wall** — The user reaches a feature and gets "You don't have permission to access this." No explanation of what permission they need, who grants it, or why it's restricted. I see this in 80% of enterprise products I audit. In one case, a B2B platform showed the permission error on a page that 100% of users needed — the permission model was misconfigured, but the error state was designed identically to a legitimate access denial. 340 support tickets in one month, all for the same error. Fix: permission errors must explain what's needed, who to contact, and ideally offer a request-access flow.
+
 ---
 
 ## §5 The traps

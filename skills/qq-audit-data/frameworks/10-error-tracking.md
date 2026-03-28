@@ -104,6 +104,12 @@ I score by coverage, context, and action rate. Coverage: what percentage of erro
 
 **The background job graveyard** — Background jobs (email sending, report generation, data processing) fail silently. The only indication is that something doesn't get done — an email isn't sent, a report isn't generated. Nobody notices until a user complains. Fix: all background job failures must be captured as errors with the same context as request errors.
 
+**The third-party SDK crash** — An advertising SDK (ironically, the consent management platform's SDK) throws an unhandled exception on iOS 16.4 when the device language is set to Turkish. The exception crashes the app for 2% of users. The error appears in Sentry but is grouped under a generic "third-party" category that nobody monitors. Fix: create separate alert rules for third-party SDK errors. In Sentry, use issue ownership rules to route third-party crashes to the team responsible for that vendor relationship.
+
+**The deploy-correlated spike** — Every Thursday deploy produces a 15-minute spike of 500 errors that self-resolves. The team considers this "normal deploy behavior." In reality, a race condition during deployment causes 0.3% of users to see an error page during the rolling restart. Over 52 deploys per year, that's ~7,800 users who hit an error. Fix: implement zero-downtime deployment. Track error rate by deploy version in Sentry or Datadog to attribute errors to specific releases. A "normal" post-deploy error spike is still a user experience failure.
+
+**The CORS error blackhole** — The frontend makes API calls to a microservice. When the service returns a 500 error, the browser's CORS preflight also fails, and the actual error message is hidden from JavaScript. The error tracking tool sees "NetworkError: Failed to fetch" — no status code, no response body, no diagnostic information. 8% of all client-side errors are this opaque CORS wrapper. Fix: ensure error responses include proper CORS headers even for 5xx responses. Add server-side error correlation IDs that the client can report to Sentry, enabling server-side log lookup for client-side CORS failures.
+
 ---
 
 ## §5 The traps
@@ -128,6 +134,8 @@ I score by coverage, context, and action rate. Coverage: what percentage of erro
 
 **Client-side error tracking can be blocked.** Ad blockers and privacy tools may block error tracking scripts just like they block analytics. Client-side error tracking has a blind spot proportional to the ad blocker penetration of your user base.
 
+**Error tracking creates a perverse incentive to suppress errors.** Teams measured by error rate may catch and swallow exceptions to keep the dashboard green. A `try/catch` with an empty catch block produces zero errors in Sentry and a broken experience for users. Monitor the ratio of logged errors to user-reported issues — if users report problems that don't appear in error tracking, errors are being swallowed.
+
 ---
 
 ## §7 Cross-framework connections
@@ -140,6 +148,10 @@ I score by coverage, context, and action rate. Coverage: what percentage of erro
 | **Observability Depth (DevOps 12)** | Errors linked to distributed traces provide full context — not just what failed, but the entire request path leading to the failure. |
 | **Log Aggregation (DevOps 08)** | Error events in logs complement structured error tracking. Logs provide additional context; error tracking provides grouping, prioritization, and triage workflow. |
 | **Data Validation (04)** | Data validation errors (constraint violations, type mismatches) should be tracked as application errors. They indicate bugs in data handling code. |
+| **WCAG 2.1 AA (UX 08)** | Errors that affect assistive technology users (screen reader crashes, focus trap errors, ARIA state failures) are invisible to standard error tracking unless you instrument for them. A React error boundary that catches a rendering failure may show a fallback UI visually but leave screen reader users with an unannounced blank region. Test error paths with assistive technology, not just visual browsers. |
+| **Privacy-Compliant Tracking (Data 05)** | Error tracking tools (Sentry, Bugsnag) capture user context — IP addresses, user IDs, session data, URL with query parameters. This is personal data under GDPR. Sentry is typically a US-based processor requiring a DPA and transfer mechanism (SCCs/DPF). Many teams set up Sentry without involving the privacy team. |
+| **CI/CD Maturity (DevOps 03)** | Error tracking should integrate with deployment pipelines. Sentry's release tracking, Datadog's deployment markers, and Bugsnag's deploy notifications enable automatic correlation between releases and new errors. Without this integration, triaging "is this error new?" requires manual investigation. |
+| **Breach Notification (Compliance 11)** | Error tracking systems that log full request context (headers, bodies, cookies) may contain sensitive data. A breach of the error tracking system itself could expose authentication tokens, session cookies, and PII from error reports. Scrub sensitive data from error payloads before transmission. Sentry's `beforeSend` hook and Bugsnag's `redactedKeys` configuration exist for this purpose. |
 
 ---
 

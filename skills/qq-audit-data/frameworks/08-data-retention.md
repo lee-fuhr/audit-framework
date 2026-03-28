@@ -112,6 +112,12 @@ I score by policy completeness and enforcement. Is there a retention policy for 
 
 **The storage cost surprise** — Monthly cloud bill includes $15K for S3 storage. Investigation reveals 60% is old analytics data in S3 Standard that was loaded once and never queried again. Fix: S3 lifecycle policies moving data to Glacier after 30 days, deletion after the retention period.
 
+**The analytics retention conflict** — The privacy team sets a 24-month retention policy for user analytics data in Amplitude. The product team needs 3-year cohort analysis for LTV modeling. The finance team needs 7-year transaction records for tax compliance. The same "user data" has three different retention needs depending on purpose. Fix: separate analytics data (24 months in Amplitude) from financial records (7 years in the warehouse) from aggregated metrics (indefinite, anonymized). One retention period for all data types is always wrong for at least one use case.
+
+**The Mixpanel deletion gap** — The team sets Mixpanel data retention to 12 months via the admin panel. But Mixpanel's retention setting only affects the query window — it doesn't delete the underlying event data for GDPR purposes. When a user requests deletion, Mixpanel's User Deletion API must be called explicitly per user, per project. The "12-month retention" is a UI filter, not data deletion. Fix: understand the difference between "retention window" (query scope) and "data deletion" (storage removal) in each analytics tool. GA4 deletes data after the retention period. Amplitude's "data retention" is also a query window. Verify what "retention" actually means in each vendor.
+
+**The log-as-analytics antipattern** — Application logs contain user IDs, IP addresses, request URLs with query parameters, and behavioral data. The logs are shipped to Datadog with 15-day retention. But an ELK stack also ingests the same logs with no retention limit — 3 years of logs with personal data. Nobody classified the ELK data as "personal data requiring retention management" because "it's just logs." Fix: classify all data stores that contain personal data, including log aggregation systems. Apply retention policies to logs containing PII.
+
 ---
 
 ## §5 The traps
@@ -138,6 +144,8 @@ I score by policy completeness and enforcement. Is there a retention policy for 
 
 **Data lifecycle management doesn't address data quality.** Old data that's being retained might also be degrading in quality (orphaned references, schema drift, deprecated fields). Retention management preserves data; it doesn't maintain it.
 
+**Retention automation can conflict with legal holds.** A litigation hold requires preserving specific data that would otherwise be deleted by automated retention policies. If the retention automation doesn't have a legal hold override, it may destroy evidence — which is spoliation and far worse than the compliance benefit of deletion. Build legal hold as a first-class feature of any retention automation.
+
 ---
 
 ## §7 Cross-framework connections
@@ -150,6 +158,10 @@ I score by policy completeness and enforcement. Is there a retention policy for 
 | **Cost Optimization (DevOps 11)** | Storage cost optimization is achieved through retention and tiering. Retention policies are the primary mechanism for controlling storage cost growth. |
 | **Schema Evolution (14)** | Schema changes affect archived data. Old data might not conform to the current schema. Plan for schema compatibility when retrieving archived data. |
 | **Data Export (13)** | Export requests (GDPR data portability) must include all retained data for the requesting user. Retention policies define WHAT data exists to export. |
+| **Right to Deletion (Compliance 10)** | Retention policies set the baseline lifecycle. Deletion requests accelerate the timeline for specific individuals. The retention system and the deletion system must interoperate — a deletion request should mark records for immediate removal, not wait for the next retention sweep. |
+| **GDPR Compliance (Compliance 01)** | GDPR's storage limitation principle (Art. 5(1)(e)) requires that data not be kept longer than necessary. Retention policies are the technical implementation of this legal principle. Every retention period must have a documented purpose justification. |
+| **Breach Notification (Compliance 11)** | Data that's retained beyond necessity expands the breach surface. If a breach exposes 7 years of user data instead of 1 year (because nobody implemented retention), the notification to regulators and users is dramatically worse. Tight retention limits breach impact. |
+| **Log Aggregation (DevOps 08)** | Log data containing personal identifiers (user IDs, IPs, emails in error messages) needs retention management just like database records. Datadog, ELK, and CloudWatch logs are data stores subject to GDPR. Apply retention policies to log systems, not just databases. |
 
 ---
 

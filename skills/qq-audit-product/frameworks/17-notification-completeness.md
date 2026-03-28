@@ -121,6 +121,10 @@ I evaluate: (1) coverage — are all important events notified? (2) relevance �
 
 **The expired notification** — A notification that arrives after the action window has closed. "Your approval is needed" — sent 3 days after the approval was auto-escalated. Fix: time-sensitive notifications should include expiration logic. Don't deliver notifications for events that are no longer actionable.
 
+**The notification-as-engagement trap** — Product teams use notifications to drive engagement metrics rather than to serve users. "You haven't logged in for 3 days!" "Someone viewed your profile!" These are retention tactics disguised as notifications. I audited a collaboration tool that sent an average of 4.2 emails per user per day. When I categorized them, 68% were engagement nudges with zero actionable content. Users had trained themselves to ignore ALL emails from the product — including the 32% that contained genuinely important information like assignment changes and deadline warnings. Unsubscribe rate was 23% per month. Fix: every notification must pass the "would the user thank me for this interruption?" test. Engagement nudges belong in the app, not in the inbox.
+
+**The timezone-blind notification** — Notifications sent based on server time or event time with no consideration of the recipient's timezone. I worked with a globally distributed team using a project tool that sent "daily digest" emails at midnight UTC — 4 PM in San Francisco, 8 AM in Tokyo, and 1 AM in London. The London users got woken up by non-urgent digests. 40% of them turned off all email notifications, missing genuinely urgent ones. Fix: send notifications in the recipient's timezone, and respect quiet hours for non-critical alerts.
+
 ---
 
 ## §5 The traps

@@ -108,6 +108,10 @@ I evaluate backbone completeness (can the user finish every journey step?) separ
 
 **The depth addiction** — The team loves refining and polishing existing features (depth) more than building missing capabilities (backbone). Every sprint is "improvements" to existing features while backbone gaps persist. Fix: protect backbone time — at least 30% of each release should extend the backbone.
 
+**The relabel-as-story trap** — Technical tasks relabeled as user stories without actual user framing. "As a user, I want the database to be migrated to PostgreSQL." That's not a user story — that's an engineering task wearing a costume. I audited a backlog where 40% of "user stories" were actually infrastructure tasks. The story map looked full, but 40% of its tiles had zero user-facing value. Fix: if the "user" in the story is actually the development team, it's a technical task. Track it separately and don't let it inflate the story map.
+
+**The quarterly replanning trap** — The story map is rebuilt from scratch every quarter because the team doesn't maintain it. Each quarter starts with a 2-day "story mapping workshop" that produces a new map bearing little resemblance to the previous one. Continuity is lost, historical decisions forgotten, and the same debates recur. I watched one team have the identical argument about the same backbone gap three quarters in a row — each time, nobody remembered the previous discussion. Fix: the story map is a living document maintained continuously, not a quarterly event. Update it as features ship and decisions are made.
+
 ---
 
 ## §5 The traps

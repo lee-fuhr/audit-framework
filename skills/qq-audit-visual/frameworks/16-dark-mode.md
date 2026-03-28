@@ -106,6 +106,12 @@ I evaluate: (1) Does the dark theme maintain **visual hierarchy** — can I dist
 
 **The image disruption** — Product screenshot embedded in a feature section. Light mode: screenshot on white background, seamless. Dark mode: screenshot still shows a light UI, creating a harsh bright rectangle in an otherwise dark page. Fix: provide dark-mode screenshots, use rounded corners with padding, or apply a subtle border to contain the contrast transition.
 
+**The system component mismatch** — The product's dark theme is well-designed, but the browser's native elements (date pickers, select dropdowns, scrollbars, color inputs) remain in light mode because `color-scheme: dark` wasn't declared. Native elements appear as bright white rectangles in an otherwise dark interface. Fix: add `color-scheme: dark` to the root element and `<meta name="color-scheme" content="dark light">` to the head.
+
+**The notification banner contrast flip** — Info/warning/error banners designed with colored backgrounds for light mode. In dark mode, a yellow warning banner on a dark background creates excessive contrast and visual weight. The banner that was a gentle nudge in light mode becomes an alarm in dark mode. Fix: dark mode semantic banners need desaturated, muted background variants — not the same saturated colors used on white.
+
+**The code syntax highlighting clash** — Light mode uses a light syntax theme (GitHub Light, Solarized Light). Dark mode uses the same theme, making code blocks jarring bright rectangles. Or the team swaps to a dark theme that uses different accent colors than the product's palette. Fix: syntax highlighting themes for both modes should be derived from the product's color palette, not generic editor themes.
+
 ---
 
 ## §5 The traps
@@ -129,6 +135,8 @@ I evaluate: (1) Does the dark theme maintain **visual hierarchy** — can I dist
 **Dark mode accessibility is under-researched.** WCAG contrast requirements were developed primarily for light backgrounds. The perceptual dynamics of dark backgrounds are different. AA compliance is necessary but may not be sufficient for all users in dark mode.
 
 **Some content can't adapt.** User-uploaded images, third-party embeds, and external content may not have dark variants. The audit should evaluate how the product frames non-adaptive content rather than penalizing its existence.
+
+**Dark mode testing is biased by the auditor's display.** OLED displays render true black differently than LCD displays. An auditor on a MacBook LCD may approve surface levels that are indistinguishable on a cheaper external monitor. Test across display technologies, not just one device.
 
 ---
 

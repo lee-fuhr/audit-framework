@@ -102,6 +102,12 @@ I score by change safety — how confidently can the team make a schema change w
 
 **The "just add a column" habit** — Every feature adds columns to the events table. After 3 years, the table has 200 columns, 150 of which are populated for less than 5% of rows. Query performance degrades. The schema is incomprehensible. Fix: related fields should be grouped. New event types should have their own schemas. Column sprawl is the schema equivalent of a god class.
 
+**The enum value expansion** — A `status` column is defined as `ENUM('active', 'inactive')`. A new feature requires a `suspended` status. The ALTER TABLE to add the enum value locks the table for 45 minutes on a 200M-row table. Production queries time out. Fix: use string columns with application-level validation for values that may expand. Database enums are only safe for truly stable value sets (e.g., ISO country codes).
+
+**The dbt model cascade** — A source table column is renamed from `created_at` to `creation_timestamp`. The dbt staging model references `created_at`. The 15 downstream models that depend on the staging model all fail silently (producing empty result sets because of the broken join). The dashboard shows zero new users for 3 days before anyone notices. Fix: use dbt's `source freshness` checks and model tests. Add a `not_null` test on key columns in every staging model. Schema changes in source systems should trigger automated dbt test runs before dashboard refresh.
+
+**The analytics event property addition** — A new property `subscription_tier` is added to all Segment events. Amplitude ingests it and creates a new user property. But the historical backfill wasn't run — 2 years of events have `null` for `subscription_tier`. Any analysis that filters by tier only sees the last 3 months of data. The analyst doesn't know the property was recently added and concludes "our product has only been active for 3 months." Fix: document when new properties were added. In Amplitude, use the "first seen" metadata for properties. In the data warehouse, create a view that annotates property availability dates.
+
 ---
 
 ## §5 The traps
@@ -126,6 +132,8 @@ I score by change safety — how confidently can the team make a schema change w
 
 **Legacy data complicates evolution.** Historical data written with old schemas may not be easily migratable to new schemas. The cost of backfilling old data often exceeds the cost of supporting multiple schema versions.
 
+**Schema evolution tooling creates false confidence.** Avro and protobuf provide binary compatibility guarantees. But "binary compatible" doesn't mean "analytically compatible." A field renamed from `revenue` to `gross_revenue` with a new `net_revenue` field is backward-compatible in protobuf (old consumers read the default for the new field) but semantically breaking — old dashboards now show gross where they used to show net, with no error.
+
 ---
 
 ## §7 Cross-framework connections
@@ -138,6 +146,10 @@ I score by change safety — how confidently can the team make a schema change w
 | **Data Layer Architecture (02)** | The data layer should validate events against the current schema. When the schema evolves, the data layer's validation must evolve with it. |
 | **Data Export (13)** | Export formats are schemas. When the internal schema evolves, the export format may need to evolve. Old exports should remain readable. |
 | **Data Retention (08)** | Retained historical data may be in old schema versions. Retrieval of historical data requires understanding old schemas. |
+| **CI/CD Maturity (DevOps 03)** | Schema changes should be validated in CI before deployment. dbt tests, Great Expectations suites, and custom SQL assertions can verify that new schemas don't break downstream models. A schema change that passes code review but breaks 5 dashboards is a CI gap. |
+| **GDPR Compliance (Compliance 01)** | Schema changes that add new personal data fields create new processing activities that may need ROPA updates, privacy policy updates, and potentially new consent. Adding a `phone_number` column isn't just a schema change — it's a new data collection that requires a legal basis. |
+| **Right to Deletion (Compliance 10)** | Schema changes that move personal data to new tables or rename identifier columns can break deletion pipelines. If the deletion job looks for `user_id` but the column was renamed to `account_id`, deletion silently fails for that table. Schema evolution and deletion pipeline testing must be coordinated. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor for schema drift as a system health metric. Unexpected columns appearing in source tables, changed data types, or missing required fields should trigger alerts. Tools like Monte Carlo, Bigeye, and dbt's source freshness checks can detect schema drift automatically. |
 
 ---
 

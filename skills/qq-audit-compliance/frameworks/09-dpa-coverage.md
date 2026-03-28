@@ -97,6 +97,14 @@ I score by coverage percentage and DPA quality. Coverage: what percentage of pro
 
 **The sub-processor cascade** — The company has a DPA with Processor A. Processor A uses Sub-processor B for hosting. Sub-processor B uses Sub-sub-processor C for CDN. The company's data flows through three entities, but the DPA only covers Processor A. Fix: DPAs should require sub-processor transparency and flow-down of data protection obligations.
 
+**The free tier DPA gap** — The marketing team uses Mailchimp's free tier for newsletters. Mailchimp's DPA is available but requires opt-in through the admin panel. Nobody activated it because "it's just a free tool." 50,000 EU subscriber email addresses are processed without a DPA — each newsletter send is an uncontracted data transfer. Fix: DPA activation is required regardless of the tool's price tier. Include DPA verification in the vendor onboarding checklist even for free tools.
+
+**The DPA audit right that nobody exercises** — Every DPA includes audit rights allowing the controller to verify the processor's compliance. In practice, nobody audits. The processor could be violating every DPA term and nobody would know until a breach. When a breach occurs, the first question regulators ask is: "When did you last exercise your audit rights?" Fix: exercise audit rights for critical processors annually. At minimum, review the processor's SOC 2 report, security practices documentation, and sub-processor list.
+
+**The AWS DPA activation confusion** — AWS has a DPA (the "AWS GDPR Data Processing Addendum"). It's incorporated by reference into the AWS Customer Agreement. But many customers don't know it exists, don't know it's active, and haven't verified its terms. The DPA covers AWS's standard services but may not cover all AWS Marketplace products. Fix: verify DPA coverage for each AWS service used, not just the general AWS account. Download and review the current AWS DPA. Confirm it covers all service regions where EU data is processed.
+
+**The employee tool processor blindspot** — The company has DPAs with customer-facing processors (Stripe, Intercom, Mailchimp). But internal tools that process employee personal data (BambooHR, Gusto, Slack, 1Password) also need DPAs. Employee data is personal data under GDPR. Fix: the processor inventory must include ALL tools that process personal data — customer-facing AND employee-facing. HR tools, payroll providers, and internal communication platforms all require DPA coverage.
+
 ---
 
 ## §5 The traps
@@ -121,6 +129,8 @@ I score by coverage percentage and DPA quality. Coverage: what percentage of pro
 
 **International complexity.** Processors in different jurisdictions face different requirements. DPAs for US-based processors need SCCs for EU-US transfers. DPAs for UK-based processors need UK-specific provisions post-Brexit.
 
+**DPA terms from large vendors are non-negotiable, and that's a problem.** AWS, Google, Microsoft, and Salesforce offer standard DPAs on a take-it-or-leave-it basis. If their standard terms don't fully comply with Art. 28(3) (and some don't, depending on interpretation), you can't negotiate changes. The controller is still responsible for ensuring the DPA meets GDPR requirements. Accepting a non-compliant DPA doesn't satisfy the obligation — it just documents that you tried.
+
 ---
 
 ## §7 Cross-framework connections
@@ -133,6 +143,11 @@ I score by coverage percentage and DPA quality. Coverage: what percentage of pro
 | **Data Validation (Data 04)** | Data flowing to processors should be validated — are the data types shared with each processor limited to what's described in the DPA? |
 | **Secret Rotation (DevOps 10)** | API credentials for processors are secrets that need management. If a processor relationship is terminated, their credentials must be revoked. |
 | **Breach Notification (11)** | DPAs require processors to notify the controller of breaches. The breach notification process must include processor-originated breaches. |
+| **Data Layer Architecture (Data 02)** | Every destination in the data layer (Segment destinations, GTM tags) is a processor relationship requiring a DPA. When a data engineer adds a new Segment destination, a DPA must be executed before events start flowing. The data layer configuration IS the processor relationship map for analytics data. |
+| **Data Retention (Data 08)** | DPAs should specify retention obligations for the processor — how long they retain data, and whether they delete upon controller instruction. If the DPA doesn't address retention, the processor may retain data indefinitely. Verify that DPA retention terms align with your retention policy. |
+| **Analytics Completeness (Data 01)** | Each analytics tool (Amplitude, Mixpanel, GA4) is a processor requiring a DPA. Adding a new analytics tool to improve completeness simultaneously creates a new DPA requirement. The analytics team and the compliance team must coordinate on new tool adoption. |
+| **Error Tracking (Data 10)** | Error tracking tools (Sentry, Bugsnag, Datadog) are processors that receive personal data in error context (user IDs, IP addresses, request bodies). These often get set up by engineering without compliance review. Every error tracking tool needs a DPA. |
+| **Log Aggregation (DevOps 08)** | Log aggregation services (Datadog, ELK Cloud, Splunk) that receive logs containing personal data are processors. If application logs include user IDs, emails, or IP addresses, the log aggregation vendor needs a DPA — even though "it's just infrastructure." |
 
 ---
 

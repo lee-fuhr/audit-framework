@@ -109,6 +109,14 @@ I score by consumer rights implementation completeness and notice accuracy. Each
 
 **The GPC ignore** — The browser sends a Global Privacy Control signal. The site ignores it. CPRA requires honoring GPC as a valid opt-out of sale/sharing. Fix: detect GPC signal, treat as opt-out, suppress sale/sharing of personal information.
 
+**The "sharing" vs. "selling" confusion** — A B2B SaaS company shares user behavioral data with a third-party analytics provider (Mixpanel) and considers this a "service provider" relationship, not a "sale." But Mixpanel uses aggregate customer data to improve its own ML models — that's using data for Mixpanel's own purposes, which may transform the relationship from "service provider" to "third party" under CCPA. Fix: review all processor contracts for clauses that allow the processor to use data for their own purposes. If they can, it may be "sharing" or "selling" under CCPA regardless of how the contract labels the relationship.
+
+**The cookie-based opt-out fragility** — The "Do Not Sell" opt-out is stored in a browser cookie. User clears cookies (or Safari's ITP does it automatically). Opt-out is lost. The user is back to being tracked. The CPPA has flagged this as a compliance gap — opt-out should be durable. Fix: for authenticated users, store opt-out preference server-side linked to the account. For anonymous users, honor GPC signal (which persists in browser settings, not cookies) and consider server-side fingerprint-free opt-out persistence.
+
+**The Sephora precedent** — In 2022, the California AG fined Sephora $1.2M for CCPA violations: failing to disclose data sales, not honoring opt-out requests, and not processing GPC signals. This was the first public CCPA enforcement action and established that third-party analytics tracking with advertising features constitutes "sale" under CCPA. Fix: treat this case as the interpretive standard. If your tracking setup resembles Sephora's (analytics tools sharing data with ad networks), you're likely "selling" under CCPA.
+
+**The multi-state privacy patchwork** — Colorado, Connecticut, Virginia, Utah, Texas, Oregon, Montana, and others have enacted privacy laws. Each has slightly different requirements: different thresholds, different opt-out mechanisms, different sensitive data definitions. A company that only implements CCPA misses Virginia's right to appeal denied requests, Colorado's universal opt-out mechanism, and Connecticut's requirement to recognize opt-out preference signals. Fix: map all state privacy laws applicable to your user base. Use CCPA/CPRA as the baseline but layer state-specific requirements.
+
 ---
 
 ## §5 The traps
@@ -133,6 +141,10 @@ I score by consumer rights implementation completeness and notice accuracy. Each
 
 **CCPA interacts with federal laws.** HIPAA, FERPA, GLBA, and other federal laws may preempt or supplement CCPA requirements for specific data types. Sector-specific analysis may be needed.
 
+**The private right of action for data breaches is underappreciated.** CCPA §1798.150 allows consumers to sue for $100-$750 per consumer per incident for data breaches involving unencrypted/unredacted personal information. At 100,000 affected consumers, that's $10M-$75M in potential statutory damages — before actual damages. This makes encryption and security investments a CCPA litigation risk management tool, not just a technical best practice.
+
+**"Personal information" under CCPA is broader than most teams realize.** It includes browsing history, search history, interactions with advertisements, inferences drawn from any of the above, and audio/visual/thermal/olfactory information. A smart thermostat company might not realize that temperature data linked to a household is "personal information" under CCPA. Audit the full CCPA definition against all data your product collects.
+
 ---
 
 ## §7 Cross-framework connections
@@ -145,6 +157,11 @@ I score by consumer rights implementation completeness and notice accuracy. Each
 | **Right to Deletion (10)** | CCPA right to delete is similar to but different from GDPR erasure. CCPA has broader exceptions where businesses can retain data. |
 | **Data Export (Data 13)** | CCPA right to know overlaps with data portability. The response format requirements differ from GDPR Art. 20. |
 | **Privacy-Compliant Tracking (Data 05)** | The "Do Not Sell" opt-out must technically stop data sharing in the tracking system. The data layer must respect CCPA opt-out state. |
+| **Data Layer Architecture (Data 02)** | The data layer's consent integration must support CCPA's opt-out model (default-on, user opts out) differently from GDPR's opt-in model (default-off, user opts in). A data layer that only supports binary consent (on/off) can't implement the jurisdictional difference correctly. GTM's consent mode supports separate "ad_storage" and "analytics_storage" states for this purpose. |
+| **Breach Notification (Compliance 11)** | CCPA's private right of action (§1798.150) applies specifically to breaches involving unencrypted personal information. The breach notification process must assess whether breached data was encrypted — this determines whether consumers can sue, not just whether regulators are notified. |
+| **Data Retention (Data 08)** | CPRA requires disclosing retention periods in the privacy notice. If your retention practices are undefined ("we keep everything"), you can't comply with CPRA's disclosure requirement. CCPA compliance forces explicit retention policy definition. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor "Do Not Sell" opt-out rates and GPC signal detection rates as compliance health metrics. A 0% GPC detection rate in California traffic means GPC isn't implemented. A sudden drop in opt-out rate might indicate the mechanism broke during a deploy. |
+| **Encryption at Rest/Transit (DevOps/Security)** | CCPA's private right of action only applies to breaches of unencrypted data. Encryption at rest and in transit is not just security best practice — it's litigation risk mitigation. The difference between encrypted and unencrypted personal information at breach time is the difference between regulatory notification and $750/consumer class action liability. |
 
 ---
 
