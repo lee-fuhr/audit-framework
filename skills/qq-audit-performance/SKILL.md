@@ -13,7 +13,9 @@ triggers:
   - "run perf audit"
 ---
 
-# Performance audit (v1 — expert personas)
+# Audit performance with expert personas
+
+Audit performance by running 22 expert personas in serial, fixing critical issues per framework before verifying.
 
 22 performance frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a performance engineer with 20 years of specialization in that specific domain.
 
@@ -45,9 +47,9 @@ Show the framework table from the Framework inventory section below, then ask wh
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -57,7 +59,7 @@ Show the framework table from the Framework inventory section below, then ask wh
 > - **Product:** [name] — [description from context]
 > - **Hosting:** [Vercel/AWS/self-hosted — inferred from config files]
 > - **Performance baseline:** [from previous audits, Lighthouse scores, or conversation]
-> - **Known pain points:** [what Lee has mentioned — slow pages, large bundles, API latency]
+> - **Known pain points:** [what the user has mentioned — slow pages, large bundles, API latency]
 > - **Scope:** [full app / specific routes / specific infrastructure layer]
 >
 > Anything wrong or missing?"
@@ -152,7 +154,7 @@ Save to project's data directory:
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
 - **Fix before moving on** — don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.8 (does this prevent errors?), §1.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Measure, don't guess** — performance claims require numbers. Run builds, check sizes, time responses.
 - **Multi-round** — after all 22 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.

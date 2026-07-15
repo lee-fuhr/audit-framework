@@ -96,6 +96,14 @@ I score by decision impact and transparency coverage. High-impact decisions (acc
 
 **The recommendation bubble** — A content recommendation algorithm shows users only content that matches their profile, effectively filtering out opportunities, information, or products that don't match the algorithm's model of their preferences. For job listings, housing, or education opportunities, this filtering has "significant effects." Fix: provide transparency about recommendation logic, allow users to see unfiltered results, and monitor for discriminatory outcomes.
 
+**The credit scoring proxy discrimination** — A lending algorithm doesn't use race or gender as inputs. But it uses zip code, which strongly correlates with race due to historical housing segregation. The algorithm produces disparate impact on minority applicants without explicit discrimination. Under ECOA and the Fair Housing Act, disparate impact is illegal regardless of intent. The algorithm is "fair" by its own logic but discriminatory in outcome. Fix: test for disparate impact across protected categories. Use techniques like adversarial debiasing, fairness constraints in training, or post-processing calibration. Document testing results and remediation efforts.
+
+**The content moderation appeal theater** — An automated content moderation system removes a user's post. The user appeals. The "appeal" is reviewed by the same automated system with the same model. The appeal is denied with the same rationale. There is no human in the loop. The "appeal mechanism" is a rubber stamp that re-runs the same algorithm. Under GDPR Art. 22(3), the safeguard requires "human intervention" — re-running the algorithm is not human intervention. Fix: appeals must route to a human reviewer who can override the algorithm. Track the override rate — if it's 0%, the review is a rubber stamp.
+
+**The dynamic pricing opacity** — An e-commerce site shows different prices to different users based on browsing history, device, location, and purchase history. A user on an iPhone in Manhattan sees $89. A user on an Android phone in Iowa sees $69. Neither user knows prices are personalized. The EU's Digital Services Act (DSA) requires transparency about personalized pricing. US state laws (California, Colorado) are moving in the same direction. Fix: disclose that prices are personalized. Provide access to the "standard" price. Consider whether the pricing differential is legally defensible if scrutinized.
+
+**The insurance risk scoring model drift** — An automated insurance pricing model was trained on 2020 data. By 2024, driving patterns have changed (more remote work, different accident patterns). The model's risk scores no longer reflect reality — it overcharges low-risk drivers and undercharges high-risk drivers. Nobody monitors model performance over time. Under state insurance regulations, pricing models must be actuarially sound. A drifted model produces prices that aren't justified by current risk. Fix: implement model monitoring. Track prediction accuracy over time. Retrain models when performance degrades below an acceptable threshold. Document the monitoring process for regulatory audits.
+
 ---
 
 ## §5 The traps
@@ -118,6 +126,10 @@ I score by decision impact and transparency coverage. High-impact decisions (acc
 
 **The EU AI Act adds new requirements.** High-risk AI systems (including those making employment, credit, and insurance decisions) will have additional transparency, documentation, and human oversight requirements effective 2026. GDPR Art. 22 is the current baseline; the AI Act raises it.
 
+**Automated decisions based on biased training data perpetuate and amplify historical discrimination.** A hiring algorithm trained on 10 years of hiring data from a company that historically hired mostly white males will score female and minority candidates lower — not because the algorithm is explicitly biased, but because it learned that "successful candidates" look like the historical pattern. The algorithm is accurately reproducing a biased system. Testing for bias requires evaluating outcomes by protected category, not just evaluating the algorithm's internal logic.
+
+**"Explainable AI" techniques have limitations that create false confidence.** SHAP values and feature importance scores explain which inputs mattered for a specific decision, but they don't explain WHY those features matter or whether the model's reasoning is fair. A SHAP explanation showing "zip code was the most important factor" is technically transparent but doesn't address whether using zip code as a proxy for race is acceptable. Explanation tools make decisions interpretable; they don't make them just.
+
 ---
 
 ## §7 Cross-framework connections
@@ -129,7 +141,12 @@ I score by decision impact and transparency coverage. High-impact decisions (acc
 | **ADA/Section 508 (04)** | Explanations and appeal mechanisms must be accessible to users with disabilities. |
 | **A/B Testing (Data 07)** | A/B tests that affect pricing, access, or eligibility may constitute automated decision-making for the experimental group. |
 | **Data Validation (Data 04)** | Input data quality affects decision quality. Biased or incorrect input data produces biased or incorrect automated decisions. |
-| **Error Tracking (Data 10)** | Automated decision errors (false positives, false negatives) should be tracked and monitored. Error patterns reveal systematic issues. |
+| **Error Tracking (Data 10)** | Automated decision errors (false positives, false negatives) should be tracked and monitored. Error patterns reveal systematic issues. Decision errors that correlate with protected categories (higher false positive rate for minority users) indicate bias. |
+| **Dashboard Accuracy (Data 09)** | Dashboards that display automated decision outcomes (approval rates, risk scores, content moderation volumes) must accurately reflect the underlying model's behavior. If the dashboard shows "95% approval rate" but doesn't break down by demographic segment, it hides potential disparate impact. Decision dashboards need mandatory segmentation by protected categories. |
+| **Data Retention (Data 08)** | Automated decision inputs and outputs should be retained for audit purposes — regulators may request evidence of how a specific decision was made months or years later. FCRA requires retention of credit decision records for at least 2 years. Decision audit trails have their own retention requirements independent of the underlying data's general retention policy. |
+| **Right to Deletion (Compliance 10)** | A user requests deletion. Their data is removed. But the automated decision model was trained on their data. Does deletion require retraining the model? For most models, individual data points don't meaningfully survive in weights. But the decision record ("user X was denied on [date] for [reason]") is personal data that must be deletable. Separate the decision record (deletable) from the model (not deletable) in the data architecture. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor automated decision systems for drift, bias, and error rates. Set alerts for: decision distribution changes (approval rate drops 10%), model prediction confidence drops, processing latency increases (suggesting infrastructure issues), and demographic outcome disparities. Automated decision systems need the same operational monitoring as any critical service. |
+| **Funnel Instrumentation (Data 06)** | When an automated decision sits in a user funnel (credit check during checkout, account risk scoring during signup), the decision outcome affects funnel conversion. If the automated system rejects 15% of applicants, that's a 15% funnel drop-off. Track automated decision outcomes as funnel events to understand their impact on conversion. |
 
 ---
 

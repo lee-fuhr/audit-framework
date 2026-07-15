@@ -13,7 +13,9 @@ triggers:
   - "run all test frameworks"
 ---
 
-# QA/Testing framework audit (v1 — expert personas)
+# Audit QA and testing with expert personas
+
+Run a full serial QA audit using 22 deep expert persona frameworks, fixing critical issues and verifying each framework before proceeding to the next.
 
 22 testing frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year QA specialist in that specific framework.
 
@@ -45,9 +47,9 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -57,7 +59,7 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 > - **Product:** [name] — [description from context]
 > - **Tech stack:** [languages, frameworks, test runners — inferred from project]
 > - **Current test state:** [test count, coverage %, CI status — from recent runs]
-> - **Known pain points:** [what Lee has mentioned or what recent changes suggest]
+> - **Known pain points:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full codebase / specific module / specific test suite]
 >
 > Anything wrong or missing?"
@@ -152,7 +154,7 @@ Save to project's data directory:
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
 - **Fix before moving on** — don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — §6.4 (retrospective tests), §1.3 (TDD red-green-refactor), §1.13 (unhappy path first).
+- **Hold every fix to a real quality bar** — no retrospective-only tests, red/green/refactor discipline, and unhappy paths tested before happy paths.
 - **Code-level evidence** — every finding must reference specific files and lines. No hand-waving.
 - **Multi-round** — after all 22 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.

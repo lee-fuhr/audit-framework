@@ -114,6 +114,12 @@ I score by verified recovery capability, not backup existence. A team with daily
 
 **The forgotten data store** — The team backs up the primary database religiously. They forget the Redis cache that contains session data, the Elasticsearch index that powers search, and the local filesystem that stores file uploads. After a recovery, the app works but search is empty, sessions are lost, and uploaded files are gone. Fix: comprehensive inventory of every data store, with backup status for each.
 
+**The ransomware-accessible backup** — Backups stored in the same network with the same credentials as production. A ransomware attack that encrypts production also encrypts the backups. The team discovers their "offline" backups were actually online and reachable from compromised infrastructure. Fix: air-gapped or immutable backups that can't be modified or deleted by production credentials. AWS S3 Object Lock, Azure Immutable Blob Storage, or physically separate backup infrastructure.
+
+**The point-in-time recovery fiction** — The team claims "point-in-time recovery to any second" for their database. In practice, WAL archiving has a 15-minute gap, and the recovery process takes 4 hours to replay logs. The "any second" RPO is technically true but the RTO to reach that point is operationally devastating. Fix: test actual PITR recovery time, not just the theoretical capability. If replaying 7 days of WAL takes 12 hours, that's the real RTO.
+
+**The multi-tenant backup isolation failure** — SaaS product backs up all tenant data in one database dump. A single tenant requests data deletion under GDPR. The team can't selectively restore without restoring all tenants to the backup timestamp. Fix: design backup granularity to match data isolation boundaries. Per-tenant backup/restore capability, or at minimum, documented procedures for selective restoration.
+
 ---
 
 ## §5 The traps
@@ -154,6 +160,9 @@ I score by verified recovery capability, not backup existence. A team with daily
 | **Secret Rotation (10)** | Secrets need to be recoverable as part of DR. If secret management depends on infrastructure in the blast radius, recovery is blocked. |
 | **12-Factor App (01)** | A 12-factor app with fully externalized config is easier to recover. The app is a container image + config. The data is in the backup. Recovery is: restore data, apply config, run image. |
 | **Container Health (09)** | Container images should be stored in registries outside the blast radius. If the registry is in the same region as production, a region failure means you can't deploy the recovery. |
+| **Security (cross-domain)** | Backups are a security-critical asset. An attacker who gains access to backups has a copy of all your data. Backup encryption, access controls, and audit logging are security requirements, not operational nice-to-haves. |
+| **Compliance (cross-domain)** | GDPR, HIPAA, and SOC2 all have backup and recovery requirements. GDPR Article 17 (right to erasure) creates tension with backup retention — deleted data may persist in backups. The compliance team needs to understand the backup lifecycle. |
+| **Data (cross-domain)** | Data teams often have their own backup/recovery needs separate from application backup. Data warehouse snapshots, ETL pipeline state, ML model artifacts — all need backup strategies coordinated with the platform team. |
 
 ---
 

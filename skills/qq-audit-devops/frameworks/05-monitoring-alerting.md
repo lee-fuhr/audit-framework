@@ -124,6 +124,12 @@ I score monitoring coverage across five dimensions: detection speed (how quickly
 
 **The average latency lie** — "Our average latency is 150ms." But p99 is 8 seconds. 1% of users wait 8 seconds on every request. For a service with 1M requests/day, that's 10,000 terrible experiences per day. Fix: always monitor and alert on percentiles. P50 is the typical experience. P95 is the common bad experience. P99 is the worst tolerable experience.
 
+**The dependency blind spot** — The app's metrics look healthy, but the third-party payment API is returning errors for 5% of checkout attempts. Nobody monitors the payment API from the app's perspective. Users see "payment failed" and leave. The app's error rate stays low because the payment errors are handled gracefully in code — but gracefully handling a failure doesn't mean the failure doesn't matter. Fix: monitor every external dependency from the consumer's perspective: success rate, latency, error types.
+
+**The cardinality bomb** — The team adds a metric with a user_id label. With 500,000 users, the metric now has 500,000 time series. Prometheus runs out of memory. Grafana queries time out. The monitoring system itself becomes the incident. Fix: never use unbounded cardinality labels (user IDs, request IDs, email addresses) in metric dimensions. Use histograms for distribution analysis instead.
+
+**The monitoring-as-code gap** — Dashboards and alert rules exist in the monitoring platform's UI. Nobody knows who created them or when. The Grafana dashboard was hand-built by someone who left. When the team migrates monitoring platforms, everything must be recreated from scratch. Fix: dashboards and alert rules should be version-controlled code (Terraform, Grafana provisioning, Prometheus rules files). If it's not in git, it's not reliable.
+
 ---
 
 ## §5 The traps
@@ -164,6 +170,9 @@ I score monitoring coverage across five dimensions: detection speed (how quickly
 | **Deployment Strategy (04)** | Canary analysis depends on monitoring quality. If metrics are sparse or lagged, canary decisions are unreliable. Monitor density must be high enough for canary comparison. |
 | **Log Aggregation (08)** | Logs complement metrics. Metrics show trends and thresholds. Logs show specific events and errors. Alert on metrics, investigate with logs. |
 | **Cost Optimization (11)** | Monitoring cost is itself a cost to optimize. Over-instrumented services can generate terabytes of metrics data per month. Right-size monitoring to match value. |
+| **Security (cross-domain)** | Security monitoring (failed auth attempts, privilege escalation, unusual API patterns) should be integrated with operational monitoring. A separate security monitoring silo means operational alerts don't capture security events and vice versa. |
+| **Compliance (cross-domain)** | Audit logging requirements (who accessed what, when) are a monitoring concern. SOC2 CC7.2 requires detection of anomalous activity — which requires monitoring that goes beyond availability. |
+| **Frontend (cross-domain)** | Frontend performance monitoring (Core Web Vitals, JS errors, client-side latency) operates in a different paradigm than backend monitoring. RUM (Real User Monitoring) data should feed into the same alerting infrastructure as backend metrics. |
 
 ---
 

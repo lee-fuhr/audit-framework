@@ -115,6 +115,10 @@ I score against the DORA metrics first, then diagnose the pipeline mechanics tha
 
 **The CI-only illusion** — The team has CI (automated build and test) but not CD (automated deploy). Tests pass on every PR. Deploying still requires someone to run a script, check a dashboard, and flip a switch. The team claims "we have CI/CD" but deployment frequency is once a week. Fix: automate the deploy. The last mile is where the value is.
 
+**The credentials-in-pipeline exposure** — Database passwords, API keys, and cloud credentials stored as pipeline environment variables visible to anyone with CI access. I audited a platform where 23 developers could see production database credentials by clicking "reveal secret" in the CI settings panel. Fix: use short-lived, scoped credentials (OIDC tokens, IAM roles) that the pipeline assumes at runtime rather than long-lived secrets stored in CI config.
+
+**The untested rollback** — The team has a rollback procedure documented in a wiki page nobody has read since 2023. I asked them to demonstrate a rollback in staging. It took 47 minutes and required 3 people because the procedure referenced a deployment tag naming convention that had changed 8 months ago. Fix: test rollbacks monthly. If the rollback can't be executed in under 5 minutes by any on-call engineer, it's not a rollback — it's a hope.
+
 ---
 
 ## §5 The traps
@@ -155,6 +159,9 @@ I score against the DORA metrics first, then diagnose the pipeline mechanics tha
 | **Container Health (09)** | Container build, scanning, and health checks are pipeline stages. Unhealthy containers shouldn't reach production — the pipeline should catch them. |
 | **Dependency Update Cadence (15)** | Automated dependency updates (Renovate, Dependabot) create PRs that flow through the pipeline. If the pipeline is slow or unreliable, dependency updates queue up and age dangerously. |
 | **IaC (02)** | Infrastructure changes should flow through the same pipeline discipline as application changes. If app deploys are CD but infra changes are manual, the pipeline has a gap. |
+| **Security (cross-domain)** | The pipeline is a high-value attack target — compromise it and you control all deployments. SAST/DAST scanning, container image scanning, and dependency vulnerability checks should be pipeline stages, not afterthoughts. |
+| **Compliance (cross-domain)** | SOC2 CC8.1 requires controlled change management. A mature CI/CD pipeline with PR reviews, automated testing, and deployment logs IS the change management evidence. |
+| **Frontend (cross-domain)** | Frontend builds have unique CI/CD needs: bundle size tracking, Lighthouse performance budgets, visual regression testing. Treat frontend pipeline quality as a first-class concern. |
 
 ---
 

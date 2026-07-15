@@ -12,7 +12,9 @@ triggers:
   - "run seo audit"
 ---
 
-# SEO framework audit (v3 — expert personas)
+# Audit SEO with expert personas
+
+Run a full serial SEO audit using 15 deep expert persona frameworks, fixing critical issues and verifying each framework before proceeding to the next.
 
 15 SEO frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -46,24 +48,24 @@ Show the framework table from the framework inventory below, then ask which one(
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
 **Pre-fill and present assumptions:**
 
-> "Here\u2019s what I know going in:
+> "Here’s what I know going in:
 > - **Product:** [name] — [description from context]
 > - **Tech stack:** [framework, rendering strategy — SSR/SSG/SPA from project]
 > - **Target audience:** [who needs to find this via search]
-> - **Known SEO concerns:** [what Lee has mentioned or what recent changes suggest]
+> - **Known SEO concerns:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full site / specific pages / specific content type]
 >
 > Anything wrong or missing?"
 
-Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can\u2019t tell whether it\u2019s SSR or client-rendered, ask. If you can infer it, state the inference.
+Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can’t tell whether it’s SSR or client-rendered, ask. If you can infer it, state the inference.
 
 **Interview output becomes the audit context** — passed to every framework agent so they audit with purpose, not generically.
 
@@ -73,7 +75,7 @@ Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you 
 
 ### Phase 1: Context gathering
 1. Run smart interview (above)
-2. Read the product\u2019s key pages, routing config, and head/meta components to understand scope
+2. Read the product’s key pages, routing config, and head/meta components to understand scope
 3. Map the site structure: pages, content types, navigation hierarchy
 
 ### Phase 2: Serial framework execution
@@ -87,7 +89,7 @@ For each framework (in order 1-15):
    - "Previous frameworks found these issues: [cumulative findings list]. Do NOT re-report duplicates."
    - "Score 1-10, list findings with file:line references, fix critical issues (score < 7), write report."
 
-2. **Collect the agent\u2019s output:**
+2. **Collect the agent’s output:**
    - Score for this framework
    - Findings (new, not duplicates)
    - Fixes applied
@@ -113,7 +115,7 @@ For each framework (in order 1-15):
 3. Compare to previous audit rounds if they exist
 
 ### Phase 4: Report
-Save to project\u2019s data directory:
+Save to project’s data directory:
 - `data/audit-seo-[date].md` — full report
 - `data/audit-seo-[date]-summary.md` — scores + critical findings only
 
@@ -125,7 +127,7 @@ Save to project\u2019s data directory:
 |---|-----------|-------------|---------------|
 | 1 | Technical SEO Fundamentals | Crawlability, indexability, canonical URLs, and sitemap — can search engines actually find, access, and understand your pages? | `01-technical-seo.md` |
 | 2 | Structured Data/schema.org | Rich snippets markup — are you giving search engines machine-readable context that earns enhanced SERP features? | `02-structured-data.md` |
-| 3 | Meta Tag Completeness | Unique title tags and meta descriptions — does every page tell search engines (and users) exactly what it\u2019s about in the SERP? | `03-meta-tags.md` |
+| 3 | Meta Tag Completeness | Unique title tags and meta descriptions — does every page tell search engines (and users) exactly what it’s about in the SERP? | `03-meta-tags.md` |
 | 4 | URL Structure and Hierarchy | Clean, hierarchical, human-readable, stable — do your URLs communicate site structure and remain permanent? | `04-url-structure.md` |
 | 5 | Internal Linking Architecture | Important pages within 3 clicks, equity flowing downward — does your internal link structure match your business priorities? | `05-internal-linking.md` |
 | 6 | Mobile-First Indexing | Mobile version has all content and structured data — does Google see the same site on mobile that users see on desktop? | `06-mobile-first.md` |
@@ -144,9 +146,9 @@ Save to project\u2019s data directory:
 ## Key principles
 
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
-- **Fix before moving on** — don\u2019t accumulate a findings list. Fix each framework\u2019s criticals before the next audit.
+- **Fix before moving on** — don’t accumulate a findings list. Fix each framework’s criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — \u00a76.9 (is this real data?), \u00a71.8 (does this prevent errors?), \u00a71.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code + rendered output** — code audits miss runtime rendering. Always check actual HTML served to crawlers when possible.
 - **Multi-round** — after all 15 frameworks, run the full cycle again. Scores increase each round until plateau.
-- **Dedup across frameworks** — each agent receives cumulative findings so they don\u2019t re-report known issues.
+- **Dedup across frameworks** — each agent receives cumulative findings so they don’t re-report known issues.

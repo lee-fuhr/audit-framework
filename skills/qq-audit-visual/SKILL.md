@@ -13,7 +13,9 @@ triggers:
   - "run all visual frameworks"
 ---
 
-# Visual UI Design framework audit (v1 — expert personas)
+# Audit visual design with expert personas
+
+Run a full serial visual design audit using 22 deep expert persona frameworks, fixing critical issues and verifying each framework before proceeding to the next.
 
 22 visual design frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year design specialist in that specific framework.
 
@@ -45,9 +47,9 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -58,7 +60,7 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 > - **Platform:** [desktop/mobile/both — inferred from tech stack]
 > - **Design system:** [Tailwind/custom CSS/component library — from project files]
 > - **Quality bar:** [aesthetic reference points — from conversation or memory]
-> - **Known pain points:** [what Lee has mentioned or what recent changes suggest]
+> - **Known pain points:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full app / specific pages / specific component]
 >
 > Anything wrong or missing?"
@@ -153,7 +155,7 @@ Save to project's data directory:
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
 - **Fix before moving on** — don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.4 (is this earning its complexity?), §1.8 (does this prevent errors?).
+- **Hold every fix to a real quality bar** — is this real data? Is the complexity earned? Does it prevent errors?
 - **Code + screenshots** — code audits miss visual issues. Always audit rendered output when possible.
 - **Multi-round** — after all 22 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.

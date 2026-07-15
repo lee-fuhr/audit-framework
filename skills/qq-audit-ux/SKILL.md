@@ -13,7 +13,9 @@ triggers:
   - "run ux audit"
 ---
 
-# UX framework audit (v3 — expert personas)
+# Audit UX with expert personas
+
+Run a full serial UX audit using 20 deep expert persona frameworks, fixing critical issues and verifying each framework before proceeding to the next.
 
 20 usability frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -45,9 +47,9 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -57,10 +59,17 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 > - **Product:** [name] — [description from context]
 > - **Platform:** [desktop/mobile/both — inferred from tech stack]
 > - **Quality bar:** [SUS target — from previous audits or conversation]
-> - **Known pain points:** [what Lee has mentioned or what recent changes suggest]
+> - **Known pain points:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full app / specific pages / specific component]
 >
 > Anything wrong or missing?"
+
+**Always ask the target score** using AskUserQuestion:
+- "What score are you targeting per heuristic?"
+  - **9+ (internal tool, chase perfection)** — fix everything below target
+  - **8 (client project, good buy-in)** — fix criticals, note the rest
+  - **7 (client project, conservative)** — don't risk changing things they like
+- The target determines which findings get fixed vs. noted. Only fix findings that bring a heuristic below the target.
 
 Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can't tell whether it's desktop-only or responsive, ask. If you can infer it, state the inference.
 
@@ -112,8 +121,13 @@ For each framework (in order 1-20):
 3. Compare to previous audit rounds if they exist
 
 ### Phase 4: Report
+
+**Exec summary is MANDATORY** — every report starts with a 3-5 sentence executive summary at the very top. No jargon, no framework names. Just: what was audited, what the score is, what the biggest problem is, and whether it improved from last time.
+
+**Per-framework exec summaries too** — after each framework completes, present a 1-2 sentence summary before the detailed findings. Lead with the score change and the single most important finding.
+
 Save to project's data directory:
-- `data/audit-ux-[date].md` — full report
+- `data/audit-ux-[date].md` — full report (exec summary at top)
 - `data/audit-ux-[date]-summary.md` — scores + critical findings only
 
 ---
@@ -150,7 +164,7 @@ Save to project's data directory:
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
 - **Fix before moving on** — don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.8 (does this prevent errors?), §1.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code + screenshots** — code audits miss visual issues. Always audit rendered output when possible.
 - **Multi-round** — after all 20 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.
@@ -161,6 +175,6 @@ Save to project's data directory:
 
 | Product | Round | SUS | Fixes | Key improvement |
 |---------|-------|-----|-------|-----------------|
-| Forge (mission-control) | 1 | 57.5 → 77.5 | 100+ | Basic interactivity, real data, help |
-| Forge (mission-control) | 2 | 77.5 → 85+ | 45+ | Convergence UX, WCAG, mobile |
-| Forge (mission-control) | 3 | 85+ → 92.5 | 30+ | Polish, emotional design, peak moments |
+| Internal dashboard (example run) | 1 | 57.5 → 77.5 | 100+ | Basic interactivity, real data, help |
+| Internal dashboard (example run) | 2 | 77.5 → 85+ | 45+ | Convergence UX, WCAG, mobile |
+| Internal dashboard (example run) | 3 | 85+ → 92.5 | 30+ | Polish, emotional design, peak moments |

@@ -12,7 +12,9 @@ triggers:
   - "run frontend audit"
 ---
 
-# Frontend build quality audit (v1 — expert personas)
+# Audit frontend with expert personas
+
+Audit frontend by running 22 expert personas in serial, fixing critical issues per framework before verifying.
 
 22 code quality frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a senior frontend engineer with 20 years of specialization in that specific domain.
 
@@ -44,9 +46,9 @@ Show the framework table from the Framework inventory section below, then ask wh
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -56,7 +58,7 @@ Show the framework table from the Framework inventory section below, then ask wh
 > - **Product:** [name] — [description from context]
 > - **Tech stack:** [framework, language, build tool — inferred from project files]
 > - **Quality bar:** [from previous audits or conversation]
-> - **Known pain points:** [what Lee has mentioned or what recent changes suggest]
+> - **Known pain points:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full app / specific modules / specific component tree]
 >
 > Anything wrong or missing?"
@@ -151,7 +153,7 @@ Save to project's data directory:
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
 - **Fix before moving on** — don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.8 (does this prevent errors?), §1.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code, not screenshots** — this audit reads source code. Visual output is the UX audit's domain.
 - **Multi-round** — after all 22 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.

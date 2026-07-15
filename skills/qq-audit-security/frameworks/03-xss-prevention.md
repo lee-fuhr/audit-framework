@@ -98,7 +98,7 @@ Stored XSS > Reflected XSS > DOM XSS in typical severity. But context matters: D
 
 **The Markdown XSS** — User writes `[Click me](javascript:alert(document.cookie))` in a Markdown comment field. The Markdown renderer converts it to `<a href="javascript:alert(document.cookie)">Click me</a>`. The HTML is "valid" — the XSS is in the URL scheme, not the HTML structure. Fix: strip or block `javascript:`, `vbscript:`, and `data:` schemes from Markdown link rendering.
 
-**The JSON-in-script-tag breakout** — Server renders `<script>var config = {"name": "[USER_DATA]"}</script>`. Attacker submits a name containing `</script><script>alert(1)</script>`. The browser's HTML parser closes the script tag before the JSON parser ever runs. Fix: HTML-encode `<` as `\u003c` in any data inside script tags, or use `<script type="application/json">` with a separate script to parse it.
+**The JSON-in-script-tag breakout** — Server renders `<script>var config = {"name": "[USER_DATA]"}</script>`. Attacker submits a name containing `</script><script>alert(1)</script>`. The browser's HTML parser closes the script tag before the JSON parser ever runs. Fix: HTML-encode `<` as `<` in any data inside script tags, or use `<script type="application/json">` with a separate script to parse it.
 
 **The SVG stored XSS** — Application allows SVG uploads for profile avatars. SVG is XML that can contain `<script>` tags, `onload` event handlers, and `<foreignObject>` elements with HTML. When another user views the avatar, the script executes. Fix: either convert SVGs to raster (PNG) on upload, or sanitize SVG through a strict whitelist parser removing all scripting elements.
 

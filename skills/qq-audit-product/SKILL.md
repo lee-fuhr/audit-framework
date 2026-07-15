@@ -13,7 +13,9 @@ triggers:
   - "jobs to be done"
 ---
 
-# Product framework audit (v1 — expert personas)
+# Audit product with expert personas
+
+Audit product by running 20 expert personas in serial, fixing critical issues per framework before verifying.
 
 20 product frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -45,9 +47,9 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What features have been discussed? What has Lee been frustrated about?
+1. **Check conversation context** — What product are we working on? What features have been discussed? What has the user been frustrated about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience, business model.
 3. **Check recent session state** — What was just built, launched, or changed?
 
@@ -58,7 +60,7 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 > - **Target user:** [who — inferred from project docs or conversation]
 > - **Stage:** [pre-launch / early / growth / mature — inferred from context]
 > - **Business model:** [how it makes money — if known]
-> - **Known concerns:** [what Lee has mentioned or what recent changes suggest]
+> - **Known concerns:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full product / specific feature area / specific workflow]
 >
 > Anything wrong or missing?"
@@ -152,8 +154,8 @@ Save to project's data directory:
 - **Serial, not parallel** — Frameworks build on each other. JTBD informs Kano which informs RICE. Serial means each round inherits context from prior findings.
 - **Fix before moving on** — Don't accumulate a findings list. Fix each framework's criticals before the next audit.
 - **Expert persona, not checklist** — Each agent IS the specialist. They reason from product principles, not checklists.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.4 (is this earning its complexity?), §6.2 (premature learning engine?).
-- **Strategy + code** — Product audits produce two kinds of findings: code fixes (apply now) and strategic recommendations (surface to Lee for decision). Both are valid outputs.
+- **Hold every fix to a real quality bar** — is this real data? Is the complexity earned? Are you building a scoring or ML system before you have the data volume to justify it?
+- **Strategy + code** — Product audits produce two kinds of findings: code fixes (apply now) and strategic recommendations (surface to the user for decision). Both are valid outputs.
 - **Multi-round** — After all 20 frameworks, run the full cycle again. Product health improves each round as fixes compound.
 - **Dedup across frameworks** — Each agent receives cumulative findings so they don't re-report known issues.
 - **Right product > right implementation** — UX asks "is this usable?" Product asks "should this exist?" Kill features that don't serve a job before polishing them.

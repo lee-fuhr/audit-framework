@@ -106,6 +106,12 @@ I score by blast radius and recovery time. A deployment strategy that limits bla
 
 **The canary that nobody watches** — Canary deploys are configured, 5% of traffic goes to the new version, but nobody looks at the canary metrics. The canary is unhealthy for 20 minutes before someone notices. By then, the auto-promotion timer has promoted it to 100%. Fix: automated canary analysis (Kayenta, Flagger, or equivalent). The machine watches the canary, not humans.
 
+**The blue-green resource doubling** — Blue-green deploys require running two full environments simultaneously. For a platform with 50 instances, that means spinning up 50 more during each deploy. The cloud bill spikes 100% for 30 minutes every deploy. The team deploys less frequently to save money, which increases batch size and risk. Fix: evaluate whether blue-green is appropriate for your scale. Rolling deploys require zero additional capacity. Canary requires only the canary fraction.
+
+**The feature flag debt** — Feature flags accumulated over 18 months without cleanup. The codebase has 47 flags, 30 of which are permanently "on" in production and haven't been needed in 6+ months. The remaining 17 create a combinatorial testing nightmare — theoretically 131,072 possible flag combinations. I audited a SaaS where a flag interaction caused a bug that only appeared when flags A, D, and G were all on — a combination nobody had tested. Fix: feature flags have an expiration date. After the flag is fully rolled out or retired, remove it from the code within one sprint.
+
+**The environment-specific deploy script** — Deploy to staging uses `deploy-staging.sh`. Deploy to production uses `deploy-production.sh`. The scripts started identical but diverged over 12 months. Staging deploys fine; production fails on a step that only exists in the production script. Fix: one deploy script parameterized by environment. If the deploy process differs between environments, that difference is a risk.
+
 ---
 
 ## §5 The traps
@@ -132,6 +138,8 @@ I score by blast radius and recovery time. A deployment strategy that limits bla
 
 **Deployment strategy is compute-centric.** Deploying a new version of a stateless web service is solved. Deploying a new version of a stateful system (database, message broker, distributed cache) is a fundamentally different problem that these patterns don't address well.
 
+**Deployment strategy doesn't account for user-facing impact perception.** A technically perfect canary deploy that routes 5% of users to a buggy version means 5% of your users had a bad experience. For a product with 100,000 daily users, that's 5,000 people. The deploy strategy may be "safe" from a systems perspective while being harmful from a user experience perspective.
+
 ---
 
 ## §7 Cross-framework connections
@@ -144,6 +152,9 @@ I score by blast radius and recovery time. A deployment strategy that limits bla
 | **Incident Response (06)** | A bad deploy is the most common cause of incidents. The deployment strategy determines how quickly the incident can be resolved (rollback speed). |
 | **Container Health (09)** | Health checks in the container config feed directly into the deployment strategy. If health checks are wrong (always passing), the deploy strategy is flying blind. |
 | **Backup and Disaster Recovery (07)** | Deployment strategy handles routine releases. Disaster recovery handles when everything fails. They share a concern: how fast can you restore to a known-good state? |
+| **Security (cross-domain)** | Every deploy is an attack surface moment — new code, new dependencies, new potential vulnerabilities. Deploy pipelines need security gates (SAST, dependency scanning, container scanning) that block promotion of vulnerable artifacts. |
+| **Compliance (cross-domain)** | Regulated industries require deployment approval trails and change windows. The deployment strategy must accommodate compliance controls (approval gates, audit logs, change advisory board reviews) without becoming so slow that teams circumvent it. |
+| **Frontend (cross-domain)** | Frontend deploys have CDN cache invalidation requirements that backend deploys don't. A backend canary affects only new requests; a frontend deploy with stale CDN cache serves old JavaScript to all users. Frontend deployment strategy needs cache-busting coordination. |
 
 ---
 

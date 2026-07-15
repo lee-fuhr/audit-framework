@@ -111,6 +111,10 @@ I score by coverage and drift. 100% IaC coverage with no drift is the target. Be
 
 **The secret in git history** — The `.tfvars` file was added to `.gitignore` six months ago. But it was committed 18 months ago with the database password in plaintext. `git log` remembers everything. Fix: audit git history, rotate all secrets that ever touched the repo, use a secret manager from the start.
 
+**The blast radius of shared state** — All infrastructure managed in one Terraform state file. A bad plan against any resource can destroy any other. I once saw a team run `terraform destroy` intending to tear down a dev load balancer — and it deleted the production database because everything was in the same state. Fix: split state by environment at minimum, by service ideally. Each state file limits the blast radius to what it manages.
+
+**The untested module promotion** — A Terraform module updated in dev, tested with `terraform plan`, and immediately promoted to production. But the production environment has different constraints — larger instance types, more replicas, different network topology. The module that worked in dev creates 3 extra security group rules in prod that open port 22 to 0.0.0.0/0. Fix: modules must be tested in a staging environment that mirrors production's configuration before promotion.
+
 ---
 
 ## §5 The traps
@@ -151,6 +155,9 @@ I score by coverage and drift. 100% IaC coverage with no drift is the target. Be
 | **Monitoring and Alerting (05)** | Monitoring infrastructure (dashboards, alerting rules, log pipelines) should ALSO be codified. If monitoring is manual, it drifts when infrastructure changes. |
 | **DNS Management (13)** | DNS is infrastructure. If your Terraform manages compute and networking but DNS is managed in a web UI, you've left a critical layer uncodified. |
 | **Cost Optimization (11)** | IaC makes cost review possible — you can see every resource in code. Without IaC, cost optimization is archaeology in the cloud console. |
+| **Security (cross-domain)** | IaC is the enforcement mechanism for security policies. Network segmentation, firewall rules, IAM policies — if they're not in code, they're one console click away from misconfiguration. Security compliance audits should reference IaC as evidence. |
+| **Compliance (cross-domain)** | Regulators increasingly require "infrastructure change audit trails." IaC + git history provides a complete, timestamped record of every infrastructure change — who, what, when, and the approval (PR review). |
+| **Data (cross-domain)** | Data infrastructure (databases, data lakes, ETL pipelines, warehouse configs) should be IaC-managed. Data teams that provision via console create shadow infrastructure invisible to the platform team. |
 
 ---
 

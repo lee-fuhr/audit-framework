@@ -13,7 +13,9 @@ triggers:
   - "editorial review"
 ---
 
-# Content/Copy framework audit (v1 — expert personas)
+# Audit copy with expert personas
+
+Audit copy by running 22 expert personas in serial, fixing critical issues per framework before verifying.
 
 22 content and copy frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -45,9 +47,9 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
@@ -57,7 +59,7 @@ Show the framework table from §Framework inventory below, then ask which one(s)
 > - **Product:** [name] — [description from context]
 > - **Audience:** [who reads this copy — inferred from product type]
 > - **Voice/brand docs:** [existing style guide, voice bank, or none detected]
-> - **Known copy pain points:** [what Lee has mentioned or what recent changes suggest]
+> - **Known copy pain points:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full app / specific pages / specific component / marketing site]
 >
 > Anything wrong or missing?"
@@ -155,7 +157,7 @@ Save to project's data directory:
 - **Voice consistency across screens** — the most common copy failure is not bad writing on any one screen, it's different writing on every screen. Voice/tone should feel like one author.
 - **Microcopy over macrocopy** — button labels, error messages, tooltips, empty states, and placeholders do more work than any paragraph of body copy. Audit the small text hardest.
 - **The reader never reads** — 79% scan. Copy must work for scanners first and readers second. Headings, labels, and first sentences carry the entire load.
-- **Build Bible at every fix** — §6.9 (is this real data?), §1.8 (does this prevent errors?), §1.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code + rendered output** — code audits miss how copy actually reads in context. Always audit rendered output when possible.
 - **Multi-round** — after all 22 frameworks, run the full cycle again. Scores increase each round until plateau.
 - **Dedup across frameworks** — each agent receives cumulative findings so they don't re-report known issues.

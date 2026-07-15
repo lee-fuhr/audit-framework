@@ -12,7 +12,9 @@ triggers:
   - "run compliance audit"
 ---
 
-# Compliance framework audit (v3 — expert personas)
+# Audit compliance with expert personas
+
+Audit compliance by running 15 expert personas in serial, fixing critical issues per framework before verifying.
 
 15 compliance frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -46,24 +48,24 @@ Show the framework table from the framework inventory below, then ask which one(
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
 **Pre-fill and present assumptions:**
 
-> "Here\u2019s what I know going in:
+> "Here’s what I know going in:
 > - **Product:** [name] — [description from context]
 > - **Jurisdictions:** [US / EU / both — inferred from audience and hosting]
 > - **User data collected:** [PII types — inferred from forms, auth, analytics]
-> - **Known compliance concerns:** [what Lee has mentioned or what recent changes suggest]
+> - **Known compliance concerns:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full compliance / specific regulation / specific feature]
 >
 > Anything wrong or missing?"
 
-Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can\u2019t tell whether the product serves EU users, ask. If you can infer it, state the inference.
+Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can’t tell whether the product serves EU users, ask. If you can infer it, state the inference.
 
 **Interview output becomes the audit context** — passed to every framework agent so they audit with purpose, not generically.
 
@@ -75,7 +77,7 @@ Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you 
 
 ### Phase 1: Context gathering
 1. Run smart interview (above)
-2. Read the product\u2019s privacy policy, terms of service, cookie implementation, and data flows to understand scope
+2. Read the product’s privacy policy, terms of service, cookie implementation, and data flows to understand scope
 3. Map the compliance surface: data collected, processors used, jurisdictions served, consent mechanisms
 
 ### Phase 2: Serial framework execution
@@ -90,7 +92,7 @@ For each framework (in order 1-15):
    - "Score 1-10, list findings with file:line references, fix critical issues (score < 7), write report."
    - "Mark anything requiring legal interpretation with LEGAL REVIEW NEEDED."
 
-2. **Collect the agent\u2019s output:**
+2. **Collect the agent’s output:**
    - Score for this framework
    - Findings (new, not duplicates)
    - Fixes applied
@@ -118,7 +120,7 @@ For each framework (in order 1-15):
 3. Compare to previous audit rounds if they exist
 
 ### Phase 4: Report
-Save to project\u2019s data directory:
+Save to project’s data directory:
 - `data/audit-compliance-[date].md` — full report
 - `data/audit-compliance-[date]-summary.md` — scores + critical findings only
 
@@ -129,12 +131,12 @@ Save to project\u2019s data directory:
 | # | Framework | Expert lens | Subskill file |
 |---|-----------|-------------|---------------|
 | 1 | GDPR Compliance | EU data protection — is personal data processed lawfully, with clear purpose, minimal collection, and enforceable data subject rights? | `01-gdpr.md` |
-| 2 | CCPA/CPRA Compliance | California privacy — do users have clear opt-out rights, data access, and an honest privacy notice about what\u2019s collected and sold? | `02-ccpa.md` |
+| 2 | CCPA/CPRA Compliance | California privacy — do users have clear opt-out rights, data access, and an honest privacy notice about what’s collected and sold? | `02-ccpa.md` |
 | 3 | Cookie Consent Implementation | Cookie law compliance — does the consent banner offer genuine choice, fire no cookies before consent, and respect withdrawal? | `03-cookie-consent.md` |
 | 4 | ADA/Section 508 Compliance | Legal accessibility — does the site meet ADA and Section 508 requirements to avoid lawsuits and serve users with disabilities? | `04-ada-508.md` |
 | 5 | Terms of Service Completeness | Legal protection — do your terms cover liability, disputes, acceptable use, and termination in an enforceable way? | `05-terms-of-service.md` |
 | 6 | Privacy Policy Accuracy | Privacy truth — does the privacy policy accurately describe what data is actually collected, used, shared, and retained? | `06-privacy-policy.md` |
-| 7 | Children\u2019s Privacy (COPPA) | Children\u2019s protection — are age gates, parental consent, and data protections in place for users under 13? | `07-coppa.md` |
+| 7 | Children’s Privacy (COPPA) | Children’s protection — are age gates, parental consent, and data protections in place for users under 13? | `07-coppa.md` |
 | 8 | Open Source License Compliance | License obligations — are all open source components identified, licenses compatible, and attribution requirements met? | `08-oss-license.md` |
 | 9 | Data Processing Agreement Coverage | Processor contracts — do all third-party processors have valid DPAs with required GDPR Art. 28 terms? | `09-dpa-coverage.md` |
 | 10 | Right to Deletion Implementation | Erasure execution — when a user requests deletion, is data actually removed from all systems including backups and third-party processors? | `10-right-to-deletion.md` |
@@ -142,17 +144,17 @@ Save to project\u2019s data directory:
 | 12 | International Data Transfer | Cross-border legality — is there a valid legal basis for every transfer of personal data outside the EEA, especially EU-to-US? | `12-international-transfer.md` |
 | 13 | Accessibility Statement | Published commitment — is there a public accessibility statement disclosing compliance level, known issues, and a contact for reporting barriers? | `13-accessibility-statement.md` |
 | 14 | Automated Decision-Making Transparency | Algorithmic accountability — are users informed about automated decisions that affect them and given the right to human review? | `14-automated-decisions.md` |
-| 15 | Record of Processing Activities (ROPA) | Processing documentation — is there a current, complete ROPA maintained that would satisfy a regulator\u2019s request? | `15-processing-records.md` |
+| 15 | Record of Processing Activities (ROPA) | Processing documentation — is there a current, complete ROPA maintained that would satisfy a regulator’s request? | `15-processing-records.md` |
 
 ---
 
 ## Key principles
 
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
-- **Fix before moving on** — don\u2019t accumulate a findings list. Fix each framework\u2019s criticals before the next audit.
+- **Fix before moving on** — don’t accumulate a findings list. Fix each framework’s criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — \u00a76.9 (is this real data?), \u00a71.8 (does this prevent errors?), \u00a71.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code + policy** — code audits miss policy gaps. Always check actual privacy policies, terms, and consent flows against what the code does.
 - **Multi-round** — after all 15 frameworks, run the full cycle again. Scores increase each round until plateau.
-- **Dedup across frameworks** — each agent receives cumulative findings so they don\u2019t re-report known issues.
-- **Not legal advice** — flag anything needing legal interpretation with LEGAL REVIEW NEEDED. This audit finds gaps, it doesn\u2019t provide legal opinions.
+- **Dedup across frameworks** — each agent receives cumulative findings so they don’t re-report known issues.
+- **Not legal advice** — flag anything needing legal interpretation with LEGAL REVIEW NEEDED. This audit finds gaps, it doesn’t provide legal opinions.

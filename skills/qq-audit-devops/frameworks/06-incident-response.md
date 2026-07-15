@@ -117,6 +117,10 @@ I score by incident lifecycle completeness and cycle time. A team with great det
 
 **The runbook from 2019** — A runbook references servers that no longer exist, dashboards that have been renamed, and commands that no longer work. The on-call engineer tries to follow it at 2 AM, wastes 15 minutes discovering it's wrong, and ends up improvising. Fix: runbook review as part of quarterly incident drills. Every drill validates the runbook.
 
+**The blameless retro that isn't** — Post-incident review is "blameless" by policy. In practice, the review asks "who made this change?" and the engineer who deployed feels singled out. The team learns to avoid deploying near incidents, not to improve systems. Fix: blameless means focusing on system failures. "Why did the system allow a single change to cause an outage?" is blameless. "Why did you deploy without checking?" is not.
+
+**The single-timezone on-call** — The on-call rotation is US-based. Incidents at 3 AM US time mean the on-call engineer needs 15 minutes to wake up, find a laptop, and understand context. Meanwhile, European customers during business hours are experiencing a full outage. Detection-to-response is 20+ minutes instead of 2 minutes. Fix: follow-the-sun on-call across time zones, or at minimum, acknowledge the gap and set SLO expectations accordingly.
+
 ---
 
 ## §5 The traps
@@ -157,6 +161,9 @@ I score by incident lifecycle completeness and cycle time. A team with great det
 | **Observability Depth (12)** | Monitoring tells you something is wrong. Observability tells you why. During incident response, the team needs traces, structured logs, and correlated metrics to diagnose root cause quickly. |
 | **Log Aggregation (08)** | During incidents, centralized searchable logs are the diagnostic tool. If logs are scattered or unstructured, debugging time increases dramatically. |
 | **Container Health (09)** | Container restarts, OOM kills, and health check failures are common incident triggers. Container monitoring feeds directly into incident detection. |
+| **Security (cross-domain)** | Security incidents (breaches, unauthorized access, data exfiltration) require the same incident response process but with additional constraints: evidence preservation, legal notification, and forensic investigation. The incident process should have a security escalation path. |
+| **Compliance (cross-domain)** | Many compliance frameworks (SOC2, HIPAA) require documented incident response procedures, regular testing, and post-incident reporting. Incident response maturity is directly auditable. |
+| **Data (cross-domain)** | Data incidents (corruption, loss, privacy breach) require data-specific expertise in the response. The incident team needs access to database experts and data governance contacts, not just infrastructure engineers. |
 
 ---
 

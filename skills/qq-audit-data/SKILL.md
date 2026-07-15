@@ -12,7 +12,9 @@ triggers:
   - "run data audit"
 ---
 
-# Data quality framework audit (v3 — expert personas)
+# Audit data quality with expert personas
+
+Audit data quality by running 15 expert personas in serial, fixing critical issues per framework before verifying.
 
 15 data quality frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -46,24 +48,24 @@ Show the framework table from the framework inventory below, then ask which one(
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
 **Pre-fill and present assumptions:**
 
-> "Here\u2019s what I know going in:
+> "Here’s what I know going in:
 > - **Product:** [name] — [description from context]
 > - **Analytics stack:** [GA4 / Mixpanel / PostHog / custom — inferred from project]
 > - **Data layer:** [GTM / Segment / custom dataLayer — inferred from code]
-> - **Known data concerns:** [what Lee has mentioned or what recent changes suggest]
+> - **Known data concerns:** [what the user has mentioned or what recent changes suggest]
 > - **Scope:** [full tracking / specific funnel / specific dashboard]
 >
 > Anything wrong or missing?"
 
-Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can\u2019t tell what analytics platform is in use, ask. If you can infer it, state the inference.
+Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can’t tell what analytics platform is in use, ask. If you can infer it, state the inference.
 
 **Interview output becomes the audit context** — passed to every framework agent so they audit with purpose, not generically.
 
@@ -73,7 +75,7 @@ Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you 
 
 ### Phase 1: Context gathering
 1. Run smart interview (above)
-2. Read the product\u2019s analytics config, event tracking code, and data layer implementation to understand scope
+2. Read the product’s analytics config, event tracking code, and data layer implementation to understand scope
 3. Map the data surface: events tracked, funnels defined, dashboards deployed, third-party integrations
 
 ### Phase 2: Serial framework execution
@@ -87,7 +89,7 @@ For each framework (in order 1-15):
    - "Previous frameworks found these issues: [cumulative findings list]. Do NOT re-report duplicates."
    - "Score 1-10, list findings with file:line references, fix critical issues (score < 7), write report."
 
-2. **Collect the agent\u2019s output:**
+2. **Collect the agent’s output:**
    - Score for this framework
    - Findings (new, not duplicates)
    - Fixes applied
@@ -113,7 +115,7 @@ For each framework (in order 1-15):
 3. Compare to previous audit rounds if they exist
 
 ### Phase 4: Report
-Save to project\u2019s data directory:
+Save to project’s data directory:
 - `data/audit-data-[date].md` — full report
 - `data/audit-data-[date]-summary.md` — scores + critical findings only
 
@@ -133,20 +135,20 @@ Save to project\u2019s data directory:
 | 8 | Data Retention and Lifecycle | Data lifecycle hygiene — are retention periods defined, automated cleanup running, and old data properly archived or deleted? | `08-data-retention.md` |
 | 9 | Dashboard Accuracy Audit | Metric trustworthiness — do dashboard numbers match their source data, are calculations correct, and can stakeholders trust what they see? | `09-dashboard-accuracy.md` |
 | 10 | Error Tracking Coverage | Failure visibility — are client and server errors captured with enough context to diagnose the problem and understand its user impact? | `10-error-tracking.md` |
-| 11 | Search Analytics | Search intelligence — are search queries tracked, zero-results visible, and search quality measured so you know what users want but can\u2019t find? | `11-search-analytics.md` |
+| 11 | Search Analytics | Search intelligence — are search queries tracked, zero-results visible, and search quality measured so you know what users want but can’t find? | `11-search-analytics.md` |
 | 12 | Attribution Modeling | Conversion credit — does your attribution model match business reality, or is it giving credit to the wrong channels? | `12-attribution-modeling.md` |
 | 13 | Data Export and Portability | Data freedom — can users get their data out in standard formats, and is the system a partner rather than a data roach motel? | `13-data-export.md` |
 | 14 | Schema Evolution Management | Schema change safety — can you add, modify, or remove event properties and data fields without breaking existing queries, dashboards, and pipelines? | `14-schema-evolution.md` |
-| 15 | Real-Time vs Batch Freshness | Data timeliness — does data freshness match business needs, and is the freshness clearly labeled so stakeholders know what they\u2019re looking at? | `15-data-freshness.md` |
+| 15 | Real-Time vs Batch Freshness | Data timeliness — does data freshness match business needs, and is the freshness clearly labeled so stakeholders know what they’re looking at? | `15-data-freshness.md` |
 
 ---
 
 ## Key principles
 
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
-- **Fix before moving on** — don\u2019t accumulate a findings list. Fix each framework\u2019s criticals before the next audit.
+- **Fix before moving on** — don’t accumulate a findings list. Fix each framework’s criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — \u00a76.9 (is this real data?), \u00a71.8 (does this prevent errors?), \u00a71.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Code + live data** — code audits miss data quality issues. Always check actual event payloads, dashboard outputs, and query results when possible.
 - **Multi-round** — after all 15 frameworks, run the full cycle again. Scores increase each round until plateau.
-- **Dedup across frameworks** — each agent receives cumulative findings so they don\u2019t re-report known issues.
+- **Dedup across frameworks** — each agent receives cumulative findings so they don’t re-report known issues.

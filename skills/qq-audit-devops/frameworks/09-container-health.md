@@ -110,6 +110,10 @@ I score by production risk surface. A container with root execution and no resou
 
 **The leaked secret in the layer** — A Dockerfile copies a `.env` file, uses the secrets during build, then deletes the `.env` file. The secret is gone from the final filesystem but still visible in the Docker layer history. Fix: use Docker build secrets (`--secret`), or multi-stage builds where the secret never touches the final stage.
 
+**The graceful shutdown that isn't** — Container receives SIGTERM, but the app doesn't handle it. Kubernetes waits 30 seconds, then sends SIGKILL. In-flight requests are dropped. Database connections are leaked. Users see intermittent errors during every deploy. Fix: handle SIGTERM in the application — finish in-flight requests, close connections, flush buffers, then exit. Test this specifically during deploy drills.
+
+**The sidecar resource competition** — Main application container has 512MB memory limit. Three sidecar containers (log agent, metrics agent, service mesh proxy) consume 300MB collectively. The pod has 812MB of actual usage but the main container is limited to 512MB and gets OOM-killed when traffic spikes. Fix: account for sidecar resource consumption in pod resource requests and limits. The pod is the unit of scaling, not just the main container.
+
 ---
 
 ## §5 The traps
@@ -150,6 +154,9 @@ I score by production risk surface. A container with root execution and no resou
 | **Secret Rotation (10)** | Secrets must be injected at runtime, never baked into images. Container secret management (mounted secrets, env vars, init containers fetching from Vault) is the mechanism for Factor 3 compliance. |
 | **Monitoring and Alerting (05)** | Container metrics (CPU, memory, restart count, OOM kills) feed into monitoring. Resource limit violations, health check failures, and restart loops are alertable events. |
 | **Dependency Update Cadence (15)** | Base image updates are a form of dependency update. If the base image hasn't been updated in 6 months, it likely has known vulnerabilities. |
+| **Security (cross-domain)** | Container image scanning (Trivy, Snyk Container, AWS ECR scanning) is a security gate. Images with critical CVEs should be blocked from deployment. Non-root execution, read-only filesystems, and minimal base images reduce the attack surface. |
+| **Compliance (cross-domain)** | Image provenance (where did this image come from, who built it, what's inside?) is increasingly a compliance requirement. Supply chain security standards (SLSA, SBOM) apply directly to container images. |
+| **Frontend (cross-domain)** | Frontend containers (Nginx serving static assets, Node.js SSR servers) have different health check patterns than API containers. A frontend container may be "healthy" (Nginx is running) while serving stale JavaScript because the build artifacts weren't updated. Frontend container health should verify content freshness, not just process liveness. |
 
 ---
 

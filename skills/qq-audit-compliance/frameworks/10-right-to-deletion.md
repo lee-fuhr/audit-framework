@@ -108,6 +108,14 @@ I score by deletion completeness — what percentage of systems containing perso
 
 **The backup restoration catastrophe** — A database issue requires restoring from a 2-week-old backup. The restoration reintroduces data from 15 users who requested deletion during those 2 weeks. Fix: document the risk. After any backup restoration, re-run deletion requests from the affected period. Maintain a deletion log that survives backup restoration.
 
+**The ML model unlearning problem** — A user requests deletion. Their data is removed from all databases, analytics tools, and backups. But their behavioral data was used to train a recommendation model that's currently in production. The model "remembers" the user's patterns as weights in a neural network. Is the model itself "personal data"? The legal answer is unsettled, but the ICO's 2023 guidance on AI and data protection suggests that if the model can reconstruct information about the individual, it may contain personal data. Fix: document the limitation. For most models, individual data points don't meaningfully survive in trained weights. But for models trained on small datasets, or models that can be queried to reveal training data (membership inference attacks), retrain the model after significant deletion volume.
+
+**The Amplitude/Mixpanel deletion API gap** — User requests deletion. The engineering team deletes from the primary database. But nobody knows that Amplitude requires a separate API call to delete user data (Amplitude's User Privacy API), and Mixpanel requires another (Mixpanel's GDPR API). Each analytics tool has its own deletion API with its own authentication, rate limits, and confirmation mechanisms. The deletion is "complete" in the primary system but incomplete in 3 analytics tools. Fix: map every analytics tool's deletion API. Build an automated deletion pipeline that calls each API in sequence with confirmation. Use Segment's User Deletion API to cascade deletion to multiple downstream tools simultaneously.
+
+**The search index persistence** — User data is deleted from the database. But the Elasticsearch index still contains the user's records. Internal search results still show the deleted user's content. A customer support agent searches for the user and finds "deleted" data. Fix: include search indexes (Elasticsearch, Algolia, Typesense) in the deletion scope. Rebuild or update search indexes after deletion.
+
+**The audit log paradox** — GDPR requires audit logging (for accountability) AND deletion (for erasure). The user requests deletion. The audit log records that the user existed, requested deletion, and was deleted — the audit log itself contains personal data about the user. Deleting the audit log entry destroys the proof of deletion compliance. Fix: anonymize deletion audit log entries. Replace the user's identifier with a hash or sequential ID. The log proves deletion occurred without revealing who was deleted.
+
 ---
 
 ## §5 The traps
@@ -132,6 +140,8 @@ I score by deletion completeness — what percentage of systems containing perso
 
 **International variations.** Different jurisdictions have different deletion requirements, exceptions, and timelines. A deletion process that satisfies GDPR may not satisfy CCPA (different exceptions) or vice versa.
 
+**"Deletion" means different things in different storage systems.** In a relational database, DELETE removes the row. In an append-only event store (Kafka), deletion requires tombstone records and log compaction. In a data warehouse (BigQuery), deletion requires DML operations on immutable storage. In an object store (S3), deletion depends on versioning settings. Each storage technology has a different "delete" implementation, and some make individual record deletion technically infeasible without full table recreation.
+
 ---
 
 ## §7 Cross-framework connections
@@ -144,6 +154,11 @@ I score by deletion completeness — what percentage of systems containing perso
 | **Backup and DR (DevOps 07)** | Backups complicate deletion. Backup retention policies must account for deletion obligations. |
 | **DPA Coverage (09)** | DPAs with processors must include deletion obligations. When a deletion request comes in, processors must be notified. |
 | **Data Export (Data 13)** | Export and deletion often happen together — user wants their data, then wants it deleted. Export must complete before deletion. |
+| **Data Layer Architecture (Data 02)** | The data layer's destination list defines the deletion scope for analytics data. Every Segment destination, every GTM tag destination, every server-side event receiver — all must be included in the deletion pipeline. When a new destination is added to the data layer, the deletion pipeline must be updated simultaneously. |
+| **Analytics Completeness (Data 01)** | Complete analytics means more systems contain personal data, which means more systems need deletion coverage. There's a tension: more analytics completeness = larger deletion scope = more complex deletion pipeline. Every new analytics event that includes user identifiers expands the deletion surface. |
+| **Schema Evolution (Data 14)** | Schema changes that rename user identifier columns or move personal data to new tables can silently break deletion pipelines. If the deletion job looks for `user_id` but a schema migration renamed it to `account_id`, deletion fails silently for that table. Coordinate schema evolution with deletion pipeline testing. |
+| **Log Aggregation (DevOps 08)** | Application logs containing personal identifiers (user IDs, email addresses in error messages, IP addresses) are within deletion scope. Most log systems (Datadog, ELK, CloudWatch) don't support individual record deletion — they rely on retention-based aging. Document this limitation and set log retention periods that are defensible under GDPR. |
+| **Monitoring and Alerting (DevOps 05)** | Monitor the deletion pipeline as a critical system. Track: deletion request volume, average processing time, system-level success/failure rates, and third-party processor confirmation rates. Alert when deletion processing time approaches the regulatory deadline (25 days, providing buffer against the 30-day GDPR requirement). |
 
 ---
 

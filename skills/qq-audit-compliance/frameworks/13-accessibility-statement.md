@@ -101,6 +101,14 @@ I score by three criteria: honesty (does the statement accurately reflect the cu
 
 **The non-accessible statement** — The accessibility statement is published as a scanned PDF image with no text layer. Screen readers can't read it. The document about accessibility is itself inaccessible. Fix: publish as HTML with proper heading structure, or at minimum as an accessible tagged PDF.
 
+**The third-party exclusion loophole** — The statement claims WCAG 2.1 AA conformance but includes a footnote: "Third-party content, including payment forms, chat widgets, and social media embeds, is excluded from this statement." The payment form (Stripe Elements) has keyboard focus issues. The chat widget (Intercom) isn't screen reader accessible. The exclusion covers 30% of the user-facing interface. Courts have held site owners responsible for embedded third-party content (Robles v. Domino's). Fix: acknowledge third-party limitations honestly but commit to remediation or alternative access. "Our Stripe payment form has known keyboard navigation issues. We provide an alternative payment method via phone at [number]."
+
+**The EAA compliance deadline** — The European Accessibility Act (EAA) takes effect June 28, 2025 for EU member states. It extends accessibility requirements beyond public sector to private sector commercial products and services (including e-commerce, banking, and transport). Companies that have ignored accessibility because "we're not public sector" now face mandatory requirements. The accessibility statement becomes legally required for a much broader set of organizations. Fix: if your product serves EU customers in covered sectors, accessibility compliance is no longer optional. Begin assessment and statement preparation now.
+
+**The annual assessment that's actually triennial** — The statement says "we conduct regular accessibility assessments." The most recent assessment was 2021. The site has been redesigned twice since then. The statement's conformance claims are based on a product that no longer exists. Fix: accessibility assessments should coincide with major redesigns at minimum. The statement's assessment date must reflect when the CURRENT version of the site was last evaluated, not when any version was evaluated.
+
+**The feedback void** — The statement provides an email address for accessibility feedback: accessibility@company.com. In 12 months, 8 reports were submitted. Zero received a response. The feedback mechanism exists but nobody monitors it. When a user with a disability can't complete a task and reports it, silence signals that the organization doesn't care. Fix: assign a specific person to monitor accessibility feedback. Set a response SLA (2 business days for acknowledgment, 30 days for remediation assessment). Track feedback volume and resolution rate as metrics.
+
 ---
 
 ## §5 The traps
@@ -121,6 +129,10 @@ I score by three criteria: honesty (does the statement accurately reflect the cu
 
 **Third-party content complicates claims.** Embedded videos, social media widgets, payment forms, and chat widgets may not be accessible. The statement should address third-party content limitations.
 
+**Accessibility statements create a double-edged legal record.** An honest statement that lists known issues demonstrates good faith and transparency. But it also documents that the organization is aware of specific accessibility barriers and hasn't yet fixed them. Plaintiffs' attorneys can use the statement's known issues list as a roadmap for litigation. Despite this risk, honesty is the better legal strategy — courts view transparent disclosure more favorably than overclaiming.
+
+**The statement is only as current as the last assessment.** Between assessments, code changes continuously introduce new accessibility issues. A statement that was accurate on assessment day becomes less accurate with every subsequent deploy. Without continuous accessibility testing in CI, the statement's accuracy degrades at the pace of development.
+
 ---
 
 ## §7 Cross-framework connections
@@ -131,7 +143,11 @@ I score by three criteria: honesty (does the statement accurately reflect the cu
 | **Privacy Policy (06)** | Like the privacy policy, the accessibility statement is a legally significant public document that must be accurate and current. Both require regular review. |
 | **Terms of Service (05)** | The accessibility statement may reference alternative access methods for services described in the ToS. |
 | **Cookie Consent (03)** | The cookie consent banner must itself be accessible. The accessibility statement should note if the consent mechanism has known limitations. |
-| **GDPR (01)** | The accessibility statement contact mechanism collects personal data (emails, names). GDPR applies to this collection. |
+| **GDPR (01)** | The accessibility statement contact mechanism collects personal data (emails, names). GDPR applies to this collection. The data collected through accessibility feedback may also reveal disability status — special category data under GDPR Art. 9 requiring explicit consent or another Art. 9(2) condition. |
+| **Error Tracking (Data 10)** | Accessibility-related errors (ARIA failures, focus management exceptions, screen reader interaction failures) should be tracked in the error monitoring system. If error rates are higher for assistive technology users, the accessibility statement's conformance claims may be inaccurate. Error tracking provides evidence-based input for the statement's known issues section. |
+| **Funnel Instrumentation (Data 06)** | If funnel analytics show higher drop-off rates for users with specific browser/OS combinations associated with assistive technology use (VoiceOver + Safari, NVDA + Firefox), this is evidence of accessibility barriers that should be reflected in the statement. Funnel data can identify which user journeys have accessibility problems without requiring dedicated accessibility testing. |
+| **CI/CD Maturity (DevOps 03)** | Automated accessibility testing in CI (axe-core, pa11y) provides a continuous assessment baseline. The statement can reference "continuous automated testing catches X% of WCAG criteria; manual testing is conducted Y times per year for the remaining criteria." CI integration makes the statement's methodology claim credible. |
+| **Monitoring and Alerting (DevOps 05)** | Track accessibility feedback volume, response time, and resolution rate as operational metrics. A spike in accessibility feedback after a deploy indicates an accessibility regression. These metrics should inform statement updates and remediation prioritization. |
 
 ---
 

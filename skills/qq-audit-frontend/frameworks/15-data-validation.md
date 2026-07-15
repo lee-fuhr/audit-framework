@@ -111,7 +111,7 @@ I evaluate three dimensions: boundary identification (has every entry point been
 
 **The postMessage open door** — `window.addEventListener('message', (e) => { setConfig(e.data.config) })`. No origin check. Any page that the user visits in the same browser can send messages to this window. An attacker embeds the application in an iframe and sends a malicious config. Fix: check `e.origin` against an allowlist before processing.
 
-**The deep null crash** — API returns `{ user: { profile: null } }` instead of `{ user: { profile: { name: 'Lee' } } }`. The component renders `user.profile.name`. Crash: `Cannot read properties of null`. The error boundary catches it, but the user sees an error. Fix: validate at the API boundary. If `profile` is nullable, the Zod schema should model it as `.nullable()` and the component should handle the null case.
+**The deep null crash** — API returns `{ user: { profile: null } }` instead of `{ user: { profile: { name: 'Ada' } } }`. The component renders `user.profile.name`. Crash: `Cannot read properties of null`. The error boundary catches it, but the user sees an error. Fix: validate at the API boundary. If `profile` is nullable, the Zod schema should model it as `.nullable()` and the component should handle the null case.
 
 ---
 

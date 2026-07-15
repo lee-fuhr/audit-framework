@@ -92,6 +92,14 @@ I score by transfer coverage — what percentage of identified cross-border tran
 
 **The missing TIA** — SCCs are in place with every US processor. But no Transfer Impact Assessment has been conducted. Post-Schrems II, SCCs without a TIA are insufficient — the exporter must verify that the SCCs actually provide adequate protection in the destination country. Fix: conduct TIAs for every SCC-based transfer.
 
+**The UK adequacy assumption** — Post-Brexit, the UK received an EU adequacy decision in June 2021 — but it's subject to review every 4 years and can be revoked if UK data protection standards diverge from EU standards. The UK's proposed reforms to data protection law (Data Protection and Digital Information Bill) create real risk that adequacy could be revoked. Companies transferring data between the EU and UK should have contingency plans (UK SCCs, UK BCRs) in case adequacy is withdrawn. Fix: don't rely solely on adequacy for UK transfers. Prepare fallback transfer mechanisms.
+
+**The employee data transfer blindspot** — A US company with EU employees uses ADP for payroll processing (US-based). Employee payroll data (names, salaries, bank details, tax IDs) is transferred to the US. The company has SCCs for customer data processors but never considered employee data transfers. HR data transfers are subject to the same Chapter V requirements as customer data. Fix: include employee data in the transfer mapping. Payroll, benefits, HR management, and corporate email (if US-hosted) all involve EU employee data transfers requiring legal mechanisms.
+
+**The CDN data transfer question** — The company uses Cloudflare as a CDN. User requests are routed to the nearest edge node. An EU user's request might be served from a Frankfurt edge node — no transfer. But during a traffic spike, Cloudflare might route to a US node. The transfer is intermittent and automatic. Is this a "transfer" requiring SCCs? The EDPB's guidance suggests yes — any access from outside the EEA, even transient, is a transfer. Fix: configure CDN to restrict EU user traffic to EU edge nodes where possible. For providers that can't guarantee EU-only routing, implement SCCs as a baseline.
+
+**The FISA 702 TIA problem** — The US FISA Section 702 allows warrantless surveillance of non-US persons' communications. For TIAs involving US processors, the key question is: "Does this processor fall under FISA 702?" Electronic communication service providers (cloud providers, email services, social media) are subject to FISA 702. The TIA must assess whether FISA 702 access undermines the protections of the SCCs and what supplementary measures (encryption where the US processor doesn't hold keys, pseudonymization) can compensate. Fix: for each US processor, determine FISA 702 applicability. Implement supplementary measures: end-to-end encryption, EU-based key management, pseudonymization before transfer.
+
 ---
 
 ## §5 The traps
@@ -112,6 +120,10 @@ I score by transfer coverage — what percentage of identified cross-border tran
 
 **Transfer mapping is never complete.** New services, new integrations, and new sub-processors create new transfers continuously. The transfer map must be maintained as a living document.
 
+**The DPF's durability is genuinely uncertain.** Max Schrems (who brought the Schrems I and Schrems II cases) has already announced plans to challenge the Data Privacy Framework. The core concern — US surveillance law hasn't fundamentally changed — remains. Organizations should treat DPF as a valid current mechanism while maintaining SCCs as a fallback. The cost of maintaining dual mechanisms is low; the cost of a DPF invalidation without fallback is catastrophic (all US transfers suddenly become unlawful).
+
+**Transfer compliance is increasingly being enforced.** In 2022, the Austrian DSB ruled that a website's use of Google Analytics constituted an unlawful transfer to the US (post-Schrems II, pre-DPF). The French CNIL and Italian Garante issued similar decisions. These rulings establish that even common SaaS tools (Google Analytics) create transfer compliance obligations. The enforcement precedent means transfer compliance is no longer theoretical.
+
 ---
 
 ## §7 Cross-framework connections
@@ -124,6 +136,11 @@ I score by transfer coverage — what percentage of identified cross-border tran
 | **Breach Notification (11)** | Breaches involving cross-border data may require notification in multiple jurisdictions. |
 | **Data Layer Architecture (Data 02)** | The data layer routes events to analytics and marketing tools, many of which are US-based. Each destination may be a cross-border transfer. |
 | **Right to Deletion (10)** | Deletion requests must propagate to international processors. Transfer mechanisms (DPAs with SCCs) should include deletion obligations. |
+| **Analytics Completeness (Data 01)** | Every analytics tool is a potential international transfer. GA4, Amplitude, Mixpanel, and Segment are all US-based services. Adding a new analytics destination isn't just a data completeness decision — it's a transfer compliance decision requiring SCCs, DPF verification, or TIA. |
+| **Error Tracking (Data 10)** | Sentry (US-based), Bugsnag (US-based), and Datadog (US-based) all receive personal data in error payloads from EU users. Each error tracking tool is an international transfer requiring a transfer mechanism. Self-hosted alternatives (Sentry self-hosted, GlitchTip) eliminate the transfer by keeping data within the EEA. |
+| **Data Layer Architecture (Data 02)** | The data layer routes events to multiple destinations, many US-based. Each destination is a transfer. When evaluating data layer architecture, the transfer map grows with every destination added. A Segment workspace with 10 destinations creates 10 international transfer relationships requiring individual compliance assessment. |
+| **Encryption and Security (DevOps/Security)** | Encryption is a supplementary measure for international transfers under Schrems II. But "encryption" only helps if the US processor doesn't hold the decryption keys. AWS encryption using AWS KMS (where AWS holds keys accessible to US law enforcement) may not satisfy the TIA's supplementary measures requirement. Customer-managed keys (BYOK) or EU-based key management provides stronger supplementary protection. |
+| **Cost Optimization (DevOps 11)** | Using EU-region cloud services to avoid transfer compliance adds infrastructure cost (EU regions are typically 10-20% more expensive than US regions for AWS/GCP). But the compliance cost of managing transfers (SCCs, TIAs, DPF monitoring) to US regions also has a cost. Quantify both and choose intentionally. |
 
 ---
 

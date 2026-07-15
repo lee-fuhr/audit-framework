@@ -12,7 +12,9 @@ triggers:
   - "comprehensive audit"
 ---
 
-# Master audit orchestrator
+# Run the full audit suite
+
+Route to 13 domain-specific audit skills intelligently based on project needs and sequence them.
 
 Routes to 13 domain-specific audit skills (255 total expert-persona frameworks) based on what the project needs. Knows which domains matter for which kinds of work and sequences them intelligently.
 
@@ -142,7 +144,7 @@ Round 2: Re-run all frameworks → Score → Fix remaining
 Round 3: Re-run all frameworks → Final score
 ```
 
-**Convergence target:** 9.5/10 per domain (configurable via smart interview).
+**Convergence target:** Configurable via smart interview (see below). Default 9.5/10. Internal tools typically 9+, client projects with buy-in 7-8.
 
 **Convergence rules:**
 - **Move on when:** Domain score reaches target, OR round 3 is complete (whichever comes first)
@@ -153,7 +155,7 @@ Round 3: Re-run all frameworks → Final score
 
 **Why convergence matters:** A single pass finds ~60% of issues. Round 2 finds 25% more (because fixes from round 1 expose new issues or fix old ones). Round 3 catches the last 10-15%. Diminishing returns after round 3 — remaining gaps are architectural.
 
-**Between domains:** After a domain converges, brief Lee: "UX converged at 9.6 after 2 rounds (35 fixes). Ready for Visual?" Always pause for direction before starting the next domain.
+**Between domains:** After a domain converges, brief the user: "UX converged at 9.6 after 2 rounds (35 fixes). Ready for Visual?" Always pause for direction before starting the next domain.
 
 ---
 
@@ -164,7 +166,7 @@ For each selected domain (in order):
 1. **Invoke the domain's slash command** — e.g., run `/qq-audit-ux` with any scope constraints
 2. **The domain orchestrator handles everything** — smart interview, serial framework execution, fixes, report
 3. **Collect the domain's output** — SUS score (for UX), overall assessment, critical findings
-4. **Brief Lee on results** — "UX scored 82. 3 critical findings fixed, 5 remaining. Moving to Visual."
+4. **Brief the user on results** — "UX scored 82. 3 critical findings fixed, 5 remaining. Moving to Visual."
 5. **Proceed to next domain**
 
 Between domains, ask: "Ready for [next domain]? Or adjust the plan?"
@@ -180,14 +182,19 @@ Before selecting domains, gather context the same way domain orchestrators do �
 3. What's the quality bar? (internal tool, client deliverable, public product)
 4. Any specific concerns? (from conversation — "the forms feel broken", "worried about mobile")
 5. What's already been audited? (check for existing audit reports)
+6. **What's the target score?** (ALWAYS ask via AskUserQuestion)
+   - 9+ (internal tool, chase perfection)
+   - 8 (client project, good buy-in)
+   - 7 (client project, conservative — don't risk changing things they like)
+   - This cascades to all domain audits as the convergence target.
 
-Pre-fill everything possible. Only ask about genuine gaps.
+Pre-fill everything possible. Only ask about genuine gaps. The target score question is ALWAYS asked — never inferred.
 
 ---
 
 ## Live Notion dashboard
 
-**At the start of every audit run, create a Notion page in the LFI Deliverables database** (data source `3ce82ab5-52bc-49e4-addb-54ce1a351a25`).
+**At the start of every audit run, create a Notion page in your own deliverables/tracking database** — set its data source ID in your project config rather than hardcoding one here.
 
 **Properties:**
 - Title: "Audit: [Product name] — [date]"
@@ -246,7 +253,7 @@ Fixed: moved Delete to overflow menu, Save now full-width.
 ```
 
 **What makes a good entry:**
-- Lead with the finding that would make Lee say "oh shit" or "I never thought of that"
+- Lead with the finding that would make the user say "oh shit" or "I never thought of that"
 - One sentence, sharp — not a report summary
 - Include the score change (⬆️ old→new) so the trajectory is visible
 - If nothing surprising, still note the most impactful fix
@@ -255,7 +262,15 @@ Fixed: moved Delete to overflow menu, Save now full-width.
 **What to skip:**
 - Findings that are just "this is fine, no issues" — only log frameworks that found something
 - Generic descriptions ("several usability issues were identified")
-- Anything Lee would skim past
+- Anything the user would skim past
+
+### Exec summary section (very top of page, before overview table)
+
+**MANDATORY** — 3-5 sentences, no jargon. What was audited, current score, biggest problem, improvement from last audit. Updated after each domain converges with a cumulative view.
+
+### Per-domain exec summaries
+
+After each domain completes, add a 1-2 sentence summary at the top of that domain's toggle section. Lead with the score and the single most important finding. No framework names — just plain language.
 
 ### Findings summary section (bottom, populated after all domains converge)
 
@@ -265,9 +280,9 @@ After all domains converge:
 - Remaining items by severity
 - Overall quality verdict
 
-**Update frequency:** Update the Notion doc after EVERY framework completes (not just per domain). This gives Lee real-time visibility into progress. Use the Notion MCP tools to update.
+**Update frequency:** Update the Notion doc after EVERY framework completes (not just per domain). This gives the user real-time visibility into progress. Use the Notion MCP tools to update.
 
-**Comments:** Lee may leave comments on the Notion page. Before starting a new domain, check for comments via `include_all_blocks: true` and incorporate feedback into the next domain's approach.
+**Comments:** The user may leave comments on the Notion page. Before starting a new domain, check for comments via `include_all_blocks: true` and incorporate feedback into the next domain's approach.
 
 ---
 
@@ -276,18 +291,34 @@ After all domains converge:
 After each domain audit completes, append a log line to `~/.agents/skills/qq-audit-master/usage.jsonl`:
 
 ```json
-{"timestamp": "ISO-8601", "domain": "ux", "product": "forge", "frameworks_run": 20, "findings": 12, "fixes": 8, "score": 85, "duration_min": 45}
+{"timestamp": "ISO-8601", "domain": "ux", "product": "example-product", "frameworks_run": 20, "findings": 12, "fixes": 8, "score": 85, "duration_min": 45}
 ```
 
 This builds the data to answer: which domains find the most issues? Which frameworks are most productive? Where is quality improving over time?
 
 ---
 
+## Domain interdependencies and sequencing
+
+Domains are NOT independent. Findings in one domain directly influence what matters in others. The default lifecycle order (Product → UX → Visual → Copy → Frontend → Backend) can be overridden when interdependencies matter more.
+
+**Key interdependencies:**
+- **Copy ↔ Visual** — Copy hierarchy needs visual support (type weight, whitespace). Visual decisions depend on copy length and density. Run these as a pair with a revisit pass.
+- **UX → Copy** — Voice/tone direction (e.g., "playful warmth") must be established in UX before copy can be evaluated for consistency.
+- **Copy + Visual → Frontend** — Frontend implements both. Code quality of copy/visual changes should be caught in frontend pass.
+- **Frontend ↔ Backend** — API contracts matter to both. God files on frontend may mirror god routes on backend. Fix frontend first (closer to user), then backend.
+- **UX delight → Visual → Copy** — Celebration animations (UX) need visual polish (Visual) and personality copy (Copy). These three form a "delight triangle."
+
+**Recommended sequences by project type:**
+- **Internal tool (a common preference):** Copy → Visual → revisit Copy → Frontend (with back-and-forth) → Backend
+- **Client project:** UX → Copy → Visual → Frontend → Backend (standard lifecycle)
+- **Marketing site:** Copy → Visual → SEO → Performance (content-led)
+
 ## Key principles
 
-- **Product before polish** — don't optimize the wrong thing. Validate product decisions first.
+- **Product before polish** — don’t optimize the wrong thing. Validate product decisions first.
 - **User-facing before engineering** — fix what users see before fixing what only engineers see.
-- **Fix between domains** — each domain's critical issues get fixed before the next domain starts.
+- **Fix between domains** — each domain’s critical issues get fixed before the next domain starts.
 - **No redundant work** — if UX #13 (WCAG) already ran, skip accessibility checks in other domains.
 - **Cumulative context** — each domain receives findings from previous domains to avoid re-reporting.
-- **Lee stays in control** — always present the plan, always pause between domains, always let Lee adjust.
+- **The user stays in control** — always present the plan, always pause between domains, always let the user adjust.

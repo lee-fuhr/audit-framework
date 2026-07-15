@@ -113,6 +113,10 @@ I score by investigation speed. Can you answer "what happened to request X?" in 
 
 **The silent log pipeline failure** — The Fluentd agent crashed on 3 out of 20 servers. Nobody noticed because there's no monitoring of the log pipeline itself. For 2 weeks, those 3 servers have no logs in the central store. During an incident, the investigation has a blind spot exactly where the problem is. Fix: monitor the log pipeline. Agent health, throughput, error rates, lag.
 
+**The timestamp timezone mismatch** — Service A logs in UTC. Service B logs in US/Eastern. Service C logs in the server's local timezone (which changes during DST). During an incident, correlating events across services requires mental timezone arithmetic at 3 AM. Fix: all services log in UTC. No exceptions. Convert to local time in the display layer if needed.
+
+**The log retention cliff** — Logs are retained for 14 days to manage costs. A customer reports a bug they noticed 3 weeks ago. The logs are gone. The investigation is impossible. Fix: tiered retention — detailed logs for 30 days, summarized/sampled logs for 90 days, and indexed events for 1 year. Match retention to your incident investigation timeline, not just your storage budget.
+
 ---
 
 ## §5 The traps
@@ -153,6 +157,9 @@ I score by investigation speed. Can you answer "what happened to request X?" in 
 | **12-Factor App (01)** | Factor 11 says logs should be written to stdout and captured by the environment. This is the foundation of log aggregation — the app doesn't manage log routing, the platform does. |
 | **Container Health (09)** | Container logs (stdout/stderr) are the primary log source in containerized environments. The log aggregation pipeline must capture container output reliably, including from ephemeral containers. |
 | **Secret Rotation (10)** | Log sanitization is critical when secrets might appear in error messages. A failed connection string logged as an error might expose a password. Sanitize at the source. |
+| **Security (cross-domain)** | Logs are both a security tool (audit trail, intrusion detection) and a security risk (PII exposure, credential leakage). Security teams need read access to logs for forensics; privacy teams need assurance that PII is sanitized. |
+| **Compliance (cross-domain)** | SOC2 CC7.2 requires event logging for security-relevant events. GDPR requires that log data containing PII be subject to the same retention and deletion policies as other personal data. Compliance drives both what you log and how long you keep it. |
+| **Data (cross-domain)** | Log data is increasingly fed into data pipelines for analytics (user behavior, feature usage, error patterns). The log aggregation system becomes a data source — schema consistency, reliability, and completeness matter for downstream consumers. |
 
 ---
 

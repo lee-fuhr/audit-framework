@@ -12,7 +12,9 @@ triggers:
   - "run devops audit"
 ---
 
-# DevOps framework audit (v3 — expert personas)
+# Audit DevOps with expert personas
+
+Audit DevOps by running 15 expert personas in serial, fixing critical issues per framework before verifying.
 
 15 DevOps frameworks, each loaded as a deep expert persona into its own agent context. Serial execution: one framework → fix critical issues → verify → next. Each agent thinks like a 20-year specialist in that specific framework.
 
@@ -46,24 +48,24 @@ Show the framework table from the framework inventory below, then ask which one(
 
 ## Smart interview (runs before any audit)
 
-**DO NOT ask dumb questions.** Before asking Lee anything, gather what you already know:
+**DO NOT ask dumb questions.** Before asking anything, gather what you already know:
 
-1. **Check conversation context** — What product are we working on? What files have been discussed? What has Lee been complaining about?
+1. **Check conversation context** — What product are we working on? What files have been discussed? What has the user been complaining about?
 2. **Check project CLAUDE.md** — Product description, tech stack, target audience.
 3. **Check recent session state** — What was just built or changed?
 
 **Pre-fill and present assumptions:**
 
-> "Here\u2019s what I know going in:
+> "Here’s what I know going in:
 > - **Product:** [name] — [description from context]
 > - **Hosting:** [Vercel / AWS / GCP / self-hosted — inferred from project]
 > - **CI/CD:** [GitHub Actions / CircleCI / none — inferred from config files]
-> - **Known ops concerns:** [what Lee has mentioned or what recent incidents suggest]
+> - **Known ops concerns:** [what the user has mentioned or what recent incidents suggest]
 > - **Scope:** [full infrastructure / specific service / specific pipeline]
 >
 > Anything wrong or missing?"
 
-Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can\u2019t tell what the hosting platform is, ask. If you can infer it, state the inference.
+Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you truly can’t tell what the hosting platform is, ask. If you can infer it, state the inference.
 
 **Interview output becomes the audit context** — passed to every framework agent so they audit with purpose, not generically.
 
@@ -73,7 +75,7 @@ Use AskUserQuestion with multiple choice ONLY for genuine gaps — e.g., if you 
 
 ### Phase 1: Context gathering
 1. Run smart interview (above)
-2. Read the product\u2019s deployment config, CI/CD pipelines, and infrastructure definitions to understand scope
+2. Read the product’s deployment config, CI/CD pipelines, and infrastructure definitions to understand scope
 3. Map the operational surface: hosting, databases, caches, queues, scheduled jobs, external services
 
 ### Phase 2: Serial framework execution
@@ -87,7 +89,7 @@ For each framework (in order 1-15):
    - "Previous frameworks found these issues: [cumulative findings list]. Do NOT re-report duplicates."
    - "Score 1-10, list findings with file:line references, fix critical issues (score < 7), write report."
 
-2. **Collect the agent\u2019s output:**
+2. **Collect the agent’s output:**
    - Score for this framework
    - Findings (new, not duplicates)
    - Fixes applied
@@ -113,7 +115,7 @@ For each framework (in order 1-15):
 3. Compare to previous audit rounds if they exist
 
 ### Phase 4: Report
-Save to project\u2019s data directory:
+Save to project’s data directory:
 - `data/audit-devops-[date].md` — full report
 - `data/audit-devops-[date]-summary.md` — scores + critical findings only
 
@@ -129,7 +131,7 @@ Save to project\u2019s data directory:
 | 4 | Deployment Strategy | Release mechanics — can you ship to production with zero downtime, instant rollback, and controlled blast radius? | `04-deployment-strategy.md` |
 | 5 | Monitoring and Alerting Coverage | Operational visibility — do you know when something is broken before your users tell you, and does the alert tell you what to do about it? | `05-monitoring-alerting.md` |
 | 6 | Incident Response Readiness | Incident management — when production breaks at 3 AM, does the team know who responds, what to do, and how to communicate? | `06-incident-response.md` |
-| 7 | Backup and Disaster Recovery | Data protection and recovery — if you lost everything right now, how long until you\u2019re back, and how much data is gone? | `07-backup-disaster-recovery.md` |
+| 7 | Backup and Disaster Recovery | Data protection and recovery — if you lost everything right now, how long until you’re back, and how much data is gone? | `07-backup-disaster-recovery.md` |
 | 8 | Log Aggregation and Search | Centralized logging — can you find the needle in the haystack when debugging a production issue at 3 AM? | `08-log-aggregation.md` |
 | 9 | Container/Runtime Health | Container hygiene — are your containers minimal, secure, health-checked, and resource-bounded? | `09-container-health.md` |
 | 10 | Secret Rotation and Management | Credential hygiene — can you rotate every secret in your system without downtime or redeployment? | `10-secret-rotation.md` |
@@ -144,9 +146,9 @@ Save to project\u2019s data directory:
 ## Key principles
 
 - **Serial, not parallel** — 70% of findings duplicate across frameworks. Serial means each round finds genuinely new issues after fixes.
-- **Fix before moving on** — don\u2019t accumulate a findings list. Fix each framework\u2019s criticals before the next audit.
+- **Fix before moving on** — don’t accumulate a findings list. Fix each framework’s criticals before the next audit.
 - **Expert persona, not checklist** — each agent IS the specialist. They reason from principles, not rules.
-- **Build Bible at every fix** — \u00a76.9 (is this real data?), \u00a71.8 (does this prevent errors?), \u00a71.4 (is this earning its complexity?).
+- **Hold every fix to a real quality bar** — is this real data? Does it prevent errors? Is the complexity earned?
 - **Config + runtime** — config audits miss runtime behavior. Always check actual deployed state, running processes, and live metrics when possible.
 - **Multi-round** — after all 15 frameworks, run the full cycle again. Scores increase each round until plateau.
-- **Dedup across frameworks** — each agent receives cumulative findings so they don\u2019t re-report known issues.
+- **Dedup across frameworks** — each agent receives cumulative findings so they don’t re-report known issues.
